@@ -1,3 +1,5 @@
 todo.txt
 node_modules/*
 dist/*
+dist
+.dist

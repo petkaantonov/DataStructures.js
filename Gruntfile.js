@@ -1,8 +1,8 @@
 module.exports = function( grunt ) {
 
-    var BUILD_DEST = './data_structures.js',
-        MIN_DEST = './data_structures.min.js',
-        COMPRESSED_DEST = './data_structures.min.js.gz';
+    var BUILD_DEST = '.dist/data_structures.js',
+        MIN_DEST = '.dist/data_structures.min.js',
+        COMPRESSED_DEST = '.dist/data_structures.min.js.gz';
 
     var gruntConfig = {};
 
