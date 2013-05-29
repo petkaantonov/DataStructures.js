@@ -3,6 +3,7 @@ module.exports = function( grunt ) {
     var BUILD_DEST = './dist/data_structures.js',
         MIN_DEST = './dist/data_structures.min.js',
         SOURCE_MAP_DEST = './dist/data_structures.js.map',
+        SOURCE_MAP_URL = 'data_structures.js.map',
         COMPRESSED_DEST = './dist/data_structures.min.js.gz';
 
     var gruntConfig = {};
@@ -112,11 +113,24 @@ module.exports = function( grunt ) {
         }
     };
 
+    grunt.registerTask( "sourcemap", function() {
+        var fs = require("fs");
+
+        var min = fs.readFileSync( MIN_DEST ),
+            map = fs.readFileSync( SOURCE_MAP_DEST );
+
+        min += "//@ sourceMappingURL="+SOURCE_MAP_URL+"\n";
+        map = ")]}\n" + map;
+
+        fs.writeFileSync( MIN_DEST, min );
+        fs.writeFileSync( SOURCE_MAP_DEST, map );
+    });
+
     grunt.initConfig(gruntConfig);
 
     grunt.registerTask( "default", ["concat"] );
     grunt.registerTask( "test", ["jshint", "concat", "qunit"] );
-    grunt.registerTask( "production", ["test", "closure-compiler", "compress"] );
+    grunt.registerTask( "production", ["test", "closure-compiler", "compress", "sourcemap"] );
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-watch');
