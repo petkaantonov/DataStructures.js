@@ -1,4 +1,4 @@
-/* global DS, test, strictEqual, strictNotEqual, deepEqual, ok */
+/* global DS, test, strictEqual, notStrictEqual, deepEqual, ok */
 test( "Test set contains", function() {
     var o = {};
     var set = new DS.Set([
@@ -27,12 +27,12 @@ test( "Test set add", function() {
     strictEqual( set.isEmpty(), true, "should be empty");
 
     var a = [
-            3, 4,
-            3.14, "pii",
-            o, "obj",
-            "string", 3,
-            true, false,
-            null, 23
+        3, 4,
+        3.14, "pii",
+        o, "obj",
+        "string", 3,
+        true, false,
+        null, 23
     ];
     var s = 0;
     for( var i = 0; i < a.length; ++i ) {
@@ -284,4 +284,41 @@ test( "Test set theoretical operations ", function() {
     deepEqual( set1.difference( set2 ).values(), [], "the difference of equal sets is empty set" );
     deepEqual( set1.difference( emptySet1 ).values(), set1.values(), "the difference of set and empty set is just the first set" );
     deepEqual( set3.difference( set4 ).values(), new DS.Set([1,2,3,6]).values(), "just the 1,2,3,6 is added in a difference" );
+});
+
+test( "Test foreach", function() {
+    var o = {};
+    var a = [
+        3, 4,
+        3.14, "pii",
+        o, "obj",
+        "string",
+        true, false,
+        null, 23
+    ];
+
+
+    var set = new DS.Set(a);
+
+    a = set.values(); // Have the array laid out in same order
+
+    var i = 0;
+
+    set.forEach( function( value, index ) {
+        strictEqual( index, i++, "index passed correctly" );
+        strictEqual( value, a[index], "correct value" );
+    });
+
+    set.forEach( function() {
+        strictEqual( this, o, "correct context");
+    }, o);
+
+    i = 0;
+    set.forEach( function() {
+        i++;
+        return false;
+    });
+
+    strictEqual( i, 1, "return false breaks forEach" );
+
 });

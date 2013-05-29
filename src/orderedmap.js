@@ -1,4 +1,3 @@
-/* global arrayRemove1 */
 var OrderedMap = (function() {
     var _super = Map.prototype,
         hasOwn = {}.hasOwnProperty,
@@ -14,57 +13,153 @@ var OrderedMap = (function() {
         }
     }
 
-    function OrderedMap( capacity, equality ) {
+    var Entry = (function() {
+        var method = Entry.prototype;
+
+        function Entry( key, value, next, hash ) {
+            this.key = key;
+            this.value = value;
+            this.next = next;
+            this.hash = hash;
+
+            this.prevEntry = this.nextEntry = null;
+        }
+
+        method.inserted = function( map ) {
+            if( map._firstEntry === null ) {
+                map._firstEntry = map._lastEntry = this;
+            }
+            else if( map._firstEntry === map._lastEntry ) {
+                map._lastEntry = this;
+                map._firstEntry.nextEntry = this;
+                this.prevEntry = map._firstEntry;
+            }
+            else {
+                var last = map._lastEntry;
+                map._lastEntry = this;
+                last.nextEntry = this;
+                this.prevEntry = last;
+            }
+        };
+
+        method.removed = function( map ) {
+            var prev = this.prevEntry,
+                next = this.nextEntry;
+
+            this.prevEntry = this.nextEntry = this.key = this.value = null;
+
+            if( prev === null && next === null ) {
+                map._firstEntry = map._lastEntry = null;
+            }
+            else if( next === null ) {
+                map._lastEntry = prev;
+                map._lastEntry.nextEntry = null;
+            }
+            else if( prev === null ) {
+                map._firstEntry = next;
+                map._firstEntry.prevEntry = null;
+            }
+            else {
+                next.prevEntry = prev;
+                prev.nextEntry = next;
+            }
+        };
+
+        method.accessed = function( map ) {
+            if( map._ordering === ACCESS_ORDER &&
+                map._firstEntry !== null &&
+                map._firstEntry !== map._lastEntry &&
+                map._lastEntry !== this ) {
+
+                var last = map._lastEntry,
+                    next = this.nextEntry,
+                    prev;
+
+                if( this === map._firstEntry ) {
+                    map._lastEntry = this;
+                    map._firstEntry = next;
+
+                    next.prevEntry = null;
+
+                    this.nextEntry = null;
+                    this.prevEntry = last;
+                    last.nextEntry = this;
+                }
+                else {
+                    prev = this.prevEntry;
+
+                    prev.nextEntry = next;
+                    next.prevEntry = prev;
+
+                    this.prevEntry = last;
+                    this.nextEntry = null;
+
+                    last.nextEntry = this;
+
+                }
+            }
+        };
+
+        return Entry;
+    })();
+
+
+
+    var INSERTION_ORDER = OrderedMap.INSERTION_ORDER = {};
+    var ACCESS_ORDER = OrderedMap.ACCESS_ORDER = {};
+
+    function OrderedMap( capacity, equality, ordering ) {
+        this._ordering = ordering === ACCESS_ORDER ? ACCESS_ORDER : INSERTION_ORDER;
+        this._firstEntry = this._lastEntry = null;
         _super.constructor.call( this, capacity, equality );
     }
 
-    method._removeFromKeyList = function( key ) {
-        var eq = this._equality,
-            list = this._keyList;
-
-        for( var i = 0, l = list.length; i < l; ++i ) {
-            if( eq( list[i], key ) ) {
-                arrayRemove1( list, i );
-                break;
-            }
-        }
+    OrderedMap.inAccessOrder = function( capacity, equality ) {
+        return new OrderedMap( capacity, equality, ACCESS_ORDER );
     };
 
-    method._addToKeyList = function( key ) {
-        this._keyList.push( key );
-    };
-
-
+    method._entryType = Entry;
 
     method.indexOfKey = function( key ) {
+        if( this._firstEntry === null ) {
+            return -1;
+        }
         var eq = this._equality,
-            list = this._keyList;
+            entry = this._firstEntry,
+            i = 0;
 
-        for( var i = 0, l = list.length; i < l; ++i ) {
-            if( eq( list[i], key ) ) {
+        while( entry !== null ) {
+            if( eq( entry.key, key ) ) {
                 return i;
             }
+            i++;
+            entry = entry.nextEntry;
         }
         return -1;
     };
 
     method.indexOfValue = function( value ) {
-        var eq = this._equality,
-            list = this._keyList;
+        if( this._firstEntry === null ) {
+            return -1;
+        }
+        var entry = this._firstEntry,
+            i = 0;
 
-        for( var i = 0, l = list.length; i < l; ++i ) {
-            if( eq( this.get( list[i] ), value ) ) {
+        while( entry !== null ) {
+            if( entry.value === value ) {
                 return i;
             }
+            i++;
+            entry = entry.nextEntry;
         }
         return -1;
     };
 
     method.firstKey = function() {
-        if( !this._keyList.length ) {
+        if( this._firstEntry === null ) {
             return void 0;
         }
-        return this._keyList[0];
+        return this._firstEntry.key;
     };
 
     method.first = function() {
@@ -72,10 +167,11 @@ var OrderedMap = (function() {
     };
 
     method.lastKey = function( ) {
-        if( !this._keyList.length ) {
+        if( this._firstEntry === null ) {
             return void 0;
         }
-        return this._keyList[ this._keyList.length - 1 ];
+
+        return this._lastEntry.key;
     };
 
     method.last = function() {
@@ -84,10 +180,16 @@ var OrderedMap = (function() {
 
 
     method.nthKey = function( index ) {
-        if( index < 0 || index >= this._keyList.length ) {
+        if( index < 0 || index >= this._size ) {
             return void 0;
         }
-        return this._keyList[index];
+        var entry = this._firstEntry;
+        var i = 0;
+        while( i < index ) {
+            entry = entry.nextEntry;
+            i++;
+        }
+        return entry.key;
     };
 
     method.nth = function( index ) {
@@ -98,29 +200,9 @@ var OrderedMap = (function() {
         return this.indexOfValue( value ) > -1;
     };
 
-    method.put = method.set = function( key, value ) {
-        var prevSize = this.size();
-        this.$set( key, value );
-        if( this.size() !== prevSize ) {
-            this._addToKeyList( key );
-        }
-    };
-
-    method.unset = method["delete"] = method.remove = function( key ) {
-        var prevSize = this.size();
-        this.$remove( key );
-        if( this.size() !== prevSize ) {
-            this._removeFromKeyList( key );
-        }
-    };
-
     method.clear = function() {
         this.$clear();
-        this._keyList = [];
-    };
-
-    method.init = function() {
-        this._keyList = [];
+        this._firstEntry = this._lastEntry = null;
     };
 
     method.iterator = function() {
@@ -132,9 +214,7 @@ var OrderedMap = (function() {
 
         function Iterator( map ) {
             this._map = map;
-            this._keyList = map._keyList;
             this._modCount = map._modCount;
-            this._indexDelta = 1;
             this.moveToStart();
         }
 
@@ -144,19 +224,49 @@ var OrderedMap = (function() {
             }
         };
 
+        method._getNextEntry = function() {
+            if( this._backingEntry !== null ) {
+                var ret = this._backingEntry;
+                this._backingEntry = null;
+                this._index--;
+                return ret;
+            }
+            if( this._currentEntry === null ) {
+                return this._map._firstEntry;
+            }
+            else {
+                return this._currentEntry.nextEntry;
+            }
+        };
+
+        method._getPrevEntry = function() {
+            if( this._backingEntry !== null ) {
+                var ret = this._backingEntry;
+                this._backingEntry = null;
+                return ret.prevEntry;
+            }
+            if( this._currentEntry === null ) {
+                return this._map._lastEntry;
+            }
+            else {
+                return this._currentEntry.prevEntry;
+            }
+        };
+
         method.next = function() {
             this._checkModCount();
-            this._index += this._indexDelta;
+            this._index++;
 
-            if( this._index >= this._keyList.length ) {
+            if( this._backingEntry === null &&
+                this._index >= this._map._size ) {
                 this.moveToEnd();
                 return false;
             }
 
-            this._indexDelta = 1;
+            var entry = this._currentEntry = this._getNextEntry();
 
-            this.key = this._keyList[this._index];
-            this.value = this._map.get( this.key );
+            this.key = entry.key;
+            this.value = entry.value;
             this.index = this._index;
 
             return true;
@@ -168,13 +278,19 @@ var OrderedMap = (function() {
             this._index--;
 
             if( this._index < 0 ||
-                this._index >= this._keyList.length ) {
+                this._map._size === 0 ) {
                 this.moveToStart();
                 return false;
             }
 
-            this.key = this._keyList[this._index];
-            this.value = this._map.get( this.key );
+            var entry = this._currentEntry = this._getPrevEntry();
+            if( entry === null ) {
+                console.log( "adtr", this );
+                throw "ad";
+            }
+
+            this.key = entry.key;
+            this.value = entry.value;
             this.index = this._index;
 
             return true;
@@ -186,7 +302,7 @@ var OrderedMap = (function() {
             this.key = this.value = void 0;
             this.index = -1;
             this._index = -1;
-
+            this._backingEntry = this._currentEntry = null;
 
             return this;
         };
@@ -194,8 +310,9 @@ var OrderedMap = (function() {
         method.moveToEnd = function() {
             this._checkModCount();
             this.key = this.value = void 0;
-            this._index = this._keyList.length;
+            this._index = this._map._size;
             this.index = -1;
+            this._backingEntry = this._currentEntry = null;
 
             return this;
         };
@@ -203,18 +320,23 @@ var OrderedMap = (function() {
         method["delete"] = method.remove = function() {
             this._checkModCount();
 
-            if( this._index < 0 ||
-                this._index >= this._map._size ||
-                this.key === void 0 ) {
+            if( this._currentEntry === null ) {
                 return;
             }
+            var entry = this._currentEntry,
+                backingEntry,
+                ret = entry.value;
 
-            var ret = this._map.remove( this.key );
+            backingEntry = this._backingEntry = entry.nextEntry;
+
+            this._map.remove( this.key );
             this._modCount = this._map._modCount;
             this.key = this.value = void 0;
             this.index = -1;
 
-            this._indexDelta = 0;
+            if( backingEntry === null ) {
+                this.moveToEnd();
+            }
 
             return ret;
         };

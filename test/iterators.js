@@ -104,10 +104,18 @@ test( "Test sorted set backward remove", function() {
 
     var it = a.iterator().moveToEnd();
     var size = a.size();
+    var l = size;
+    var i = 0;
+    var c = a.values();
     while(it.prev()){
+        var ind = l-i-1;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
+
     strictEqual( a.size(), 0, "should be empty after run");
 
 });
@@ -122,9 +130,15 @@ test( "Test sorted set forward remove", function() {
 
     var it = a.iterator().moveToStart();
     var size = a.size();
+    var i = 0;
+    var c = a.values();
     while(it.next()){
+        var ind = i;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
 
     strictEqual( a.size(), 0, "should be empty after run");
@@ -139,32 +153,38 @@ test( "Test sorted set traversals after removal", function() {
     ]);
 
     var it = a.iterator();
-    for( var i = 0; i < 10; ++i ) {
+    var i = 0;
+    for( i = 0; i < 10; ++i ) {
         it.next();
     }
 
     strictEqual( it.value, 9, "should be 9");
+    strictEqual( it.index, 9, "index should be 9");
 
     it.remove();
     it.next();
 
+    strictEqual( it.index, 9, "index should be 9" );
     strictEqual( it.value, 10, "next should be after removal 10" );
 
     it.next();
     it.next();
     it.next();
 
+    strictEqual( it.index, 12, "index should be 12" );
     strictEqual( it.value, 13, "next should 13 now " );
 
     it.remove();
     it.prev();
 
+    strictEqual( it.index, 11, "index should be 11" );
     strictEqual( it.value, 12, "Previous of deleted 13 is 12" );
 
     it.prev();
     it.prev();
     it.prev();
 
+    strictEqual( it.index, 8, "index should be 8" );
     strictEqual( it.value, 8, "Should be 8 since 9 was deleted before" );
 });
 
@@ -265,9 +285,16 @@ test( "Test ordered set backward remove", function() {
 
     var it = a.iterator().moveToEnd();
     var size = a.size();
+    var l = size;
+    var i = 0;
+    var c = a.values();
     while(it.prev()){
+        var ind = l-i-1;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
     strictEqual( a.size(), 0, "should be empty after run");
 
@@ -280,9 +307,15 @@ test( "Test ordered set forward remove", function() {
 
     var it = a.iterator().moveToStart();
     var size = a.size();
+    var i = 0;
+    var c = a.values();
     while(it.next()){
+        var ind = i;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
 
     strictEqual( a.size(), 0, "should be empty after run");
@@ -299,20 +332,26 @@ test( "Test ordered set traversals after removal", function() {
     }
 
     strictEqual( it.value, 9, "should be 9");
+    strictEqual( it.index, 9, "index should be 9" );
+
 
     it.remove();
     it.next();
 
+    strictEqual( it.index, 9, "index should be 9" );
     strictEqual( it.value, 10, "next should be after removal 10" );
 
+
     it.next();
     it.next();
     it.next();
 
+    strictEqual( it.index, 12, "index should be 12" );
     strictEqual( it.value, 13, "next should 13 now " );
 
     it.remove();
     it.prev();
+    strictEqual( it.index, 11, "index should be 11" );
 
     strictEqual( it.value, 12, "Previous of deleted 13 is 12" );
 
@@ -320,6 +359,7 @@ test( "Test ordered set traversals after removal", function() {
     it.prev();
     it.prev();
 
+    strictEqual( it.index, 8, "index should be 8" );
     strictEqual( it.value, 8, "Should be 8 since 9 was deleted before" );
 });
 
@@ -420,9 +460,16 @@ test( "Test set backward remove", function() {
 
     var it = a.iterator().moveToEnd();
     var size = a.size();
+    var l = size;
+    var i = 0;
+    var c = a.values();
     while(it.prev()){
+        var ind = l-i-1;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
     strictEqual( a.size(), 0, "should be empty after run");
 
@@ -435,9 +482,15 @@ test( "Test set forward remove", function() {
 
     var it = a.iterator().moveToStart();
     var size = a.size();
+    var i = 0;
+    var c = a.values();
     while(it.next()){
+        var ind = i;
+        strictEqual( it.value, c[ind], "iterator key must match" );
+        strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
+        i++;
     }
 
     strictEqual( a.size(), 0, "should be empty after run");
@@ -455,27 +508,33 @@ test( "Test set traversals after removal", function() {
     }
 
     strictEqual( it.value, arr[9], "should be whatever is at 9");
+    strictEqual( it.index, 9, "index should be 9");
+
 
     it.remove();
     it.next();
 
+    strictEqual( it.index, 9, "index should be 9" );
     strictEqual( it.value, arr[10], "next should be after removal 10" );
 
     it.next();
     it.next();
     it.next();
 
+    strictEqual( it.index, 12, "index should be 12" );
     strictEqual( it.value, arr[13], "next should 13 now " );
 
     it.remove();
     it.prev();
 
+    strictEqual( it.index, 11, "index should be 11" );
     strictEqual( it.value, arr[12], "Previous of deleted 13 is 12" );
 
     it.prev();
     it.prev();
     it.prev();
 
+    strictEqual( it.index, 8, "index should be 8" );
     strictEqual( it.value, arr[8], "Should be 8 since 9 was deleted before" );
 });
 

@@ -191,9 +191,17 @@ test( "Test foreach", function() {
         strictEqual( value, a[index][1], "correct value" );
     });
 
-    map.forEach( function( value, key, index ) {
+    map.forEach( function() {
         strictEqual( this, o, "correct context");
     }, o);
+
+    i = 0;
+    map.forEach( function() {
+        i++;
+        return false;
+    });
+
+    strictEqual( i, 1, "return false breaks forEach" );
 
 });
 

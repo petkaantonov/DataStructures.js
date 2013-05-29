@@ -1,4 +1,4 @@
-/* global Buffer, uid, MapForEach, arrayRemove2, toListOfTuples */
+/* global Buffer, uid, MapForEach, toListOfTuples */
 /* exported Map */
 /* jshint -W079 */
 var Map = (function() {
@@ -160,6 +160,32 @@ var Map = (function() {
     var MAX_CAPACITY = primes.highest();
     var LOAD_FACTOR = 0.67;
 
+    var Entry = (function() {
+        var method = Entry.prototype;
+        function Entry( key, value, next, hash ) {
+            this.key = key;
+            this.value = value;
+            this.next = next;
+            this.hash = hash;
+        }
+
+        method.inserted = function() {
+
+        };
+
+        method.removed = function() {
+            this.key = this.value = null;
+        };
+
+        method.accessed = function() {
+
+        };
+
+        return Entry;
+    })();
+
+
+
     var method = Map.prototype;
     function Map( capacity, equality ) {
         if( typeof capacity === "function" ) {
@@ -196,15 +222,15 @@ var Map = (function() {
 
         if( setCapacity > -1 || !capacity ) {
             this._capacity = clampCapacity( setCapacity );
-            this.init();
         }
         else {
             var tuples = toListOfTuples( capacity );
             this._capacity = primes.atLeast( tuples.length );
-            this.init();
             this._setAll( tuples );
         }
     }
+
+    method._entryType = Entry;
 
     method._makeBuckets = function() {
         var b = this._buckets = new Array( this._capacity );
@@ -214,29 +240,18 @@ var Map = (function() {
         }
     };
 
-    method._keyAsBucketIndex = function( key ) {
-        return hash( key ) % this._capacity;
-    };
-
-    method._bucketByKey = function( key ) {
+    method._hashAsBucketIndex = function( hash ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
-
-        var index = this._keyAsBucketIndex( key ),
-            ret = this._buckets[index];
-
-        return ret === null ? ( this._buckets[index] = [] ) : ret;
+        return hash % this._capacity;
     };
 
-    method._bucketKeyIndex = function( bucket, key ) {
-        for( var i = 0, l = bucket.length; i < l; i += 2 ) {
-            if( this._equality( bucket[i], key ) ) {
-                return i;
-            }
+    method._keyAsBucketIndex = function( key ) {
+        if( this._buckets === null ) {
+            this._makeBuckets();
         }
-
-        return -1;
+        return hash( key ) % this._capacity;
     };
 
     method._resizeTo = function( capacity ) {
@@ -251,12 +266,16 @@ var Map = (function() {
 
         if( oldBuckets !== null ) {
             for( var i = 0, l = oldBuckets.length; i < l; ++i ) {
-                var entries = oldBuckets[i];
-                if( entries !== null ) {
-                    for( var j = 0, ll = entries.length; j < ll; j += 2 ) {
-                        var bucket = this._bucketByKey( entries[j] );
-                        bucket.push( entries[j], entries[j + 1] );
-                    }
+                var entry = oldBuckets[i];
+                var counter = 0;
+
+                while( entry !== null && counter++ < 20 ) {
+                    var bucketIndex = this._hashAsBucketIndex( entry.hash ),
+                        next = entry.next;
+
+                    entry.next = this._buckets[bucketIndex];
+                    this._buckets[bucketIndex] = entry;
+                    entry = next;
                 }
                 oldBuckets[i] = null;
             }
@@ -277,6 +296,18 @@ var Map = (function() {
         }
     };
 
+    method._getEntryWithKey = function( entry, key ) {
+        var eq = this._equality;
+
+        while( entry !== null ) {
+            if( eq( entry.key, key ) ) {
+                return entry;
+            }
+            entry = entry.next;
+        }
+        return null;
+    };
+
     method._setAll = function( obj ) {
         if( !obj.length ) {
             return;
@@ -290,6 +321,7 @@ var Map = (function() {
         for( var i = 0; i < obj.length; ++i ) {
             var key = obj[i][0],
                 value = obj[i][1];
+
             this.set( key, value );
         }
     };
@@ -298,9 +330,6 @@ var Map = (function() {
 
     method.forEach = MapForEach;
 
-    method.init = function() {
-
-    };
 
     method.clone = function() {
         return new this.constructor(
@@ -320,51 +349,78 @@ var Map = (function() {
     };
 
     method.containsKey = method.hasKey = function( key ) {
-        return this.get( key ) !== void 0;
+        var bucketIndex = this._keyAsBucketIndex( key );
+        return this._getEntryWithKey( this._buckets[bucketIndex], key ) !== null;
     };
 
     method.get = function( key ) {
-        var bucket = this._bucketByKey( key ),
-            bucketIndex;
+        var bucketIndex = this._keyAsBucketIndex( key ),
+            entry = this._getEntryWithKey( this._buckets[bucketIndex], key );
 
-        if( bucket.length &&
-            (bucketIndex = this._bucketKeyIndex( bucket, key ) ) >= 0  ) {
-            return bucket[ bucketIndex + 1 ];
+        if( entry !== null ) {
+            entry.accessed( this );
+            return entry.value;
         }
         return void 0;
     };
 
+
     method["delete"] = method.unset = method.remove = function( key ) {
         this._modCount++;
-        var bucket = this._bucketByKey( key ),
+        var bucketIndex = this._keyAsBucketIndex( key ),
             ret = void 0,
-            bucketIndex;
+            entry = this._buckets[bucketIndex],
+            eq = this._equality,
+            prevEntry = null;
 
-        if( bucket.length &&
-            (bucketIndex = this._bucketKeyIndex( bucket, key ) ) >= 0 ) {
-            ret = bucket[bucketIndex+1];
-            arrayRemove2( bucket, bucketIndex );
+        var eq = this._equality;
+
+        //Find the entry in the bucket
+        while( entry !== null ) {
+            if( eq( entry.key, key ) ) {
+                break;
+            }
+            prevEntry = entry;
+            entry = entry.next;
+        }
+
+        //It was found in the bucket, remove
+        if( entry !== null ) {
+            ret = entry.value;
+            if( prevEntry === null) { //It was the first entry in the bucket
+                this._buckets[bucketIndex] = entry.next;
+            }
+            else {
+                prevEntry.next = entry.next;
+            }
+            entry.removed( this );
             this._size--;
         }
         return ret;
     };
 
+
+
+
     method.put = method.set = function( key, value ) {
         this._modCount++;
-        var bucket = this._bucketByKey( key ),
+        var h = hash( key ),
+            bucketIndex = this._hashAsBucketIndex( h),
             ret = void 0,
-            bucketIndex;
+            oldEntry = this._buckets[bucketIndex],
+            entry = this._getEntryWithKey( oldEntry, key );
 
-        if( bucket.length &&
-            (bucketIndex = this._bucketKeyIndex( bucket, key ) ) >= 0 ) {
-            ret = bucket[bucketIndex+1];
-            bucket[bucketIndex+1] = value;
+        if( entry === null ) {
+            this._size++;
+            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry, h );
+            this._checkResize();
+            entry.inserted( this );
         }
         else {
-            this._size++;
-            bucket.push( key, value );
-            this._checkResize();
+            ret = entry.value;
+            entry.value = value;
         }
+
         return ret;
     };
 
@@ -451,9 +507,9 @@ var Map = (function() {
         function Iterator( map ) {
             this._map = map;
             this._modCount = map._modCount;
-            this._indexDelta = 1;
-
+            this._backingEntry = null;
             this.moveToStart();
+
         }
 
         method._checkModCount = function() {
@@ -462,103 +518,94 @@ var Map = (function() {
             }
         };
 
-        method._moveToNextEntry = function() {
-            var buckets = this._map._buckets,
-                bucket;
+        method._getNextEntryFromEntry = function( entry ) {
 
-            if( this._entryIndex > -1 ) {
-                bucket = buckets[this._bucketIndex];
-                this._entryIndex += (this._indexDelta * 2);
-                if( this._entryIndex >= bucket.length ) {
-                    this._entryIndex = 0;
-                    for( var i = this._bucketIndex + 1, l = buckets.length; i < l; ++i ) {
-                        bucket = buckets[i];
+            if( entry !== null && entry.next !== null ) {
+                return entry.next;
+            }
 
-                        if( bucket !== null && bucket.length ) {
-                            this._bucketIndex = i;
-                            bucket = buckets[i];
-                            this.key = bucket[0];
-                            this.value = bucket[1];
-                            break;
-                        }
-                    }
-                }
-                else {
-                    this.key = bucket[this._entryIndex];
-                    this.value = bucket[this._entryIndex + 1];
+            var buckets = this._map._buckets;
+
+            for( var i = this._bucketIndex + 1, l = buckets.length; i < l; ++i ) {
+                entry = buckets[i];
+
+                if( entry !== null ) {
+                    this._bucketIndex = i;
+                    return entry;
                 }
             }
-            else {
-                for( var i = this._bucketIndex, l = buckets.length; i < l; ++i ) {
-                    bucket = buckets[i];
 
-                    if( bucket !== null && bucket.length ) {
-                        this._bucketIndex = i;
-                        this._entryIndex = 0;
-                        this.key = bucket[0];
-                        this.value = bucket[1];
-                        break;
-                    }
-                }
-            }
+            return null;
+
         };
 
-        method._moveToPrevEntry = function() {
+        method._getNextEntry = function() {
+
+            if( this._backingEntry !== null ) {
+                var ret = this._backingEntry;
+                this._backingEntry = null;
+                this._index--;
+                return ret;
+            }
+
+            return this._getNextEntryFromEntry( this._currentEntry );
+        };
+
+        method._getPrevEntry = function() {
             var buckets = this._map._buckets,
-                bucket;
+                entry = this._currentEntry,
+                backingEntry;
 
-            if( this._entryIndex > -1 ) {
-                bucket = buckets[this._bucketIndex];
-                this._entryIndex -= 2;
-                if( this._entryIndex < 0 ) {
-                    for( var i = this._bucketIndex - 1; i >= 0; --i ) {
-                        bucket = buckets[i];
+            if( entry === null &&
+                ( ( backingEntry = this._backingEntry ) !== null ) ) {
+                this._backingEntry = null;
+                entry = backingEntry;
+            }
 
-                        if( bucket !== null && bucket.length ) {
-                            this._bucketIndex = i;
-                            this._entryIndex = bucket.length - 2;
-                            bucket = buckets[i];
-                            this.key = bucket[this._entryIndex];
-                            this.value = bucket[this._entryIndex + 1];
-                            break;
-                        }
+            if( entry !== null ) {
+                var first = buckets[this._bucketIndex];
+                if( first !== entry ) {
+                    var next = entry;
+                    entry = first;
+                    while( entry.next !== next ) {
+                        entry = entry.next;
                     }
-                }
-                else {
-                    this.key = bucket[this._entryIndex];
-                    this.value = bucket[this._entryIndex + 1];
+                    return entry;
                 }
             }
-            else {
-                for( var i = this._bucketIndex; i >= 0; --i ) {
-                    bucket = buckets[i];
 
-                    if( bucket !== null && bucket.length ) {
-                        this._bucketIndex = i;
-                        this._entryIndex = bucket.length - 2;
-                        this.key = bucket[this._entryIndex];
-                        this.value = bucket[this._entryIndex + 1];
-                        break;
+            for( var i = this._bucketIndex - 1; i >= 0; --i ) {
+                entry = buckets[i];
+
+                if( entry !== null ) {
+                    this._bucketIndex = i;
+                    while( entry.next !== null ) {
+                        entry = entry.next;
                     }
+                    return entry;
                 }
             }
+
+            return entry;
         };
 
         //API
 
         method.next = function() {
             this._checkModCount();
-            this._index += this._indexDelta;
+            this._index++;
 
-            if( this._index >= this._map._size ) {
+            if( this._backingEntry === null &&
+                this._index >= this._map._size ) {
                 this.moveToEnd();
                 return false;
             }
 
-            this._moveToNextEntry();
-            this.index = this._index;
+            var entry = this._currentEntry = this._getNextEntry();
 
-            this._indexDelta = 1;
+            this.key = entry.key;
+            this.value = entry.value;
+            this.index = this._index;
 
             return true;
         };
@@ -568,12 +615,14 @@ var Map = (function() {
             this._index--;
 
             if( this._index < 0 ||
-                this._index >= this._map._size ) {
+                this._map._size === 0 ) {
                 this.moveToStart();
                 return false;
             }
+            var entry = this._currentEntry = this._getPrevEntry();
 
-            this._moveToPrevEntry();
+            this.key = entry.key;
+            this.value = entry.value;
             this.index = this._index;
 
 
@@ -585,8 +634,8 @@ var Map = (function() {
             this.key = this.value = void 0;
             this.index = -1;
             this._index = -1;
-            this._bucketIndex = 0;
-            this._entryIndex = -1;
+            this._bucketIndex = -1;
+            this._backingEntry = this._currentEntry = null;
 
             return this;
         };
@@ -596,8 +645,8 @@ var Map = (function() {
             this.key = this.value = void 0;
             this._index = this._map._size;
             this.index = -1;
-            this._bucketIndex = this._map._capacity - 1;
-            this._entryIndex = -1;
+            this._bucketIndex = this._map._capacity;
+            this._backingEntry = this._currentEntry = null;
 
             return this;
         };
@@ -605,17 +654,20 @@ var Map = (function() {
         method["delete"] = method.remove = function() {
             this._checkModCount();
 
-            if( this._index < 0 ||
-                this._index >= this._map._size ||
-                this.key === void 0 ) {
-
+            if( this._currentEntry === null ) {
                 return;
             }
+            this._backingEntry = this._getNextEntryFromEntry( this._currentEntry );
+            this._currentEntry = null;
             var ret = this._map.remove( this.key );
             this._modCount = this._map._modCount;
+
             this.key = this.value = void 0;
-            this._indexDelta = 0;
             this.index = -1;
+
+            if( this._backingEntry === null ) {
+                this.moveToEnd();
+            }
 
             return ret;
         };

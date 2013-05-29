@@ -498,7 +498,7 @@ var RedBlackTree = (function() {
                     node = node.right;
                 }
             }
-            else { //node's key is equal or greater, go for precedessor
+            else { //node's key is equal or greater, go for backingNode
                 if( node.left !== NIL ) {
                     node = node.left;
                 }
@@ -557,7 +557,7 @@ var RedBlackTree = (function() {
         function Iterator( tree) {
             this._tree = tree;
             this._modCount = tree.modCount;
-            this._precedessor = this._successor = null;
+            this._backingNode = null;
             this.moveToStart();
         }
 
@@ -570,9 +570,10 @@ var RedBlackTree = (function() {
         method._getPrevNode = function() {
             var ret;
             if( this._currentNode === null ) {
-                if( this._precedessor !== null ) {
-                    ret = this._precedessor;
-                    this._precedessor = this._successor = null;
+                if( this._backingNode !== null ) {
+                    ret = this._backingNode;
+                    this._backingNode = null;
+                    return ret.getPrecedessor();
 
                 }
                 else {
@@ -589,9 +590,9 @@ var RedBlackTree = (function() {
 
             var ret;
             if( this._currentNode === null ) {
-                if( this._successor !== null ) {
-                    ret = this._successor;
-                    this._precedessor = this._successor = null;
+                if( this._backingNode !== null ) {
+                    ret = this._backingNode;
+                    this._backingNode = null;
                     this._index--;
                 }
                 else {
@@ -610,7 +611,7 @@ var RedBlackTree = (function() {
 
             this._index++;
 
-            if( this._successor === null &&
+            if( this._backingNode === null &&
                 this._index >= this._tree.size()
             ) {
                 this.moveToEnd();
@@ -631,7 +632,7 @@ var RedBlackTree = (function() {
             this._index--;
 
             if( this._index < 0 ||
-                this._index >= this._tree.size() ) {
+                this._tree.size() === 0 ) {
                 this.moveToStart();
                 return false;
             }
@@ -671,21 +672,32 @@ var RedBlackTree = (function() {
         method["delete"] = method.remove = function() {
             this._checkModCount();
 
-            if( this._index < 0 ||
-                this._index >= this._tree.size() ||
-                this._currentNode === null ) {
+            if( this._currentNode === null ) {
                 return;
             }
 
-            this._precedessor = this._currentNode.getPrecedessor();
-            this._successor = this._currentNode.getSuccessor();
+            var ret = this._currentNode.value,
+                backingNode,
+                parent;
+
+            this._backingNode = backingNode = this._currentNode.getSuccessor();
 
             this._tree.unset( this._currentNode );
-            var ret = this._currentNode.value;
+
             this.key = this.value = void 0;
             this.index = -1;
             this._currentNode = null;
             this._modCount = this._tree.modCount;
+
+
+            if( backingNode === null ) {
+                this.moveToEnd();
+            }
+            else if( ( parent = backingNode.parent ) !== null &&
+                this._tree.comparator( parent.key, backingNode.key ) === 0 ) {
+                this._backingNode = parent;
+            }
+
             return ret;
         };
 
