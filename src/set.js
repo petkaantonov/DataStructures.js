@@ -55,7 +55,7 @@ var Set = (function() {
     };
 
     method.remove = function( value ) {
-        return this._map.remove( value );
+        return this._map.remove( value ) === __value;
     };
 
     method.addAll = function( items ) {

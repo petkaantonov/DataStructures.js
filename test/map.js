@@ -163,6 +163,37 @@ test( "Test array returning methods", function() {
     deepEqual( keys.sort(), map.keys().sort(), "keys returned properly" );
     deepEqual( values.sort(), map.values().sort(), "values returned properly" );
     deepEqual( entries.sort(), map.entries().sort(), "entries returned properly" );
+    deepEqual( [], new DS.Map().keys(), "empty array" );
+    deepEqual( [], new DS.Map().values(), "empty array" );
+    deepEqual( [], new DS.Map().entries(), "empty array" );
+});
+
+test( "Test foreach", function() {
+    var o = {};
+    var a = [
+        [3, 4],
+        [3.14, "pii"],
+        [o, "obj"],
+        ["string", 3],
+        [true, false],
+        [null, 23]
+    ];
+
+    var map = new DS.Map(a);
+
+    a = map.entries(); // Have the array laid out in same order
+
+    var i = 0;
+
+    map.forEach( function( value, key, index ) {
+        strictEqual( index, i++, "index passed correctly" );
+        strictEqual( key, a[index][0], "correct key" );
+        strictEqual( value, a[index][1], "correct value" );
+    });
+
+    map.forEach( function( value, key, index ) {
+        strictEqual( this, o, "correct context");
+    }, o);
 
 });
 
