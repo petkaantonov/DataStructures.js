@@ -1,8 +1,9 @@
 module.exports = function( grunt ) {
 
-    var BUILD_DEST = '.dist/data_structures.js',
-        MIN_DEST = '.dist/data_structures.min.js',
-        COMPRESSED_DEST = '.dist/data_structures.min.js.gz';
+    var BUILD_DEST = './dist/data_structures.js',
+        MIN_DEST = './dist/data_structures.min.js',
+        SOURCE_MAP_DEST = './dist/data_structures.js.map',
+        COMPRESSED_DEST = './dist/data_structures.min.js.gz';
 
     var gruntConfig = {};
 
@@ -90,6 +91,8 @@ module.exports = function( grunt ) {
                 compilation_level: 'SIMPLE_OPTIMIZATIONS',
                 language_in: 'ECMASCRIPT5',
                 charset: "UTF-8",
+                create_source_map: SOURCE_MAP_DEST,
+                source_map_format: "V3",
                 debug: false
             },
             noreport: true
