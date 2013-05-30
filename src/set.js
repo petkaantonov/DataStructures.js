@@ -108,23 +108,11 @@ var Set = (function() {
         return set.allContainedIn( this );
     };
 
-    method.valueOf = function() {
-        var it = this.iterator();
-        var ret = 31;
-        while( it.next() ) {
-            ret ^= ( Map.hash( it.value ) );
-            ret >>>= 0;
-        }
-        return ret;
-    };
+    method.valueOf = SetValueOf;
 
-    method.toString = function() {
-        return this.values().toString();
-    };
+    method.toString = SetToString;
 
-    method.toJSON = function() {
-        return this.values();
-    };
+    method.toJSON = SetToJSON;
 
     method.union = function( a ) {
         var ret = new this.constructor( this.size() + a.size(), this._map._equality );

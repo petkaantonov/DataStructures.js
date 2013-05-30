@@ -38,6 +38,8 @@ test( "Test ordered map access order", function() {
 
 });
 
+
+
 test( "Test ordered map index of key", function() {
     var o = {};
     var map = new DS.OrderedMap([
@@ -168,7 +170,6 @@ test( "Test ordered map contains value", function() {
 test( "Test ordered map resize", function() {
     var l = 200;
     var map = DS.OrderedMap();
-
     var a = [];
     var c;
     while(l-- ) {

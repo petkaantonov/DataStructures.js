@@ -158,23 +158,11 @@ var SortedMap = (function() {
         return this._tree.iterator();
     };
 
-    method.toJSON = function() {
-        return this.entries();
-    };
+    method.toJSON = MapToJSON;
 
-    method.toString = function() {
-        return this.entries().toString();
-    };
+    method.toString = MapToString;
 
-    method.valueOf = function() {
-        var it = this.iterator();
-        var ret = 31;
-        while( it.next() ){
-            ret += ( Map.hash( it.key ) ^ Map.hash( it.value ) );
-            ret >>>= 0;
-        }
-        return ret;
-    };
+    method.valueOf = MapValueOf;
 
     return SortedMap;
 })();

@@ -205,8 +205,6 @@ var Map = (function() {
         }
     }
 
-    method._resizesInPlace = false;
-
     method._makeBuckets = function() {
         var b = this._buckets = new Array( this._capacity );
 
@@ -237,8 +235,6 @@ var Map = (function() {
         for( var i = 0; i < oldLength; ++i ) {
             var entry = oldBuckets[i];
             while( entry !== null ) {
-                oldBuckets[i] = null;
-
                 var bucketIndex = entry.hash % newLen,
                     next = entry.next;
 
@@ -247,6 +243,7 @@ var Map = (function() {
                 entry = next;
 
             }
+            oldBuckets[i] = null;
         }
     };
 
@@ -255,30 +252,13 @@ var Map = (function() {
         if( this._capacity >= capacity ) {
             return;
         }
+        var oldBuckets = this._buckets;
         this._capacity = capacity;
+        this._makeBuckets();
 
-        var buckets = this._buckets,
-            oldLength;
-
-        if( buckets === null ) {
-            this._makeBuckets();
-            return;
+        if( oldBuckets !== null ) {
+            this._resized( oldBuckets );
         }
-
-        //Ordered map can be resized in place
-        if( this._resizesInPlace ) {
-            oldLength = buckets.length;
-            buckets.length = capacity;
-            for( var i = oldLength; i < capacity; ++i ) {
-                buckets[i] = null;
-            }
-            this._resized( oldLength );
-        }
-        else {
-            this._makeBuckets();
-            this._resized( buckets );
-        }
-
     };
 
     method._getNextCapacity = function() {
@@ -452,23 +432,12 @@ var Map = (function() {
         return this._size === 0;
     };
 
-    method.toJSON = function() {
-        return this.entries();
-    };
 
-    method.toString = function() {
-        return this.toJSON().toString();
-    };
+    method.toJSON = MapToJSON;
 
-    method.valueOf = function() {
-        var it = this.iterator();
-        var ret = 31;
-        while( it.next() ){
-            ret += ( hash( it.key ) ^ hash( it.value ) );
-            ret >>>= 0;
-        }
-        return ret;
-    };
+    method.toString = MapToString;
+
+    method.valueOf = MapValueOf;
 
     method.iterator = function() {
         return new Iterator( this );

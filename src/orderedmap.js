@@ -5,14 +5,6 @@ var OrderedMap = (function() {
 
     method.constructor = OrderedMap;
 
-    for( var key in _super ) {
-        if( hasOwn.call( _super, key ) &&
-            key.charAt(0) !== "_" &&
-            typeof _super[key] === "function" ) {
-            method[ "$" + key ] = _super[key];
-        }
-    }
-
     var INSERTION_ORDER = OrderedMap.INSERTION_ORDER = {};
     var ACCESS_ORDER = OrderedMap.ACCESS_ORDER = {};
 
@@ -26,21 +18,16 @@ var OrderedMap = (function() {
         return new OrderedMap( capacity, equality, ACCESS_ORDER );
     };
 
-    method._resizesInPlace = true;
-
     method._resized = function( oldLength ) {
-        var entry = this._firstEntry,
-            buckets = this._buckets,
-            len = buckets.length;
+        var newBuckets = this._buckets,
+            newLen = newBuckets.length,
+            entry = this._firstEntry;
 
         while( entry !== null ) {
-            var bucketIndex = entry.hash % len,
-                entryAtIndex = buckets[bucketIndex];
+            var bucketIndex = entry.hash % newLen;
 
-            if( entryAtIndex !== entry ) {
-                entry.next = entryAtIndex;
-                buckets[bucketIndex] = entry;
-            }
+            entry.next = newBuckets[bucketIndex];
+            newBuckets[bucketIndex] = entry;
 
             entry = entry.nextEntry;
         }
@@ -127,7 +114,7 @@ var OrderedMap = (function() {
     };
 
     method.clear = function() {
-        this.$clear();
+        _super.clear.call( this );
         this._firstEntry = this._lastEntry = null;
     };
 

@@ -18,8 +18,6 @@ var Queue = (function() {
     }
 
     function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
-        console.log( srcIndex, dstIndex, len );
-
         for( var j = 0; j < len; ++j ) {
             dst[j + dstIndex ] = src[j + srcIndex];
         }

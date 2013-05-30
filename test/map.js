@@ -190,7 +190,6 @@ test( "Test array returning methods", function() {
 test( "Test map resize", function() {
     var l = 200;
     var map = DS.Map();
-
     var a = [];
     var c;
     while(l-- ) {

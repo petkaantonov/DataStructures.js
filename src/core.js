@@ -186,4 +186,58 @@ function SetForEach( fn, ctx ) {
     }
 }
 
+function MapToString() {
+    var ret = [],
+        it = this.iterator();
 
+    while( it.next() ) {
+        ret.push( [
+            it.key === this ? null : it.key,
+            it.value === this ? null : it.value
+        ]);
+    }
+
+    return JSON.stringify( ret );
+}
+
+function MapValueOf() {
+    var it = this.iterator();
+    var ret = 31;
+    while( it.next() ) {
+        ret += (
+            Map.hash( it.key === this ? null : it.key ) ^
+            Map.hash( it.value === this ? null : it.value )
+        );
+        ret >>>= 0;
+    }
+    return ret;
+}
+
+function MapToJSON() {
+    return this.entries();
+}
+
+function SetToString() {
+    var ret = [],
+        it = this.iterator();
+
+    while( it.next() ) {
+        ret.push( it.value === this ? null : it.value );
+    }
+
+    return JSON.stringify( ret );
+}
+
+function SetValueOf() {
+    var it = this.iterator();
+    var ret = 31;
+    while( it.next() ) {
+        ret += ( Map.hash( it.value === this ? null : it.value ) );
+        ret >>>= 0;
+    }
+    return ret;
+}
+
+function SetToJSON() {
+    return this.values();
+}

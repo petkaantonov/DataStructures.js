@@ -240,7 +240,7 @@ test( "Test set toString method", function() {
 
     var set = new DS.Set(a);
 
-    strictEqual( set.toString(), set.values().toString(), "same as values to string" );
+    strictEqual( set.toString(), JSON.stringify(set), "toString same as JSON" );
 
 });
 
