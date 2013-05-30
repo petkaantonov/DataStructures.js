@@ -113,7 +113,6 @@ var Queue = (function() {
             front = this._front,
             index = front + size;
 
-
         console.log( index, len, capacity );
         if( index + len <= capacity ) {
             arrayCopy( items, 0, queue, index, len );
@@ -132,11 +131,11 @@ var Queue = (function() {
 
     };
 
-    method.enqueueAll = function( items ) {
+    method.unshiftAll = method.enqueueAll = function( items ) {
         return this._addAll( toList( items ) );
     };
 
-    method.enqueue = function( item ) {
+    method.unshift = method.enqueue = function( item ) {
         if( this._items === null ) {
             this._makeCapacity();
         }
@@ -146,7 +145,7 @@ var Queue = (function() {
         this._size++;
     };
 
-    method.dequeue = function() {
+    method.shift = method.dequeue = function() {
         if( this._size === 0 ){
             return void 0;
         }
@@ -172,6 +171,9 @@ var Queue = (function() {
 
     method.isEmpty = function() {
         return this._size === 0;
+    };
+
+    method.toArray = method.toJSON = method.values = function() {
     };
 
 

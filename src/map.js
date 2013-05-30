@@ -161,6 +161,7 @@ var Map = (function() {
     var LOAD_FACTOR = 0.67;
 
     var method = Map.prototype;
+
     function Map( capacity, equality ) {
         if( typeof capacity === "function" ) {
             var tmp = equality;
@@ -204,6 +205,8 @@ var Map = (function() {
         }
     }
 
+    method._resizesInPlace = false;
+
     method._makeBuckets = function() {
         var b = this._buckets = new Array( this._capacity );
 
@@ -226,17 +229,23 @@ var Map = (function() {
         return hash( key ) % this._capacity;
     };
 
-    method._resize = function( oldBuckets ) {
-        for( var i = 0, l = oldBuckets.length; i < l; ++i ) {
+    method._resized = function( oldBuckets ) {
+        var newBuckets = this._buckets,
+            newLen = newBuckets.length,
+            oldLength = oldBuckets.length;
+
+        for( var i = 0; i < oldLength; ++i ) {
             var entry = oldBuckets[i];
-            oldBuckets[i] = null;
             while( entry !== null ) {
-                var bucketIndex = this._hashAsBucketIndex( entry.hash ),
+                oldBuckets[i] = null;
+
+                var bucketIndex = entry.hash % newLen,
                     next = entry.next;
 
-                entry.next = this._buckets[bucketIndex];
-                this._buckets[bucketIndex] = entry;
+                entry.next = newBuckets[bucketIndex];
+                newBuckets[bucketIndex] = entry;
                 entry = next;
+
             }
         }
     };
@@ -248,10 +257,26 @@ var Map = (function() {
         }
         this._capacity = capacity;
 
-        var oldBuckets = this._buckets;
-        this._makeBuckets();
-        if( oldBuckets !== null ) {
-            this._resize( oldBuckets );
+        var buckets = this._buckets,
+            oldLength;
+
+        if( buckets === null ) {
+            this._makeBuckets();
+            return;
+        }
+
+        //Ordered map can be resized in place
+        if( this._resizesInPlace ) {
+            oldLength = buckets.length;
+            buckets.length = capacity;
+            for( var i = oldLength; i < capacity; ++i ) {
+                buckets[i] = null;
+            }
+            this._resized( oldLength );
+        }
+        else {
+            this._makeBuckets();
+            this._resized( buckets );
         }
 
     };
@@ -272,7 +297,6 @@ var Map = (function() {
 
     method._getEntryWithKey = function( entry, key ) {
         var eq = this._equality;
-
         while( entry !== null ) {
             if( eq( entry.key, key ) ) {
                 return entry;
@@ -281,8 +305,8 @@ var Map = (function() {
         }
         return null;
     };
-
-    method._setAll = function( obj ) {
+                                    //Used by set
+    method._setAll = function( obj, __value ) {
         if( !obj.length ) {
             return;
         }
@@ -292,11 +316,15 @@ var Map = (function() {
             this._resizeTo( primes.atLeast( ( 1 + newSize / LOAD_FACTOR ) | 0 ) );
         }
 
-        for( var i = 0; i < obj.length; ++i ) {
-            var key = obj[i][0],
-                value = obj[i][1];
-
-            this.set( key, value );
+        if( arguments.length > 1 ) {
+            for( var i = 0; i < obj.length; ++i ) {
+                this.set( obj[i], __value );
+            }
+        }
+        else {
+            for( var i = 0; i < obj.length; ++i ) {
+                this.set( obj[i][0], obj[i][1] );
+            }
         }
     };
 

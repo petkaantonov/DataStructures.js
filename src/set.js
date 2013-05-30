@@ -36,9 +36,7 @@ var Set = (function() {
     method._mapType = Map;
 
     method._addAll = function( items ) {
-        for( var i = 0, l = items.length; i < l; ++i ) {
-            this._map.put( items[i], __value );
-        }
+        this._map._setAll( items, __value );
     };
 
     //API

@@ -26,15 +26,21 @@ var OrderedMap = (function() {
         return new OrderedMap( capacity, equality, ACCESS_ORDER );
     };
 
+    method._resizesInPlace = true;
 
-    method._resize = function() {
-        var entry = this._firstEntry;
+    method._resized = function( oldLength ) {
+        var entry = this._firstEntry,
+            buckets = this._buckets,
+            len = buckets.length;
 
         while( entry !== null ) {
-            var bucketIndex = this._hashAsBucketIndex( entry.hash );
+            var bucketIndex = entry.hash % len,
+                entryAtIndex = buckets[bucketIndex];
 
-            entry.next = this._buckets[bucketIndex];
-            this._buckets[bucketIndex] = entry;
+            if( entryAtIndex !== entry ) {
+                entry.next = entryAtIndex;
+                buckets[bucketIndex] = entry;
+            }
 
             entry = entry.nextEntry;
         }

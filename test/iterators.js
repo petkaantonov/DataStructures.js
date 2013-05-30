@@ -5,7 +5,10 @@ test( "Test sorted set forward iterator", function() {
         49, 9, 21, 34, 25, 18, 3, 19, 0, 5, 10, 23, 24, 48, 41, 12, 28, 47,
         30, 31, 32, 46, 6, 35, 44, 37, 17, 1, 13, 14, 45, 8, 11, 27, 26, 29,
         16, 43, 50
-    ]), b = a.clone(), c = a.values();
+    ]);
+
+    var b = a.clone(), c = a.values();
+
 
     var t = a._tree;
 
@@ -365,7 +368,8 @@ test( "Test ordered set traversals after removal", function() {
 
 test( "Test set forward iterator", function() {
     var a = new DS.Set( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]
-), b = a.clone(), c = a.values();
+);
+    var b = a.clone(), c = a.values();
 
     var t = a;
 
