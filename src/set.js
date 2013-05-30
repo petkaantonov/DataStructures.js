@@ -211,5 +211,7 @@ var Set = (function() {
         return Iterator;
     })();
 
+    method._Iterator = Iterator;
+
     return Set;
 })();

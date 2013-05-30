@@ -200,6 +200,7 @@ var SortedSet = (function() {
         return Iterator;
     })();
 
+    method._Iterator = Iterator;
 
     return SortedSet;
 })();

@@ -669,6 +669,18 @@ var RedBlackTree = (function() {
             return this;
         };
 
+        method.set = method.put = function( value ) {
+            this._checkModCount();
+
+            if( this._currentNode === null ) {
+                return;
+            }
+
+            var ret = this.value;
+            this._currentNode.value = this.value = value;
+            return ret;
+        };
+
         method["delete"] = method.remove = function() {
             this._checkModCount();
 
@@ -704,6 +716,8 @@ var RedBlackTree = (function() {
 
         return Iterator;
     })();
+
+    method._Iterator = Iterator;
 
 
 

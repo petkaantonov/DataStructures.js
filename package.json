@@ -9,6 +9,7 @@
     "grunt-closure-compiler": "0.0.18",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-compress": "~0.5.1",
-    "qunitjs": "~1.11.0"
+    "qunitjs": "~1.11.0",
+    "browserify": "~2.16.0"
   }
 }

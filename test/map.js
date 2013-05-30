@@ -1,4 +1,4 @@
-/* global DS, test, strictEqual, deepEqual */
+/* global DS, test, strictEqual, deepEqual, ok */
 test( "Test map capacity", function() {
     var maps = [new DS.Map(10), new DS.Map(100), new DS.Map(1000), new DS.Map(10000), new DS.Map(35000)];
     var expectedCapacity = [13, 193, 1543, 12289, 49157];
@@ -111,6 +111,25 @@ test( "Test map clear", function() {
 
 });
 
+test( "Test map contains value", function() {
+    var o = {};
+    var map = new DS.Map([
+        [3, 4],
+        [3.14, "pii"],
+        [o, "obj"],
+        ["string", 3],
+        [true, false],
+        [null, o]
+    ]);
+
+    strictEqual( map.containsValue("obj"), true, "map contains value" );
+    strictEqual( map.containsValue(o), true, "map contains the object as value too" );
+    strictEqual( map.containsValue(true), false, "map has the value as key but not value" );
+    strictEqual( map.containsValue("Not at all"), false, "map doesn't contain as value");
+
+
+});
+
 test( "Test map clone", function() {
     var o = {};
     var map = new DS.Map([
@@ -168,7 +187,23 @@ test( "Test array returning methods", function() {
     deepEqual( [], new DS.Map().entries(), "empty array" );
 });
 
-test( "Test foreach", function() {
+test( "Test map resize", function() {
+    var l = 200;
+    var map = DS.Map();
+
+    var a = [];
+    var c;
+    while(l-- ) {
+        a.push( ( c = Math.random() ) );
+        map.put( c, true );
+        ok( map._capacity > a.length, "greater capacity" );
+    }
+
+    strictEqual( map.size(), a.length, "same size" );
+    ok( map._capacity > a.length, "greater capacity" );
+});
+
+test( "Test map foreach", function() {
     var o = {};
     var a = [
         [3, 4],

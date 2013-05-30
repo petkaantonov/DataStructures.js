@@ -1,6 +1,6 @@
-/* exported hasOwn, toString, isArray, arrayLike, uid,
-    toList, toListOfTuples, arrayRemove1, arrayRemove2,
-    copyProperties, setIteratorMethods, MapForEach, SetForEach
+/* exported hasOwn, toString, isArray, uid,
+    toList, toListOfTuples,
+    copyProperties, setIteratorMethods, MapForEach, SetForEach, exportCtor
 */
 var hasOwn = {}.hasOwnProperty,
     toString = {}.toString,
@@ -9,11 +9,19 @@ var hasOwn = {}.hasOwnProperty,
         return toString.call(arr) === "[object Array]";
     };
 
+function exportCtor( Ctor ) {
+    var ret = function( arg1, arg2, arg3 ) {
+        return new Ctor( arg1, arg2, arg3 );
+    };
 
-function arrayLike( arr ) {
-    return !!(arr && ( ( arr.length && ( "0" in arr ) ) || ( arr.size && arr.size() ) ) && typeof arr !== "function");
+    for( var key in Ctor ) {
+        if( hasOwn.call( Ctor, key ) ) {
+            ret[key] = Ctor[key];
+        }
+    }
+
+    return ret;
 }
-
 
 var uid = (function() {
     var id = 0,
@@ -88,23 +96,6 @@ function toListOfTuples( obj ) {
     else {
         return [];
     }
-}
-
-
-function arrayRemove2( arr, index ) {
-    for( var i = index, len = arr.length - 2; i < len; ++i ) {
-        arr[i+1] = arr[i+2];
-        arr[i] = arr[i+1];
-    }
-
-    arr.length = len;
-}
-
-function arrayRemove1( arr, index ) {
-    for( var i = index, len = arr.length - 1; i < len; ++i ) {
-        arr[i] = arr[i+1];
-    }
-    arr.length = len;
 }
 
 function copyProperties( src, dst ) {

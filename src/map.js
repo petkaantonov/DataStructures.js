@@ -3,7 +3,7 @@
 /* jshint -W079 */
 var Map = (function() {
     //TODO equals,
-    //  methods from sortedmap
+
     var primes = (function() {
         //Hash table sizes that roughly double each time, are prime, and as far as as possible from the nearest powers of 2
         var primes = [
@@ -160,32 +160,6 @@ var Map = (function() {
     var MAX_CAPACITY = primes.highest();
     var LOAD_FACTOR = 0.67;
 
-    var Entry = (function() {
-        var method = Entry.prototype;
-        function Entry( key, value, next, hash ) {
-            this.key = key;
-            this.value = value;
-            this.next = next;
-            this.hash = hash;
-        }
-
-        method.inserted = function() {
-
-        };
-
-        method.removed = function() {
-            this.key = this.value = null;
-        };
-
-        method.accessed = function() {
-
-        };
-
-        return Entry;
-    })();
-
-
-
     var method = Map.prototype;
     function Map( capacity, equality ) {
         if( typeof capacity === "function" ) {
@@ -230,8 +204,6 @@ var Map = (function() {
         }
     }
 
-    method._entryType = Entry;
-
     method._makeBuckets = function() {
         var b = this._buckets = new Array( this._capacity );
 
@@ -254,6 +226,21 @@ var Map = (function() {
         return hash( key ) % this._capacity;
     };
 
+    method._resize = function( oldBuckets ) {
+        for( var i = 0, l = oldBuckets.length; i < l; ++i ) {
+            var entry = oldBuckets[i];
+            oldBuckets[i] = null;
+            while( entry !== null ) {
+                var bucketIndex = this._hashAsBucketIndex( entry.hash ),
+                    next = entry.next;
+
+                entry.next = this._buckets[bucketIndex];
+                this._buckets[bucketIndex] = entry;
+                entry = next;
+            }
+        }
+    };
+
     method._resizeTo = function( capacity ) {
         capacity = clampCapacity( capacity );
         if( this._capacity >= capacity ) {
@@ -263,23 +250,10 @@ var Map = (function() {
 
         var oldBuckets = this._buckets;
         this._makeBuckets();
-
         if( oldBuckets !== null ) {
-            for( var i = 0, l = oldBuckets.length; i < l; ++i ) {
-                var entry = oldBuckets[i];
-                var counter = 0;
-
-                while( entry !== null && counter++ < 20 ) {
-                    var bucketIndex = this._hashAsBucketIndex( entry.hash ),
-                        next = entry.next;
-
-                    entry.next = this._buckets[bucketIndex];
-                    this._buckets[bucketIndex] = entry;
-                    entry = next;
-                }
-                oldBuckets[i] = null;
-            }
+            this._resize( oldBuckets );
         }
+
     };
 
     method._getNextCapacity = function() {
@@ -393,8 +367,8 @@ var Map = (function() {
             else {
                 prevEntry.next = entry.next;
             }
-            entry.removed( this );
             this._size--;
+            entry.removed( this );
         }
         return ret;
     };
@@ -413,12 +387,13 @@ var Map = (function() {
         if( entry === null ) {
             this._size++;
             this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry, h );
-            this._checkResize();
             entry.inserted( this );
+            this._checkResize();
         }
         else {
             ret = entry.value;
             entry.value = value;
+            entry.accessed( this );
         }
 
         return ret;
@@ -651,6 +626,17 @@ var Map = (function() {
             return this;
         };
 
+        method.set = method.put = function( value ) {
+            this._checkModCount();
+
+            if( this._currentEntry === null ) {
+                return;
+            }
+            var ret = this.value;
+            this._currentEntry.value = this.value = value;
+            return ret;
+        };
+
         method["delete"] = method.remove = function() {
             this._checkModCount();
 
@@ -674,6 +660,34 @@ var Map = (function() {
 
         return Iterator;
     })();
+
+    method._Iterator = Iterator;
+
+    var Entry = (function() {
+        var method = Entry.prototype;
+        function Entry( key, value, next, hash ) {
+            this.key = key;
+            this.value = value;
+            this.next = next;
+            this.hash = hash;
+        }
+
+        method.inserted = function() {
+
+        };
+
+        method.removed = function() {
+            this.key = this.value = null;
+        };
+
+        method.accessed = function() {
+
+        };
+
+        return Entry;
+    })();
+
+    method._entryType = Entry;
 
     Map.hashString = hashString;
     Map.hashNumber = hashNumber;

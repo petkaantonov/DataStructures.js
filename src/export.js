@@ -1,15 +1,16 @@
 /* global Set, OrderedSet, SortedSet, Map, OrderedMap, SortedMap,
     defaultComparer, invertedComparator, arePrimitive, composeComparators,
-    comparePosition, global*/
+    comparePosition, global, exportCtor */
+
 var DS = {
 
-    Set: Set,
-    OrderedSet: OrderedSet,
-    SortedSet: SortedSet,
+    Set: exportCtor( Set ),
+    OrderedSet: exportCtor( OrderedSet ),
+    SortedSet: exportCtor( SortedSet ),
 
-    Map: Map,
-    OrderedMap: OrderedMap,
-    SortedMap: SortedMap,
+    Map: exportCtor( Map ),
+    OrderedMap: exportCtor( OrderedMap ),
+    SortedMap: exportCtor( SortedMap ),
 
     compare: {
         NATURAL_ASC: defaultComparer,

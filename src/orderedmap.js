@@ -13,98 +13,6 @@ var OrderedMap = (function() {
         }
     }
 
-    var Entry = (function() {
-        var method = Entry.prototype;
-
-        function Entry( key, value, next, hash ) {
-            this.key = key;
-            this.value = value;
-            this.next = next;
-            this.hash = hash;
-
-            this.prevEntry = this.nextEntry = null;
-        }
-
-        method.inserted = function( map ) {
-            if( map._firstEntry === null ) {
-                map._firstEntry = map._lastEntry = this;
-            }
-            else if( map._firstEntry === map._lastEntry ) {
-                map._lastEntry = this;
-                map._firstEntry.nextEntry = this;
-                this.prevEntry = map._firstEntry;
-            }
-            else {
-                var last = map._lastEntry;
-                map._lastEntry = this;
-                last.nextEntry = this;
-                this.prevEntry = last;
-            }
-        };
-
-        method.removed = function( map ) {
-            var prev = this.prevEntry,
-                next = this.nextEntry;
-
-            this.prevEntry = this.nextEntry = this.key = this.value = null;
-
-            if( prev === null && next === null ) {
-                map._firstEntry = map._lastEntry = null;
-            }
-            else if( next === null ) {
-                map._lastEntry = prev;
-                map._lastEntry.nextEntry = null;
-            }
-            else if( prev === null ) {
-                map._firstEntry = next;
-                map._firstEntry.prevEntry = null;
-            }
-            else {
-                next.prevEntry = prev;
-                prev.nextEntry = next;
-            }
-        };
-
-        method.accessed = function( map ) {
-            if( map._ordering === ACCESS_ORDER &&
-                map._firstEntry !== null &&
-                map._firstEntry !== map._lastEntry &&
-                map._lastEntry !== this ) {
-
-                var last = map._lastEntry,
-                    next = this.nextEntry,
-                    prev;
-
-                if( this === map._firstEntry ) {
-                    map._lastEntry = this;
-                    map._firstEntry = next;
-
-                    next.prevEntry = null;
-
-                    this.nextEntry = null;
-                    this.prevEntry = last;
-                    last.nextEntry = this;
-                }
-                else {
-                    prev = this.prevEntry;
-
-                    prev.nextEntry = next;
-                    next.prevEntry = prev;
-
-                    this.prevEntry = last;
-                    this.nextEntry = null;
-
-                    last.nextEntry = this;
-
-                }
-            }
-        };
-
-        return Entry;
-    })();
-
-
-
     var INSERTION_ORDER = OrderedMap.INSERTION_ORDER = {};
     var ACCESS_ORDER = OrderedMap.ACCESS_ORDER = {};
 
@@ -118,7 +26,19 @@ var OrderedMap = (function() {
         return new OrderedMap( capacity, equality, ACCESS_ORDER );
     };
 
-    method._entryType = Entry;
+
+    method._resize = function() {
+        var entry = this._firstEntry;
+
+        while( entry !== null ) {
+            var bucketIndex = this._hashAsBucketIndex( entry.hash );
+
+            entry.next = this._buckets[bucketIndex];
+            this._buckets[bucketIndex] = entry;
+
+            entry = entry.nextEntry;
+        }
+    };
 
     method.indexOfKey = function( key ) {
         if( this._firstEntry === null ) {
@@ -209,7 +129,7 @@ var OrderedMap = (function() {
         return new Iterator( this );
     };
 
-    var Iterator = (function() {
+    var Iterator = (function( _super ) {
         var method = Iterator.prototype;
 
         function Iterator( map ) {
@@ -253,49 +173,8 @@ var OrderedMap = (function() {
             }
         };
 
-        method.next = function() {
-            this._checkModCount();
-            this._index++;
-
-            if( this._backingEntry === null &&
-                this._index >= this._map._size ) {
-                this.moveToEnd();
-                return false;
-            }
-
-            var entry = this._currentEntry = this._getNextEntry();
-
-            this.key = entry.key;
-            this.value = entry.value;
-            this.index = this._index;
-
-            return true;
-
-        };
-
-        method.prev = function() {
-            this._checkModCount();
-            this._index--;
-
-            if( this._index < 0 ||
-                this._map._size === 0 ) {
-                this.moveToStart();
-                return false;
-            }
-
-            var entry = this._currentEntry = this._getPrevEntry();
-            if( entry === null ) {
-                console.log( "adtr", this );
-                throw "ad";
-            }
-
-            this.key = entry.key;
-            this.value = entry.value;
-            this.index = this._index;
-
-            return true;
-
-        };
+        method.next = _super.next;
+        method.prev = _super.prev;
 
         method.moveToStart = function() {
             this._checkModCount();
@@ -316,6 +195,8 @@ var OrderedMap = (function() {
 
             return this;
         };
+
+        method.set = method.put = _super.set;
 
         method["delete"] = method.remove = function() {
             this._checkModCount();
@@ -343,8 +224,91 @@ var OrderedMap = (function() {
 
 
         return Iterator;
+    })( _super._Iterator.prototype );
+
+    method._Iterator = Iterator;
+
+    var Entry = (function() {
+        var method = Entry.prototype;
+
+        function Entry( key, value, next, hash ) {
+            this.key = key;
+            this.value = value;
+            this.next = next;
+            this.hash = hash;
+
+            this.prevEntry = this.nextEntry = null;
+        }
+
+        method.inserted = function( map ) {
+            if( map._firstEntry === null ) {
+                map._firstEntry = map._lastEntry = this;
+            }
+            else if( map._firstEntry === map._lastEntry ) {
+                map._lastEntry = this;
+                map._firstEntry.nextEntry = this;
+                this.prevEntry = map._firstEntry;
+            }
+            else {
+                var last = map._lastEntry;
+                map._lastEntry = this;
+                last.nextEntry = this;
+                this.prevEntry = last;
+            }
+        };
+
+        method.removed = function( map ) {
+            var prev = this.prevEntry,
+                next = this.nextEntry;
+
+            this.prevEntry = this.nextEntry = this.key = this.value = null;
+
+            if( prev === null && next === null ) {
+                map._firstEntry = map._lastEntry = null;
+            }
+            else if( next === null ) {
+                map._lastEntry = prev;
+                map._lastEntry.nextEntry = null;
+            }
+            else if( prev === null ) {
+                map._firstEntry = next;
+                map._firstEntry.prevEntry = null;
+            }
+            else {
+                next.prevEntry = prev;
+                prev.nextEntry = next;
+            }
+        };
+
+        method.accessed = function( map ) {
+            if( map._ordering === ACCESS_ORDER &&
+                map._firstEntry !== null &&
+                map._firstEntry !== map._lastEntry &&
+                map._lastEntry !== this ) {
+                var prev = this.prevEntry,
+                    next = this.nextEntry;
+
+                if( prev !== null ) {
+                    prev.nextEntry = next;
+                }
+                else {
+                    map._firstEntry = next;
+                }
+                next.prevEntry = prev;
+
+                var last = map._lastEntry;
+
+                this.nextEntry = null;
+                this.prevEntry = last;
+                last.nextEntry = this;
+                map._lastEntry = this;
+            }
+        };
+
+        return Entry;
     })();
 
+    method._entryType = Entry;
 
     return OrderedMap;
 })();

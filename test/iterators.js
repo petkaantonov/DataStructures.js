@@ -775,3 +775,44 @@ test( "Test map iteration", function() {
 });
 
 
+test( "Test map iterator updates", function() {
+    var a = [[1,2],[3,4],[5,6]];
+    var smap = DS.SortedMap(a),
+        omap = DS.OrderedMap(a),
+        map = DS.Map(a);
+
+    var it = smap.iterator();
+
+    while( it.next() ) {
+        it.set( 5 );
+        strictEqual( it.value, 5, "iterator updated value");
+    }
+
+    it = omap.iterator();
+
+    while( it.next() ) {
+        it.set( 5 );
+        strictEqual( it.value, 5, "iterator updated value");
+    }
+
+    it = map.iterator();
+
+    while( it.next() ) {
+        it.set( 5 );
+        strictEqual( it.value, 5, "iterator updated value");
+
+    }
+
+    strictEqual( smap.get(1), 5, "updated value");
+    strictEqual( smap.get(3), 5, "updated value");
+    strictEqual( smap.get(5), 5, "updated value");
+
+    strictEqual( omap.get(1), 5, "updated value");
+    strictEqual( omap.get(3), 5, "updated value");
+    strictEqual( omap.get(5), 5, "updated value");
+
+    strictEqual( map.get(1), 5, "updated value");
+    strictEqual( map.get(3), 5, "updated value");
+    strictEqual( map.get(5), 5, "updated value");
+});
+

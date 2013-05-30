@@ -66,7 +66,7 @@ module.exports = function( grunt ) {
     gruntConfig.jshint = {
         all: {
             options: {
-                jshintrc: "./jshint.json"
+                jshintrc: "./.jshintrc"
             },
 
             files: {
