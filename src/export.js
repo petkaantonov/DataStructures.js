@@ -12,6 +12,8 @@ var DS = {
     OrderedMap: exportCtor( OrderedMap ),
     SortedMap: exportCtor( SortedMap ),
 
+    Queue: exportCtor( Queue ),
+
     compare: {
         NATURAL_ASC: defaultComparer,
 

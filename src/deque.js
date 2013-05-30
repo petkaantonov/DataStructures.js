@@ -17,6 +17,12 @@ var Deque = (function() {
         return num;
     }
 
+    function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
+        for( var j = 0; j < len; ++j ) {
+            dst[j + dstIndex ] = src[j + srcIndex];
+        }
+    }
+
     function Deque( capacity ) {
         var items = null;
 
@@ -39,8 +45,6 @@ var Deque = (function() {
         this._size = 0;
         this._items = null;
 
-        this._firstIndex = this._lastIndex = 0;
-
         if( items ) {
             this._makeCapacity();
             this._addAll( items );
@@ -56,6 +60,32 @@ var Deque = (function() {
         }
     };
 
+    this._resizeTo = function( size ) {
+        var capacity = this._capacity = size,
+            oldItems = this._items;
+
+        this._makeCapacity();
+
+        var l = this._size >> 1,
+            n = capacity - l,
+            items = this._items;
+            i, j;
+
+        for( i = 0; i < l; ++i ) {
+            items[i] = oldItems[i];
+            oldItems[i] = null;
+        }
+
+        this._firstIndex = j = i;
+
+        for( i = capacity - 1; i >= n; --i ) {
+            items[i] = oldItems[j];
+            oldItems[j++] = null;
+        }
+
+        this._lastIndex = i;
+    };
+
     method._addAll = function( items ) {
         this._checkCapacity( this._size() + items.length );
     };
@@ -67,6 +97,7 @@ var Deque = (function() {
         for( var i = 0; i < capacity; ++i ) {
             items[i] = null;
         }
+        this._firstIndex = this._lastIndex = 0;
     };
 
     method.forEach = SetForEach;

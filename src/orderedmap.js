@@ -259,18 +259,20 @@ var OrderedMap = (function() {
 
         method.removed = function( map ) {
             var prev = this.prevEntry,
-                next = this.nextEntry;
+                next = this.nextEntry,
+                prevIsNull = prev === null,
+                nextIsNull = next === null;
 
             this.prevEntry = this.nextEntry = this.key = this.value = null;
 
-            if( prev === null && next === null ) {
+            if( prevIsNull && nextIsNull ) {
                 map._firstEntry = map._lastEntry = null;
             }
-            else if( next === null ) {
+            else if( nextIsNull ) {
                 map._lastEntry = prev;
                 map._lastEntry.nextEntry = null;
             }
-            else if( prev === null ) {
+            else if( prevIsNull ) {
                 map._firstEntry = next;
                 map._firstEntry.prevEntry = null;
             }

@@ -38,6 +38,8 @@ module.exports = function( grunt ) {
                 "./src/orderedset.js",
                 "./src/sortedset.js",
 
+                "./src/queue.js",
+
                 "./src/export.js",
 
                 "./build/end.js"
