@@ -1,5 +1,7 @@
-(function(){
+(function(global){
     "use strict";
+
+    var performance = global.performance;
 
     var hashString = function( str ) {
         var hash = 5381,
@@ -13,7 +15,8 @@
     };
 
     //Like above but ensures no number ever goes above
-    //2^30 - 1 I.E. Doesn't force Double mode in V8
+    //              2^30 - 1
+    //I.E. Doesn't force Double mode in V8
     var hashStringSmi = (function() {
         var smiMask = 0x39FFFFFF;
 
@@ -122,40 +125,44 @@
     var sizes = [ 5, 10, 20, 50, 150, 350, 750, 1500, 3000, 6000, 7500, 10000 ];
 
     sizes.forEach( function( size ) {
-
+        var buckets = primes.atLeast( size / 0.67 );
         var normalCol = getNormalCollisions( size ),
             smiCol = getSmiCollisions( size );
 
+        var idealCol = ( size - buckets * ( 1 - Math.pow( ( ( buckets - 1 ) / buckets ), size ) ) );
+        idealCol = Math.round(idealCol * 1e9)/1e9;
+
         console.log(
-            "With ", size, "items in a table",
+            "With ", size, "items in a table of", buckets, "buckets",
             "normal hashing collided", normalCol, "times",
             "while SMI hashing collided", smiCol, "times.",
             (smiCol < normalCol ? "SMI wins." :
             smiCol > normalCol ? "Normal wins." :
-            "It's a tie.")
+            "It's a tie."),
+            "\nIdeal amount of collisions for", size, "items in a table of", buckets, "buckets: ", Math.round(idealCol)
         );
     });
 
     function smiHashSpeed() {
-        var now = Date.now();
+        var now = performance.now();
         var l = 5;
         while( l-- ) {
             for( var i = 0, len = randomStrings.length; i < len; ++i ) {
                 hashStringSmi( randomStrings[i] );
             }
         }
-        return Date.now() - now;
+        return performance.now() - now;
     }
 
     function normalHashSpeed() {
-        var now = Date.now();
+        var now = performance.now();
         var l = 5;
         while( l-- ) {
             for( var i = 0, len = randomStrings.length; i < len; ++i ) {
                 hashString( randomStrings[i] );
             }
         }
-        return Date.now() - now;
+        return performance.now() - now;
     }
 
     var smiTimes = [],
@@ -178,4 +185,4 @@
 
     console.log( "SMI average time for 50000 hashes:", smiAvg, "milliseconds" );
     console.log( "normal average time for 50000 hashes:", normalAvg, "milliseconds" );
-})();
+})(this);
