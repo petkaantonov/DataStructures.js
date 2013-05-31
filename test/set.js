@@ -222,7 +222,6 @@ test( "test set valueOf method", function() {
     ]);
     var val = set.valueOf();
     ok( typeof val === "number", "returns a number" );
-    strictEqual( val | 0, val, "returns an integer" );
     ok( val > 0, "greater than 0");
     ok( val < (-1 >>> 0), "less than 0xffffffff");
 });

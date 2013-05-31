@@ -1,3 +1,4 @@
+/* global toList */
 var Queue = (function() {
     var method = Queue.prototype;
 
@@ -5,16 +6,14 @@ var Queue = (function() {
     var DEFAULT_CAPACITY = 16;
     var MAX_CAPACITY = 536870912;
 
-    function closestPowerOfTwo( num ) {
-        num = num >>> 0;
-        num |= (num >> 1);
-        num |= (num >> 2);
-        num |= (num >> 4);
-        num |= (num >> 8);
-        num |= (num >> 16);
-        num = num >>> 0;
-        num++;
-        return num;
+    function nextPowerOfTwo( num ) {
+        num = ((num >>> 0) - 1);
+        num |= (num >>> 1);
+        num |= (num >>> 2);
+        num |= (num >>> 4);
+        num |= (num >>> 8);
+        num |= (num >>> 16);
+        return (num + 1)>>>0;
     }
 
     function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
@@ -28,12 +27,12 @@ var Queue = (function() {
 
         switch( typeof capacity ) {
         case "number":
-            capacity = closestPowerOfTwo( capacity );
+            capacity = nextPowerOfTwo( capacity );
             break;
         case "object":
             if( capacity ) {
                 items = toList( capacity );
-                capacity = closestPowerOfTwo( items.length + 1);
+                capacity = nextPowerOfTwo( items.length );
             }
             break;
         default:
@@ -43,7 +42,7 @@ var Queue = (function() {
         this._capacity = Math.max(Math.min( MAX_CAPACITY, capacity ), DEFAULT_CAPACITY);
 
         this._size = 0;
-        this._items = null;
+        this._queue = null;
         this._front = 0;
 
         if( items ) {
@@ -52,9 +51,18 @@ var Queue = (function() {
         }
     }
 
+    method._checkCapacity = function( size ) {
+        if( size > MAX_CAPACITY ) {
+            throw new Error( "Too many items");
+        }
+        else if( size > this._capacity ) {
+            this._resizeTo( this._capacity * 2 );
+        }
+    };
+
     method._makeCapacity = function() {
         var capacity = this._capacity,
-            items = this._items = new Array( capacity );
+            items = this._queue = new Array( capacity );
 
         for( var i = 0; i < capacity; ++i ) {
             items[i] = null;
@@ -63,35 +71,28 @@ var Queue = (function() {
     };
 
     method._resizeTo = function( capacity ) {
-        var oldItems = this._items,
+        var oldQueue = this._queue,
+            newQueue,
             oldFront = this._front,
             oldCapacity = this._capacity,
-            k = 0,
             size = this._size;
 
         this._capacity = capacity;
 
         this._makeCapacity();
 
+        newQueue = this._queue;
+            //Can perform direct linear copy
         if( oldFront + size <= oldCapacity ) {
-            arrayCopy( oldItems, oldFront, this._items, 0, size );
+            arrayCopy( oldQueue, oldFront, newQueue, 0, size );
         }
-        else {
-            var lengthAfterWrapping = size - oldFront + 1;
-            arrayCopy( oldItems, oldFront, this._items, 0, lengthAfterWrapping );
-            arrayCopy( oldItems, 0, this._items, lengthAfterWrapping, oldFront );
+        else { //Cannot perform copy directly, perform as much as possible
+                //at the end, and then copy the rest to the beginning of the buffer
+            var lengthBeforeWrapping = size - oldFront + 1;
+            arrayCopy( oldQueue, oldFront, newQueue, 0, lengthBeforeWrapping );
+            arrayCopy( oldQueue, 0, newQueue, lengthBeforeWrapping, oldFront );
         }
 
-    };
-
-
-    method._checkCapacity = function( size ) {
-        if( size >= MAX_CAPACITY ) {
-            throw new Error( "Too many items");
-        }
-        else if( size >= this._capacity ) {
-            this._resizeTo( this._capacity * 2 );
-        }
     };
 
     method._addAll = function( items ) {
@@ -101,27 +102,24 @@ var Queue = (function() {
         }
         this._checkCapacity( len + this._size );
 
-        if( this._items === null ) {
+        if( this._queue === null ) {
             this._makeCapacity();
         }
 
-        var size = this._size,
-            queue = this._items,
+        var queue = this._queue,
             capacity = this._capacity,
-            front = this._front,
-            index = front + size;
+            insertionPoint = this._front + this._size & ( capacity - 1 );
 
-        console.log( index, len, capacity );
-        if( index + len <= capacity ) {
-            arrayCopy( items, 0, queue, index, len );
-        }
-        else if( index <= capacity ) {
-            var lengthAfterWrapping = index & ( capacity - 1 );
-            arrayCopy( items, 0, this._items, index, lengthAfterWrapping );
-            arrayCopy( items, lengthAfterWrapping, this._items, 0, len - lengthAfterWrapping );
+         //Can perform direct linear copy
+        if( insertionPoint + len < capacity ) {
+            arrayCopy( items, 0, queue, insertionPoint, len );
         }
         else {
-            arrayCopy( items, 0, queue, index & ( capacity - 1 ), len );
+            //Cannot perform copy directly, perform as much as possible
+            //at the end, and then copy the rest to the beginning of the buffer
+            var lengthBeforeWrapping = capacity - insertionPoint;
+            arrayCopy( items, 0, queue, insertionPoint, lengthBeforeWrapping );
+            arrayCopy( items, lengthBeforeWrapping, queue, 0, len - lengthBeforeWrapping );
         }
 
         this._size += len;
@@ -129,17 +127,19 @@ var Queue = (function() {
 
     };
 
-    method.unshiftAll = method.enqueueAll = function( items ) {
+    //API
+
+    method.addAll = function( items ) {
         return this._addAll( toList( items ) );
     };
 
     method.unshift = method.enqueue = function( item ) {
-        if( this._items === null ) {
+        if( this._queue === null ) {
             this._makeCapacity();
         }
         this._checkCapacity( this._size + 1 );
         var i = ( this._front + this._size ) & ( this._capacity - 1 );
-        this._items[i] = item;
+        this._queue[i] = item;
         this._size++;
     };
 
@@ -148,19 +148,19 @@ var Queue = (function() {
             return void 0;
         }
         var front = this._front,
-            ret = this._items[front];
+            ret = this._queue[front];
 
-        this._items[front] = null;
+        this._queue[front] = null;
         this._front = ( front + 1 ) & ( this._capacity - 1);
         this._size--;
         return ret;
     };
 
-    method.peek = function() {
+    method.peekFront = function() {
         if( this._size === 0 ){
             return void 0;
         }
-        return this._items[this._front];
+        return this._queue[this._front];
     };
 
     method.size = function() {

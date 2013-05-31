@@ -1,4 +1,5 @@
-/* global toListOfTuples, MapForEach, RedBlackTree, defaultComparer */
+/* global toListOfTuples, MapForEach, RedBlackTree, defaultComparer,
+    MapValueOf, MapEntries, MapKeys, MapValues, MapToString, MapToJSON */
 var SortedMap = (function() {
     var method = SortedMap.prototype;
 
@@ -124,35 +125,11 @@ var SortedMap = (function() {
         return this._tree.size() === 0;
     };
 
-    method.keys = function() {
-        var keys = [],
-            it = this.iterator();
+    method.keys = MapKeys;
 
-        while( it.next() ) {
-            keys.push( it.key );
-        }
-        return keys;
-    };
+    method.values = MapValues;
 
-    method.values = function() {
-        var values = [],
-            it = this.iterator();
-
-        while( it.next() ) {
-            values.push( it.value );
-        }
-        return values;
-    };
-
-    method.entries = function() {
-        var entries = [],
-            it = this.iterator();
-
-        while( it.next() ) {
-            entries.push( [it.key, it.value] );
-        }
-        return entries;
-    };
+    method.entries = MapEntries;
 
     method.iterator = function() {
         return this._tree.iterator();

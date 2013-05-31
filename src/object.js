@@ -5,6 +5,9 @@ var Object = (function( Object ) {
     return {
         /* For inheritance without invoking the parent constructor */
         create: Object.create || function( proto ) {
+            if( proto === null ) {
+                return {};
+            }
             function Type(){}
             Type.prototype = proto;
             return new Type();

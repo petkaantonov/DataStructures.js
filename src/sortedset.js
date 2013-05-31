@@ -1,5 +1,6 @@
 /* global defaultComparer, SortedMap, SetForEach, setIteratorMethods,
-    copyProperties, toList, RedBlackTree */
+    copyProperties, toList, RedBlackTree,
+    SetValueOf, SetToString, SetToJSON */
 var SortedSet = (function() {
 
     var method = SortedSet.prototype;

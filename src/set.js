@@ -1,4 +1,5 @@
-/* global copyProperties, setIteratorMethods, toList, SetForEach */
+/* global copyProperties, setIteratorMethods, toList, SetForEach,
+    SetToJSON, SetToString, SetValueOf */
 /* jshint -W079 */
 var Set = (function() {
     var method = Set.prototype;

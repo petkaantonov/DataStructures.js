@@ -1,4 +1,6 @@
-/* global Buffer, uid, MapForEach, toListOfTuples */
+/* global Buffer, uid, MapForEach, toListOfTuples, NativeMap, exportCtor,
+    MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, MapValueOf,
+    MapToJSON, MapToString */
 /* exported Map */
 /* jshint -W079 */
 var Map = (function() {
@@ -439,38 +441,14 @@ var Map = (function() {
 
     method.valueOf = MapValueOf;
 
+    method.keys = MapKeys;
+
+    method.values = MapValues;
+
+    method.entries = MapEntries;
+
     method.iterator = function() {
         return new Iterator( this );
-    };
-
-    method.keys = function() {
-        var keys = [],
-            it = this.iterator();
-
-        while( it.next() ) {
-            keys.push( it.key );
-        }
-        return keys;
-    };
-
-    method.values = function() {
-        var values = [],
-            it = this.iterator();
-
-        while( it.next() ) {
-            values.push( it.value );
-        }
-        return values;
-    };
-
-    method.entries = function() {
-        var entries = [],
-        it = this.iterator();
-
-        while( it.next() ) {
-            entries.push( [it.key, it.value] );
-        }
-        return entries;
     };
 
     var Iterator = (function() {
@@ -484,11 +462,7 @@ var Map = (function() {
 
         }
 
-        method._checkModCount = function() {
-            if( this._modCount !== this._map._modCount ) {
-                throw new Error( "map cannot be mutated while iterating" );
-            }
-        };
+        method._checkModCount = MapIteratorCheckModCount;
 
         method._getNextEntryFromEntry = function( entry ) {
 
@@ -690,6 +664,8 @@ var Map = (function() {
     Map.hashNumber = hashNumber;
     Map.hashBoolean = hashBoolean;
     Map.hash = hash;
+
+    Map.Native = exportCtor( NativeMap );
 
     return Map;
 })();

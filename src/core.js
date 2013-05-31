@@ -1,6 +1,8 @@
 /* exported hasOwn, toString, isArray, uid,
     toList, toListOfTuples,
-    copyProperties, setIteratorMethods, MapForEach, SetForEach, exportCtor
+    copyProperties, setIteratorMethods, MapForEach, SetForEach, exportCtor,
+    MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, SetToJSON,
+    SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString
 */
 var hasOwn = {}.hasOwnProperty,
     toString = {}.toString,
@@ -210,7 +212,7 @@ function MapValueOf() {
         );
         ret >>>= 0;
     }
-    return ret;
+    return ret >>> 0;
 }
 
 function MapToJSON() {
@@ -235,9 +237,45 @@ function SetValueOf() {
         ret += ( Map.hash( it.value === this ? null : it.value ) );
         ret >>>= 0;
     }
-    return ret;
+    return ret >>> 0;
 }
 
 function SetToJSON() {
     return this.values();
+}
+
+function MapKeys() {
+    var keys = [],
+        it = this.iterator();
+
+    while( it.next() ) {
+        keys.push( it.key );
+    }
+    return keys;
+}
+
+function MapValues() {
+    var values = [],
+        it = this.iterator();
+
+    while( it.next() ) {
+        values.push( it.value );
+    }
+    return values;
+}
+
+function MapEntries() {
+    var entries = [],
+    it = this.iterator();
+
+    while( it.next() ) {
+        entries.push( [it.key, it.value] );
+    }
+    return entries;
+}
+
+function MapIteratorCheckModCount() {
+    if( this._modCount !== this._map._modCount ) {
+        throw new Error( "map cannot be mutated while iterating" );
+    }
 }

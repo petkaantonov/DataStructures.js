@@ -31,12 +31,16 @@ module.exports = function( grunt ) {
                 "./src/red_black_tree_node.js",
                 "./src/red_black_tree.js",
 
+                "./src/nativemap.js",
+
                 "./src/map.js",
                 "./src/orderedmap.js",
                 "./src/sortedmap.js",
                 "./src/set.js",
                 "./src/orderedset.js",
                 "./src/sortedset.js",
+
+                "./src/nativeset.js",
 
                 "./src/queue.js",
 

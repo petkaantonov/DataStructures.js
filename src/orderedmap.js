@@ -1,6 +1,5 @@
 var OrderedMap = (function() {
     var _super = Map.prototype,
-        hasOwn = {}.hasOwnProperty,
         method = OrderedMap.prototype = Object.create( _super );
 
     method.constructor = OrderedMap;
@@ -18,7 +17,7 @@ var OrderedMap = (function() {
         return new OrderedMap( capacity, equality, ACCESS_ORDER );
     };
 
-    method._resized = function( oldLength ) {
+    method._resized = function() {
         var newBuckets = this._buckets,
             newLen = newBuckets.length,
             entry = this._firstEntry;

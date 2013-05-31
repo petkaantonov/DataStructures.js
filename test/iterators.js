@@ -115,6 +115,8 @@ test( "Test sorted set backward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -140,6 +142,8 @@ test( "Test sorted set forward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -296,6 +300,8 @@ test( "Test ordered set backward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -317,6 +323,8 @@ test( "Test ordered set forward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -472,6 +480,8 @@ test( "Test set backward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, ind, "iterator index must match" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -493,6 +503,8 @@ test( "Test set forward remove", function() {
         strictEqual( it.value, c[ind], "iterator key must match" );
         strictEqual( it.index, 0, "iterator index must be 0" );
         it.remove();
+        strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+        strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
         i++;
     }
@@ -619,6 +631,12 @@ test( "Test sorted map iteration", function() {
     strictEqual( it.index, 0, "should be the first index");
 
     strictEqual( it.prev(), false, "should be no more iterations" );
+
+    it.next();
+    it.remove();
+    strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+    strictEqual( it.key, void 0, "iterator key undefined after .remove()" );
+    strictEqual( it.index, -1, "iterator index -1 after .remove()" );
 });
 
 test( "Test ordered map iteration", function() {
@@ -697,6 +715,12 @@ test( "Test ordered map iteration", function() {
     strictEqual( it.index, 0, "should be the first index");
 
     strictEqual( it.prev(), false, "should be no more iterations" );
+
+    it.next();
+    it.remove();
+    strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+    strictEqual( it.key, void 0, "iterator key undefined after .remove()" );
+    strictEqual( it.index, -1, "iterator index -1 after .remove()" );
 });
 
 test( "Test map iteration", function() {
@@ -776,6 +800,12 @@ test( "Test map iteration", function() {
     strictEqual( it.index, 0, "should be the first index");
 
     strictEqual( it.prev(), false, "should be no more iterations" );
+
+    it.next();
+    it.remove();
+    strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
+    strictEqual( it.key, void 0, "iterator key undefined after .remove()" );
+    strictEqual( it.index, -1, "iterator index -1 after .remove()" );
 });
 
 

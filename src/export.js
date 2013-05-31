@@ -1,6 +1,8 @@
 /* global Set, OrderedSet, SortedSet, Map, OrderedMap, SortedMap,
     defaultComparer, invertedComparator, arePrimitive, composeComparators,
-    comparePosition, global, exportCtor */
+    comparePosition, global, exportCtor, NativeSet, Queue */
+
+Set.Native = exportCtor( NativeSet );
 
 var DS = {
 
@@ -47,6 +49,8 @@ var DS = {
         composeComparators: composeComparators
     }
 };
+
+
 
 
 if( typeof module !== "undefined" && module.exports ) {
