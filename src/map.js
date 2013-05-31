@@ -41,24 +41,26 @@ var Map = (function() {
     })();
 
     var hashBoolean = function( bool ) {
-        return bool ? 1 : 0;
+        return bool | 0;
     };
 
-    var hashString = function( str ) {
-        if( str == null ) {
-            return 0;
+    var hashString = (function() {
+        //Even though enforcing no SMI overflow takes
+        //more operations, it performs almost 2 times faster
+        //see bench/string_hash.js
+        var smiMask = 0x39FFFFFF;
+
+        return function( str ) {
+            var hash = 5381,
+                i = 0;
+
+            for( var i = 0, l = str.length; i < l; ++i ) {
+                hash = ( ( ( ( hash & smiMask ) << 5 ) + ( hash & 0x1F ) ) ^ str.charCodeAt( i ) );
+            }
+
+            return hash;
         }
-
-        var hash = 5381,
-            i = 0;
-
-        for( var i = 0, l = str.length; i < l; ++i ) {
-            hash = ( ( ( hash << 5 ) + hash ) ^ str.charCodeAt( i ) );
-        }
-
-        return (hash >>> 0); //The shift is a trick to get unsigned 32-bit
-                           //(-1 >>> 0) === 4294967295
-    };
+    })();
 
     var hashNumber = (function() {
         //No support of reading the bits of a double directly as 2 unsigned ints
