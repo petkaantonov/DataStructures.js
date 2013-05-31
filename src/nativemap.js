@@ -140,7 +140,7 @@ var NativeMap = (function() {
 
         method.next = function() {
             this._checkModCount();
-            this.index += this._indexDelta;
+            this._index += this._indexDelta;
 
             if( this._index >= this._map._size ) {
                 this.moveToEnd();
@@ -183,6 +183,7 @@ var NativeMap = (function() {
             this.key = this.value = void 0;
             this.index = -1;
             this._index = -1;
+            this._indexDelta = 1;
 
             return this;
         };
@@ -193,6 +194,7 @@ var NativeMap = (function() {
             this.key = this.value = void 0;
             this.index = -1;
             this._index = this._keys.length;
+            this._indexDelta = 1;
 
             return this;
         };

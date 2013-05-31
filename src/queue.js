@@ -22,6 +22,20 @@ var Queue = (function() {
         }
     }
 
+    /*  This is efficient array implementation that provides
+        O(1) for random access, removing at front, removing at back (deque only),
+        adding at front, adding at back( deque only)
+
+        It resizes itself automatically and uses power of two physical sizes to avoid modulo operations.
+
+        It should perform much better than the native Javascript array when using the unshift/shift
+        methods. Random access etc is slower, but much faster than would be in a linked list O(N).
+
+        I didn't use this implementation because of random access though but to avoid creating a ton of
+        objects and have better reference locality. I implemented the random access methods just because it was possible
+        to do so efficiently. Could be useful if you need queue/deque but also random access...
+    */
+
     function Queue( capacity ) {
         var items = null;
 
@@ -44,6 +58,7 @@ var Queue = (function() {
         this._size = 0;
         this._queue = null;
         this._front = 0;
+        this._modCount = 0;
 
         if( items ) {
             this._makeCapacity();
@@ -96,6 +111,7 @@ var Queue = (function() {
     };
 
     method._addAll = function( items ) {
+        this._modCount++;
         var len = items.length;
         if( len <= 0 ) {
             return;
@@ -108,7 +124,7 @@ var Queue = (function() {
 
         var queue = this._queue,
             capacity = this._capacity,
-            insertionPoint = this._front + this._size & ( capacity - 1 );
+            insertionPoint = ( this._front + this._size ) & ( capacity - 1 );
 
          //Can perform direct linear copy
         if( insertionPoint + len < capacity ) {
@@ -129,11 +145,36 @@ var Queue = (function() {
 
     //API
 
+    method.forEach = SetForEach;
+
+    method.get = function( index ) {
+        var i = (index >>> 0);
+        if( i < 0 || i >= this._size ) {
+            return void 0;
+        }
+        i = ( this._front + i ) & ( this._capacity - 1 );
+        return this._queue[i];
+    };
+
+    method.set = function( index, value ) {
+        this._modCount++;
+        var i = (index >>> 0);
+        if( i < 0 || i >= this._size ) {
+            return void 0;
+        }
+        i = ( this._front + i ) & ( this._capacity - 1 );
+        var ret = this._queue[i];
+        this._queue[i] = value;
+        return ret;
+    };
+
     method.addAll = function( items ) {
+        this._modCount++;
         return this._addAll( toList( items ) );
     };
 
     method.unshift = method.enqueue = function( item ) {
+        this._modCount++;
         if( this._queue === null ) {
             this._makeCapacity();
         }
@@ -144,6 +185,7 @@ var Queue = (function() {
     };
 
     method.shift = method.dequeue = function() {
+        this._modCount++;
         if( this._size === 0 ){
             return void 0;
         }
@@ -163,6 +205,15 @@ var Queue = (function() {
         return this._queue[this._front];
     };
 
+    method.clear = function() {
+        this._modCount++;
+        this._front = this._size = 0;
+        var queue = this._queue;
+        for( var i = 0, len = queue.length; i < len; ++i ) {
+            queue[i] = null;
+        }
+    };
+
     method.size = function() {
         return this._size;
     };
@@ -171,10 +222,88 @@ var Queue = (function() {
         return this._size === 0;
     };
 
-    method.toArray = method.toJSON = method.values = function() {
+    method.toArray = method.toJSON = method.values = MapValues;
+
+    method.valueOf = SetValueOf;
+
+    method.toString = SetToString;
+
+    method.iterator = function() {
+        return new Iterator( this );
     };
 
+    var Iterator = (function() {
+        var method = Iterator.prototype;
 
+        function Iterator( queue ) {
+            this._queue = queue;
+            this._modCount = this._queue._modCount;
+            this._items = this._queue._queue;
+            this.moveToStart();
+        }
+
+        method._checkModCount = function() {
+            if( this._modCount !== this._queue._modCount ) {
+                throw new Error( "Cannot mutate queue while iterating" );
+            }
+        };
+        method.next = function() {
+            this._checkModCount();
+
+            var i = ++this._index;
+
+            if( i >= this._queue._size ) {
+                this.moveToEnd();
+                return false;
+            }
+            var item = this._items[( this._queue._front + i ) & ( this._queue._capacity - 1 )];
+
+            this.value = item;
+            this.index = i;
+
+            return true;
+        };
+
+        method.prev = function() {
+            this._checkModCount();
+
+            var i = --this._index;
+
+            if( i < 0 || this._queue._size === 0 ) {
+                this.moveToStart();
+                return false;
+            }
+
+            var item = this._items[( this._queue._front + i ) & ( this._queue._capacity - 1 )];
+
+            this.value = item;
+            this.index = i;
+
+            return true;
+        };
+
+        method.moveToStart = function() {
+            this._checkModCount();
+
+            this.index = -1;
+            this._index = -1;
+            this.value = void 0;
+
+            return this;
+        };
+
+        method.moveToEnd = function() {
+            this._checkModCount();
+
+            this.index = -1;
+            this._index = this._queue._size;
+            this.value = void 0;
+
+            return this;
+        };
+
+        return Iterator;
+    })();
 
     return Queue;
 })();

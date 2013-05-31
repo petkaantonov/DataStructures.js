@@ -4,7 +4,7 @@ var dequed = [];
 
 var q = new DS.Queue();
 q.enqueue("a");
-q.enqueueAll("bcdefghijklmnop".split(""))
+q.addAll("bcdefghijklmnop".split(""))
 
 var i = 0;
 while( i < 11 ) {
@@ -13,7 +13,7 @@ while( i < 11 ) {
 }
 var put = "daa rem uni ok not hai there what up dog desk per top kol mo ne mo ji to".split(" ");
 queued = queued.concat( );
-q.enqueueAll(put);
+q.addAll(put);
 
 var i = 0;
 while( i < 14 ) {
@@ -24,7 +24,7 @@ while( i < 14 ) {
 queued = queued.concat("1234567891234556678".split("") );
 
 
-q.enqueueAll("1234567891234556678".split(""));
+q.addAll("1234567891234556678".split(""));
 
 q.enqueue(1)
 
@@ -32,6 +32,20 @@ q.enqueue(2)
 q.enqueue(3)
 
 queued.push( 1, 2, 3 );
+
+var prev = [], next = [];
+
+it = q.iterator()
+
+while( it.next() ){
+    next.push( it.value );
+}
+
+while( it.prev() ) {
+    prev.push( it.value );
+}
+
+
 
 dequed.forEach( function(v){
 console.log(v);
