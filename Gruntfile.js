@@ -43,6 +43,7 @@ module.exports = function( grunt ) {
                 "./src/nativeset.js",
 
                 "./src/queue.js",
+                "./src/deque.js",
 
                 "./src/export.js",
 

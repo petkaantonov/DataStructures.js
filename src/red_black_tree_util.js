@@ -1,6 +1,6 @@
-/* exported RED, BLACK, arePrimitive, defaultComparer, arrayCopy, composeComparators,
+/* exported RED, BLACK, arePrimitive, defaultComparer, composeComparators,
     comparePosition, invertedComparator, True, Null */
-/* global uid */
+/* global uid, arrayCopy */
 var BLACK = true,
     RED = false,
     OBJ = {}.constructor;
@@ -37,19 +37,10 @@ function defaultComparer( a,b ) {
     }
 }
 
-function arrayCopy( arr ) {
-    var a = [];
-
-    for( var i = 0; i < arr.length; ++i ) {
-        a.push(arr[i]);
-    }
-
-    return a;
-}
 
 function composeComparators( arg ) {
     if( !Array.isArray(arg) ) {
-        arg = arrayCopy(arguments);
+        arg = arrayCopy(arguments, 0, [], 0, arguments.length);
     }
     return function( a, b ) {
         for( var i = 0; i < arg.length; ++i ) {

@@ -35,9 +35,9 @@ queued.push( 1, 2, 3 );
 
 var prev = [], next = [];
 
-it = q.iterator()
+it = q.iterator();
 
-while( it.next() ){
+while( it.next() ) {
     next.push( it.value );
 }
 
@@ -80,6 +80,29 @@ for( var i = 0; i < oldLength; ++i ) {
         entry = next;
 
     }
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+/* off by one
+
+
+var q = new DS.Deque([0,1,2,3,4,5,6]);
+
+var i = 0;
+
+while( i< 15 ) {
+    q.unshift(-1);
+    i++;
 }
 
 */

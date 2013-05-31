@@ -2,7 +2,7 @@
     toList, toListOfTuples,
     copyProperties, setIteratorMethods, MapForEach, SetForEach, exportCtor,
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, SetToJSON,
-    SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString
+    SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString, arrayCopy, arraySearch
 */
 var hasOwn = {}.hasOwnProperty,
     toString = {}.toString,
@@ -105,6 +105,21 @@ function copyProperties( src, dst ) {
         if( hasOwn.call( src, key ) ) {
             dst[key] = src[key];
         }
+    }
+}
+
+function arraySearch( array, startIndex, length, value ) {
+    for( var i = startIndex; i < length; ++i ) {
+        if( array[i] === value ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
+    for( var j = 0; j < len; ++j ) {
+        dst[j + dstIndex ] = src[j + srcIndex];
     }
 }
 
