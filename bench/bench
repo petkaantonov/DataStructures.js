@@ -1,0 +1,2 @@
+#!/bin/bash
+node --trace_deopt --trace_inlining --trace_opt --code_comments $2 $1 > bench.txt

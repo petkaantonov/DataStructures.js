@@ -1,0 +1,1013 @@
+[deoptimize context: eaf14679]
+[marking STRING_ADD_RIGHT 0xe460a780 for recompilation, reason: small function, ICs with typeinfo: 0/3 (0%)]
+[disabled optimization for STRING_ADD_RIGHT, reason: inlined runtime function: IsStringWrapperSafeForDefaultValueOf]
+[marking  0xa277a518 for recompilation, reason: hot and stable, ICs with typeinfo: 3/4 (75%)]
+[optimizing:  / a277a519 - took 0.000, 1.000, 0.000 ms]
+[marking _makeBuckets 0xe4604288 for recompilation, reason: small function, ICs with typeinfo: 3/6 (50%)]
+[optimizing: _makeBuckets / e4604289 - took 0.000, 0.000, 0.000 ms]
+[marking hashHash 0xebf363a0 for recompilation, reason: small function, ICs with typeinfo: 11/11 (100%)]
+[marking _hashAsBucketIndex 0xe46042d0 for recompilation, reason: small function, ICs with typeinfo: 2/3 (66%)]
+[marking inserted 0xe4604af8 for recompilation, reason: small function, ICs with typeinfo: 0/0 (100%)]
+[marking _isOverCapacity 0xe4604438 for recompilation, reason: small function, ICs with typeinfo: 4/5 (80%)]
+[marking _checkResize 0xe4604480 for recompilation, reason: small function, ICs with typeinfo: 2/4 (50%)]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined hashHash called from _hashAsBucketIndex.
+Inlined _hashAsBucketIndex called from set.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+[marking ENTRY_FUNCTION_MAP 0x95cc6768 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 2/32 (6%)]
+Did not inline ret called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline set called from ENTRY_FUNCTION_MAP (target text too big).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP / 95cc6769 - took 0.000, 1.000, 0.000 ms]
+[optimizing: hashHash / 95cc9171 - took 0.000, 0.000, 0.000 ms]
+[marking _resized 0xe4604360 for recompilation, reason: small function, ICs with typeinfo: 8/12 (66%)]
+Inlined hashHash called from _resized.
+[optimizing: _resized / e4604361 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #15, address 0x0, frame size 96
+            ;;; Deferred code @428: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @15]
+  translating set => node=85, height=56
+    0x0023f450: [top + 104] <- 0x95cc66d9 ; rbx 0000000095CC66D9 <a Map>
+    0x0023f448: [top + 96] <- 0xaaaab00000000 ; [sp + 136] 699051
+    0x0023f440: [top + 88] <- 0x95cc66c1 ; [sp + 128] 0000000095CC66C1 <an Object>
+    0x0023f438: [top + 80] <- 0x0298b138 ; caller's pc
+    0x0023f430: [top + 72] <- 0x0023f578 ; caller's fp
+    0x0023f428: [top + 64] <- 0x95cc6609; context
+    0x0023f420: [top + 56] <- 0xe46046c1; function
+    0x0023f418: [top + 48] <- 0xaaaab00000000 ; [sp + 48] 699051
+    0x0023f410: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f408: [top + 32] <- 00000000E4604121 <undefined> ; literal
+    0x0023f400: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3f8: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3f0: [top + 8] <- 0xe46046c1 ; [sp + 80] 00000000E46046C1 <JS Function set>
+    0x0023f3e8: [top + 0] <- 660981 ; rdx (smi)
+[deoptimizing: end 0xe46046c1 set => node=85, pc=0x029847e4, state=TOS_REG, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[optimizing: inserted / e4604af9 - took 0.000, 1.000, 0.000 ms]
+Inlined _isOverCapacity called from _checkResize.
+[optimizing: _checkResize / e4604481 - took 0.000, 0.000, 0.000 ms]
+[optimizing: _hashAsBucketIndex / e46042d1 - took 0.000, 0.000, 0.000 ms]
+[marking hashFunction 0x95cc9128 for recompilation, reason: small function, ICs with typeinfo: 2/6 (33%)]
+[optimizing: hashFunction / 95cc9129 - took 0.000, 0.000, 0.000 ms]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP at bailout #8, address 0x0, frame size 272
+            ;;; @120: deoptimize.
+[deoptimizing: begin 0x95cc6769 ENTRY_FUNCTION_MAP @8]
+  translating ENTRY_FUNCTION_MAP => node=122, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 120] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970a62 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0x95cc67f9; context
+    0x0023f568: [top + 64] <- 0x95cc6769; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0x95cc66d9 ; [sp + 136] 0000000095CC66D9 <a Map>
+    0x0023f550: [top + 40] <- 0x95cc66c1 ; [sp + 144] 0000000095CC66C1 <an Object>
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 168] 1000000
+    0x0023f540: [top + 24] <- 0 ; rbx (smi)
+    0x0023f538: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0x95cc6769 ENTRY_FUNCTION_MAP => node=122, pc=0x0296ac2c, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP]
+[marking equals 0x95cc9200 for recompilation, reason: small function, ICs with typeinfo: 0/1 (0%)]
+[marking accessed 0xe4604b88 for recompilation, reason: small function, ICs with typeinfo: 0/0 (100%)]
+[marking get 0xe4604630 for recompilation, reason: small function, ICs with typeinfo: 6/6 (100%)]
+Inlined hashFunction called from _keyAsBucketIndex.
+Inlined hashHash called from _keyAsBucketIndex.
+Inlined _keyAsBucketIndex called from get.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from get.
+Inlined accessed called from get.
+[optimizing: get / e4604631 - took 0.000, 0.000, 0.000 ms]
+[marking ENTRY_FUNCTION_MAP 0x95cc6768 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 4/32 (12%)]
+Did not inline set called from ENTRY_FUNCTION_MAP (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP / 95cc6769 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP at bailout #14, address 0x0, frame size 280
+            ;;; @168: deoptimize.
+[deoptimizing: begin 0x95cc6769 ENTRY_FUNCTION_MAP @14]
+  translating ENTRY_FUNCTION_MAP => node=183, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 104] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970a62 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0x95cc67f9; context
+    0x0023f568: [top + 64] <- 0x95cc6769; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0x95cc66d9 ; [sp + 120] 0000000095CC66D9 <a Map>
+    0x0023f550: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 128] 1000000
+    0x0023f540: [top + 24] <- 0 ; rcx (smi)
+    0x0023f538: [top + 16] <- 0xeaf9d6e1 ; rbx 00000000EAF9D6E1 <Number: 1370246869233>
+    0x0023f530: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0x95cc6769 ENTRY_FUNCTION_MAP => node=183, pc=0x0296ad13, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP]
+[marking ENTRY_FUNCTION_MAP 0x95cc6768 for recompilation, reason: hot and stable, ICs with typeinfo: 6/32 (18%)]
+Did not inline set called from ENTRY_FUNCTION_MAP (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP / 95cc6769 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP at bailout #17, address 0x0, frame size 272
+            ;;; @200: deoptimize.
+[deoptimizing: begin 0x95cc6769 ENTRY_FUNCTION_MAP @17]
+  translating ENTRY_FUNCTION_MAP => node=184, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 80] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970a62 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0x95cc67f9; context
+    0x0023f568: [top + 64] <- 0x95cc6769; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0x95cc66d9 ; [sp + 96] 0000000095CC66D9 <a Map>
+    0x0023f550: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 104] 1000000
+    0x0023f540: [top + 24] <- 1000000 ; [sp + 64] (smi)
+    0x0023f538: [top + 16] <- 0xeaf9d6e1 ; [sp + 112] 00000000EAF9D6E1 <Number: 1370246869233>
+    0x0023f530: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0x95cc6769 ENTRY_FUNCTION_MAP => node=184, pc=0x0296ad55, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP]
+[marking ENTRY_FUNCTION_MAP 0x95cc6768 for recompilation, reason: hot and stable, ICs with typeinfo: 11/32 (34%)]
+Did not inline set called from ENTRY_FUNCTION_MAP (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP / 95cc6769 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: get at bailout #21, address 0x0, frame size 56
+            ;;; @280: deoptimize.
+[deoptimizing: begin 0xe4604631 get @21]
+  translating get => node=80, height=24
+    0x0023f458: [top + 64] <- 0x95cc66d9 ; rdx 0000000095CC66D9 <a Map>
+    0x0023f450: [top + 56] <- 0x20000000000000 ; [sp + 88] 2097152
+    0x0023f448: [top + 48] <- 0x02991f6d ; caller's pc
+    0x0023f440: [top + 40] <- 0x0023f578 ; caller's fp
+    0x0023f438: [top + 32] <- 0x95cc6609; context
+    0x0023f430: [top + 24] <- 0xe4604631; function
+    0x0023f428: [top + 16] <- 148006 ; rbx (smi)
+    0x0023f420: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f418: [top + 0] <- 0xe4604631 ; [sp + 40] 00000000E4604631 <JS Function get>
+  translating _getEntryWithKey => node=65, height=16
+    0x0023f410: [top + 64] <- 0x95cc66d9 ; rdx 0000000095CC66D9 <a Map>
+    0x0023f408: [top + 56] <- 0xa417ee79 ; rdi 00000000A417EE79 <an Entry>
+    0x0023f400: [top + 48] <- 0x20000000000000 ; [sp + 88] 2097152
+    0x0023f3f8: [top + 40] <- 0x0298eab4 ; caller's pc
+    0x0023f3f0: [top + 32] <- 0x0023f440 ; caller's fp
+    0x0023f3e8: [top + 24] <- 0x95cc6609; context
+    0x0023f3e0: [top + 16] <- 0xe46044c9; function
+    0x0023f3d8: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f3d0: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=65, pc=0x02986a2b, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: get]
+[optimizing: equals / 95cc9201 - took 0.000, 0.000, 0.000 ms]
+[marking _keyAsBucketIndex 0xe4604318 for recompilation, reason: small function, ICs with typeinfo: 2/3 (66%)]
+Inlined hashFunction called from _keyAsBucketIndex.
+Inlined hashHash called from _keyAsBucketIndex.
+[optimizing: _keyAsBucketIndex / e4604319 - took 0.000, 0.000, 0.000 ms]
+[marking get 0xe4604630 for recompilation, reason: small function, ICs with typeinfo: 6/6 (100%)]
+Inlined hashFunction called from _keyAsBucketIndex.
+Inlined hashHash called from _keyAsBucketIndex.
+Inlined _keyAsBucketIndex called from get.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from get.
+Inlined accessed called from get.
+[optimizing: get / e4604631 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP at bailout #22, address 0x0, frame size 264
+            ;;; @240: deoptimize.
+[deoptimizing: begin 0x95cc6769 ENTRY_FUNCTION_MAP @22]
+  translating ENTRY_FUNCTION_MAP => node=250, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 48] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970a62 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0x95cc67f9; context
+    0x0023f568: [top + 64] <- 0x95cc6769; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0x95cc66d9 ; [sp + 64] 0000000095CC66D9 <a Map>
+    0x0023f550: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 72] 1000000
+    0x0023f540: [top + 24] <- 3000000 ; [sp + 40] (smi)
+    0x0023f538: [top + 16] <- 0xeaf9d6e1 ; [sp + 80] 00000000EAF9D6E1 <Number: 1370246869233>
+    0x0023f530: [top + 8] <- 3000000 ; [sp + 88] (smi)
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0x95cc6769 ENTRY_FUNCTION_MAP => node=250, pc=0x0296ae3b, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP]
+[marking ENTRY_FUNCTION_MAP 0x95cc6768 for recompilation, reason: hot and stable, ICs with typeinfo: 14/32 (43%)]
+Did not inline set called from ENTRY_FUNCTION_MAP (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP / 95cc6769 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP at bailout #28, address 0x0, frame size 264
+            ;;; @284: deoptimize.
+[deoptimizing: begin 0x95cc6769 ENTRY_FUNCTION_MAP @28]
+  translating ENTRY_FUNCTION_MAP => node=338, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 40] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970a62 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0x95cc67f9; context
+    0x0023f568: [top + 72] <- 0x95cc6769; function
+    0x0023f560: [top + 64] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 56] <- 0x95cc66d9 ; [sp + 56] 0000000095CC66D9 <a Map>
+    0x0023f550: [top + 48] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 40] <- 0xf424000000000 ; [sp + 64] 1000000
+    0x0023f540: [top + 32] <- 4294967295 ; [sp + 32] (heap number)
+    0x0023f538: [top + 24] <- 0xeaf9d6e1 ; [sp + 72] 00000000EAF9D6E1 <Number: 1370246869233>
+    0x0023f530: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 0xeafa0c99 ; rax 00000000EAFA0C99 <Number: 1370246869314>
+[deoptimizing: end 0x95cc6769 ENTRY_FUNCTION_MAP => node=338, pc=0x0296af2b, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+Materializing a new heap number FFFFFFFF00000000 [-1.000000e+000] in slot 000000000023F540
+[removing optimized code for: ENTRY_FUNCTION_MAP]
+[marking ENTRY_FUNCTION_NATIVE 0xa8284198 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 2/31 (6%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE / a8284199 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE at bailout #4, address 0x0, frame size 240
+            ;;; @94: deoptimize.
+[deoptimizing: begin 0xa8284199 ENTRY_FUNCTION_NATIVE @4]
+  translating ENTRY_FUNCTION_NATIVE => node=99, height=56
+    0x0023f588: [top + 88] <- 0xe4606c91 ; [sp + 120] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 80] <- 0x02970a99 ; caller's pc
+    0x0023f578: [top + 72] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 64] <- 0xa8284121; context
+    0x0023f568: [top + 56] <- 0xa8284199; function
+    0x0023f560: [top + 48] <- 0xa8284181 ; [sp + 136] 00000000A8284181 <an Object>
+    0x0023f558: [top + 40] <- 0xa8284169 ; [sp + 144] 00000000A8284169 <an Object>
+    0x0023f550: [top + 32] <- 0xf424000000000 ; [sp + 160] 1000000
+    0x0023f548: [top + 24] <- 0 ; rbx (smi)
+    0x0023f540: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f538: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xa8284199 ENTRY_FUNCTION_NATIVE => node=99, pc=0x0296b316, state=NO_REGISTERS, alignment=no padding, took 1.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE]
+[marking ENTRY_FUNCTION_NATIVE 0xa8284198 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 4/31 (12%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE / a8284199 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE at bailout #10, address 0x0, frame size 256
+            ;;; @140: deoptimize.
+[deoptimizing: begin 0xa8284199 ENTRY_FUNCTION_NATIVE @10]
+  translating ENTRY_FUNCTION_NATIVE => node=155, height=56
+    0x0023f588: [top + 88] <- 0xe4606c91 ; [sp + 96] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 80] <- 0x02970a99 ; caller's pc
+    0x0023f578: [top + 72] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 64] <- 0xa8284121; context
+    0x0023f568: [top + 56] <- 0xa8284199; function
+    0x0023f560: [top + 48] <- 0xa8284181 ; [sp + 112] 00000000A8284181 <an Object>
+    0x0023f558: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 32] <- 0xf424000000000 ; [sp + 120] 1000000
+    0x0023f548: [top + 24] <- 0 ; rcx (smi)
+    0x0023f540: [top + 16] <- 0xebfe4679 ; rbx 00000000EBFE4679 <Number: 1370246869368>
+    0x0023f538: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xa8284199 ENTRY_FUNCTION_NATIVE => node=155, pc=0x0296b3f1, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE]
+[marking ENTRY_FUNCTION_NATIVE 0xa8284198 for recompilation, reason: hot and stable, ICs with typeinfo: 6/31 (19%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE / a8284199 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE at bailout #13, address 0x0, frame size 248
+            ;;; @170: deoptimize.
+[deoptimizing: begin 0xa8284199 ENTRY_FUNCTION_NATIVE @13]
+  translating ENTRY_FUNCTION_NATIVE => node=156, height=56
+    0x0023f588: [top + 88] <- 0xe4606c91 ; r9 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 80] <- 0x02970a99 ; caller's pc
+    0x0023f578: [top + 72] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 64] <- 0xa8284121; context
+    0x0023f568: [top + 56] <- 0xa8284199; function
+    0x0023f560: [top + 48] <- 0xa8284181 ; rdi 00000000A8284181 <an Object>
+    0x0023f558: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 32] <- 0xf424000000000 ; rcx 1000000
+    0x0023f548: [top + 24] <- 1000000 ; r14 (smi)
+    0x0023f540: [top + 16] <- 0xebfe4679 ; rbx 00000000EBFE4679 <Number: 1370246869368>
+    0x0023f538: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xa8284199 ENTRY_FUNCTION_NATIVE => node=156, pc=0x0296b433, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE]
+[marking ENTRY_FUNCTION_NATIVE 0xa8284198 for recompilation, reason: hot and stable, ICs with typeinfo: 11/31 (35%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE / a8284199 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE at bailout #16, address 0x0, frame size 224
+            ;;; @202: deoptimize.
+[deoptimizing: begin 0xa8284199 ENTRY_FUNCTION_NATIVE @16]
+  translating ENTRY_FUNCTION_NATIVE => node=217, height=56
+    0x0023f588: [top + 88] <- 0xe4606c91 ; [sp + 48] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 80] <- 0x02970a99 ; caller's pc
+    0x0023f578: [top + 72] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 64] <- 0xa8284121; context
+    0x0023f568: [top + 56] <- 0xa8284199; function
+    0x0023f560: [top + 48] <- 0xa8284181 ; [sp + 64] 00000000A8284181 <an Object>
+    0x0023f558: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 32] <- 0xf424000000000 ; [sp + 72] 1000000
+    0x0023f548: [top + 24] <- 3000000 ; [sp + 40] (smi)
+    0x0023f540: [top + 16] <- 0xebfe4679 ; [sp + 80] 00000000EBFE4679 <Number: 1370246869368>
+    0x0023f538: [top + 8] <- 3000000 ; [sp + 128] (smi)
+    0x0023f530: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xa8284199 ENTRY_FUNCTION_NATIVE => node=217, pc=0x0296b50d, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE]
+[marking ENTRY_FUNCTION_NATIVE 0xa8284198 for recompilation, reason: hot and stable, ICs with typeinfo: 14/31 (45%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE / a8284199 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE at bailout #23, address 0x0, frame size 240
+            ;;; @246: deoptimize.
+[deoptimizing: begin 0xa8284199 ENTRY_FUNCTION_NATIVE @23]
+  translating ENTRY_FUNCTION_NATIVE => node=295, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 40] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970a99 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0xa8284121; context
+    0x0023f568: [top + 64] <- 0xa8284199; function
+    0x0023f560: [top + 56] <- 0xa8284181 ; [sp + 56] 00000000A8284181 <an Object>
+    0x0023f558: [top + 48] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 40] <- 0xf424000000000 ; [sp + 64] 1000000
+    0x0023f548: [top + 32] <- 4294967295 ; [sp + 32] (heap number)
+    0x0023f540: [top + 24] <- 0xebfe4679 ; [sp + 72] 00000000EBFE4679 <Number: 1370246869368>
+    0x0023f538: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 0] <- 0xebfe5901 ; rax 00000000EBFE5901 <Number: 1370246869411>
+[deoptimizing: end 0xa8284199 ENTRY_FUNCTION_NATIVE => node=295, pc=0x0296b5f1, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+Materializing a new heap number FFFFFFFF00000000 [-1.000000e+000] in slot 000000000023F548
+[removing optimized code for: ENTRY_FUNCTION_NATIVE]
+**** DEOPT: set at bailout #16, address 0x0, frame size 96
+            ;;; Deferred code @434: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @16]
+  translating set => node=85, height=56
+    0x0023f520: [top + 104] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 96] <- 0xca504d49 ; [sp + 136] 00000000CA504D49 <String[1]: 0>
+    0x0023f510: [top + 88] <- 0xb129c0f1 ; [sp + 128] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 80] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 72] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 64] <- 0x95cc6609; context
+    0x0023f4f0: [top + 56] <- 0xe46046c1; function
+    0x0023f4e8: [top + 48] <- 0x2b5d500000000 ; [sp + 48] 177621
+    0x0023f4e0: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d8: [top + 32] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c8: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 8] <- 0xe46046c1 ; [sp + 80] 00000000E46046C1 <JS Function set>
+    0x0023f4b8: [top + 0] <- 0x29bca00000000 ; rbx 170954
+[deoptimizing: end 0xe46046c1 set => node=85, pc=0x029847e4, state=TOS_REG, alignment=no padding, took 1.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a32449 ; [sp + 128] 00000000E6A32449 <String[3]: 262>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb878ebf00000000 ; [sp + 40] 193433279
+    0x0023f4e0: [top + 32] <- 0x84b7400000000 ; rbx 543604
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a32449 ; [sp + 128] 00000000E6A32449 <String[3]: 262>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a334a9 ; [sp + 128] 00000000E6A334A9 <String[3]: 393>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb87936400000000 ; [sp + 40] 193434468
+    0x0023f4e0: [top + 32] <- 0x8574800000000 ; rbx 546632
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a334a9 ; [sp + 128] 00000000E6A334A9 <String[3]: 393>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a34509 ; [sp + 128] 00000000E6A34509 <String[3]: 524>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb879b0000000000 ; [sp + 40] 193436416
+    0x0023f4e0: [top + 32] <- 0x85fba00000000 ; rbx 548794
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a34509 ; [sp + 128] 00000000E6A34509 <String[3]: 524>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a35569 ; [sp + 128] 00000000E6A35569 <String[3]: 655>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb879fa500000000 ; [sp + 40] 193437605
+    0x0023f4e0: [top + 32] <- 0x85b5c00000000 ; rbx 547676
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a35569 ; [sp + 128] 00000000E6A35569 <String[3]: 655>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 1.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a365c9 ; [sp + 128] 00000000E6A365C9 <String[3]: 786>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb87a44a00000000 ; [sp + 40] 193438794
+    0x0023f4e0: [top + 32] <- 0x8637900000000 ; rbx 549753
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a365c9 ; [sp + 128] 00000000E6A365C9 <String[3]: 786>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 1.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a37629 ; [sp + 128] 00000000E6A37629 <String[3]: 917>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xb87abe600000000 ; [sp + 40] 193440742
+    0x0023f4e0: [top + 32] <- 0x86c3000000000 ; rbx 551984
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a37629 ; [sp + 128] 00000000E6A37629 <String[3]: 917>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking hashString 0x9470ace8 for recompilation, reason: small function, ICs with typeinfo: 7/8 (87%)]
+Inlining builtin 00000000E4618EA9 <JS Function charCodeAt>
+[optimizing: hashString / 9470ace9 - took 0.000, 1.000, 0.000 ms]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6a38689 ; [sp + 128] 00000000E6A38689 <String[4]: 1048>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0x7c78c13200000000 ; [sp + 40] 2088288562
+    0x0023f4e0: [top + 32] <- 0xf6c00000000 ; rbx 3948
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=29, height=16
+    0x0023f4b8: [top + 64] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 56] <- 0xe4604101 ; rcx 00000000E4604101 <null>
+    0x0023f4a8: [top + 48] <- 0xe6a38689 ; [sp + 128] 00000000E6A38689 <String[4]: 1048>
+    0x0023f4a0: [top + 40] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 32] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 24] <- 0x95cc6609; context
+    0x0023f488: [top + 16] <- 0xe46044c9; function
+    0x0023f480: [top + 8] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 0] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+[deoptimizing: end 0xe46044c9 _getEntryWithKey => node=29, pc=0x02986a71, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: set at bailout #47, address 0x0, frame size 88
+            ;;; Deferred code @436: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @47]
+  translating set => node=140, height=48
+    0x0023f520: [top + 96] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f518: [top + 88] <- 0xe6ae0679 ; [sp + 128] 00000000E6AE0679 <String[5]: 21413>
+    0x0023f510: [top + 80] <- 0xb129c0f1 ; [sp + 120] 00000000B129C0F1 <an Object>
+    0x0023f508: [top + 72] <- 0x0296b920 ; caller's pc
+    0x0023f500: [top + 64] <- 0x0023f578 ; caller's fp
+    0x0023f4f8: [top + 56] <- 0x95cc6609; context
+    0x0023f4f0: [top + 48] <- 0xe46046c1; function
+    0x0023f4e8: [top + 40] <- 0xba38ba000000000 ; [sp + 40] 195267488
+    0x0023f4e0: [top + 32] <- 0xe445200000000 ; rbx 934994
+    0x0023f4d8: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4d0: [top + 16] <- 0xb12fb491 ; rcx 00000000B12FB491 <an Entry>
+    0x0023f4c8: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4c0: [top + 0] <- 0xe46046c1 ; [sp + 72] 00000000E46046C1 <JS Function set>
+  translating _getEntryWithKey => node=58, height=24
+    0x0023f4b8: [top + 72] <- 0xb129c061 ; rdx 00000000B129C061 <a Map>
+    0x0023f4b0: [top + 64] <- 0xb12fb491 ; rax 00000000B12FB491 <an Entry>
+    0x0023f4a8: [top + 56] <- 0xe6ae0679 ; [sp + 128] 00000000E6AE0679 <String[5]: 21413>
+    0x0023f4a0: [top + 48] <- 0x0298482a ; caller's pc
+    0x0023f498: [top + 40] <- 0x0023f500 ; caller's fp
+    0x0023f490: [top + 32] <- 0x95cc6609; context
+    0x0023f488: [top + 24] <- 0xe46044c9; function
+    0x0023f480: [top + 16] <- 0000000095CC9201 <JS Function> ; literal
+    0x0023f478: [top + 8] <- 00000000E46044C9 <JS Function _getEntryWithKey> ; literal
+    0x0023f470: [top + 0] <- 0000000095CC9201 <JS Function> ; literal
+  translating equals => node=2, height=0
+    0x0023f468: [top + 48] <- 00000000E4604121 <undefined> ; literal
+    0x0023f460: [top + 40] <- 0xe6a835b9 ; rdi 00000000E6A835B9 <String[5]: 10198>
+    0x0023f458: [top + 32] <- 0xe6ae0679 ; [sp + 128] 00000000E6AE0679 <String[5]: 21413>
+    0x0023f450: [top + 24] <- 0x029869d4 ; caller's pc
+    0x0023f448: [top + 16] <- 0x0023f498 ; caller's fp
+    0x0023f440: [top + 8] <- 0x95cc6609; context
+    0x0023f438: [top + 0] <- 0x95cc9201; function
+[deoptimizing: end 0x95cc9201 equals => node=2, pc=0x0298ed54, state=NO_REGISTERS, alignment=no padding, took 1.000 ms]
+[removing optimized code for: set]
+**** DEOPT: equals at bailout #1, address 0x0, frame size 0
+            ;;; Deferred code @18: tagged-to-i.
+[deoptimizing: begin 0x95cc9201 equals @1]
+  translating equals => node=3, height=0
+    0x0023f468: [top + 48] <- 0xe4604121 ; [sp + 48] 00000000E4604121 <undefined>
+    0x0023f460: [top + 40] <- 0xe6a835d9 ; [sp + 40] 00000000E6A835D9 <String[5]: 10199>
+    0x0023f458: [top + 32] <- 0xe6ae0699 ; [sp + 32] 00000000E6AE0699 <String[5]: 21414>
+    0x0023f450: [top + 24] <- 0x029869d4 ; caller's pc
+    0x0023f448: [top + 16] <- 0x0023f498 ; caller's fp
+    0x0023f440: [top + 8] <- 0x95cc6609; context
+    0x0023f438: [top + 0] <- 0x95cc9201; function
+[deoptimizing: end 0x95cc9201 equals => node=3, pc=0x0298ed54, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: equals]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+Inlined hashFunction called from set.
+Inlined _hashAsBucketIndex called from set.
+Inlined equals called from _getEntryWithKey.
+Inlined _getEntryWithKey called from set.
+Inlined Entry called from set.
+Inlined inserted called from set.
+Inlined _isOverCapacity called from _checkResize.
+Inlined _checkResize called from set.
+[optimizing: set / e46046c1 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: hashString at bailout #5, address 0x0, frame size 0
+            ;;; Deferred code @46: string-char-code-at.
+[deoptimizing: begin 0x9470ace9 hashString @5]
+  translating hashString => node=62, height=32
+    0x0023f488: [top + 72] <- 0xe4604121 ; [sp + 40] 00000000E4604121 <undefined>
+    0x0023f480: [top + 64] <- 0xee8650a1 ; rbx 00000000EE8650A1 <String[6]: 200000>
+    0x0023f478: [top + 56] <- 0x029a4236 ; caller's pc
+    0x0023f470: [top + 48] <- 0x0023f500 ; caller's fp
+    0x0023f468: [top + 40] <- 0x95cc6609; context
+    0x0023f460: [top + 32] <- 0x9470ace9; function
+    0x0023f458: [top + 24] <- 195227159 ; r8 (smi)
+    0x0023f450: [top + 16] <- 5 ; rdi (smi)
+    0x0023f448: [top + 8] <- 0x600000000 ; rdx 6
+    0x0023f440: [top + 0] <- 0x9470ace9 ; rax 000000009470ACE9 <JS Function hashString>
+[deoptimizing: end 0x9470ace9 hashString => node=62, pc=0x0299cb3b, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: hashString]
+[marking hashString 0x9470ace8 for recompilation, reason: small function, ICs with typeinfo: 7/8 (87%)]
+Inlining builtin 00000000E4618EA9 <JS Function charCodeAt>
+[optimizing: hashString / 9470ace9 - took 0.000, 0.000, 0.000 ms]
+[marking ENTRY_FUNCTION_MAP_STRING 0xb129c108 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 3/34 (8%)]
+Did not inline ret called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline set called from ENTRY_FUNCTION_MAP_STRING (target text too big).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP_STRING / b129c109 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: _resized at bailout #6, address 0x0, frame size 176
+            ;;; Deferred code @148: tagged-to-i.
+[deoptimizing: begin 0xe4604361 _resized @6]
+  translating _resized => node=68, height=64
+    0x0023f368: [top + 104] <- 0xb129c061 ; r9 00000000B129C061 <a Map>
+    0x0023f360: [top + 96] <- 0xb129c041 ; r8 00000000B129C041 <JS Array[1048576]>
+    0x0023f358: [top + 88] <- 0x0298be4a ; caller's pc
+    0x0023f350: [top + 80] <- 0x0023f390 ; caller's fp
+    0x0023f348: [top + 72] <- 0x95cc6609; context
+    0x0023f340: [top + 64] <- 0xe4604361; function
+    0x0023f338: [top + 56] <- 0xeaf04101 ; rcx 00000000EAF04101 <JS Array[2097152]>
+    0x0023f330: [top + 48] <- 2097152 ; rbx (smi)
+    0x0023f328: [top + 40] <- 1048576 ; rdx (smi)
+    0x0023f320: [top + 32] <- 0 ; rax (smi)
+    0x0023f318: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f310: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f308: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f300: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xe4604361 _resized => node=68, pc=0x0298aade, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: _resized]
+[marking _resized 0xe4604360 for recompilation, reason: small function, ICs with typeinfo: 8/12 (66%)]
+Inlined hashHash called from _resized.
+[optimizing: _resized / e4604361 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: set at bailout #16, address 0x0, frame size 96
+            ;;; Deferred code @440: tagged-to-i.
+[deoptimizing: begin 0xe46046c1 set @16]
+  translating set => node=85, height=56
+    0x0023f440: [top + 104] <- 0xb129c061 ; rcx 00000000B129C061 <a Map>
+    0x0023f438: [top + 96] <- 0xbf5dacc1 ; [sp + 136] 00000000BF5DACC1 <String[6]: 699051>
+    0x0023f430: [top + 88] <- 0xb129c0f1 ; [sp + 128] 00000000B129C0F1 <an Object>
+    0x0023f428: [top + 80] <- 0x029a5f7a ; caller's pc
+    0x0023f420: [top + 72] <- 0x0023f578 ; caller's fp
+    0x0023f418: [top + 64] <- 0x95cc6609; context
+    0x0023f410: [top + 56] <- 0xe46046c1; function
+    0x0023f408: [top + 48] <- 0xeaf43819 ; [sp + 48] 00000000EAF43819 <Number: 2315067459>
+    0x0023f400: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3f8: [top + 32] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3f0: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3e8: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f3e0: [top + 8] <- 0xe46046c1 ; [sp + 80] 00000000E46046C1 <JS Function set>
+    0x0023f3d8: [top + 0] <- 0x19071000000000 ; rbx 1640208
+[deoptimizing: end 0xe46046c1 set => node=85, pc=0x029847e4, state=TOS_REG, alignment=no padding, took 0.000 ms]
+[removing optimized code for: set]
+[marking equals 0x95cc9200 for recompilation, reason: small function, ICs with typeinfo: 0/1 (0%)]
+[optimizing: equals / 95cc9201 - took 0.000, 0.000, 0.000 ms]
+[marking set 0xe46046c0 for recompilation, reason: small function, ICs with typeinfo: 15/18 (83%)]
+[disabled optimization for set, reason: optimized too many times]
+[marking _getEntryWithKey 0xe46044c8 for recompilation, reason: small function, ICs with typeinfo: 3/3 (100%)]
+Inlined equals called from _getEntryWithKey.
+[optimizing: _getEntryWithKey / e46044c9 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP_STRING at bailout #12, address 0x0, frame size 288
+            ;;; @142: deoptimize.
+[deoptimizing: begin 0xb129c109 ENTRY_FUNCTION_MAP_STRING @12]
+  translating ENTRY_FUNCTION_MAP_STRING => node=93, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 112] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970ad0 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0xb129c151; context
+    0x0023f568: [top + 64] <- 0xb129c109; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0xb129c061 ; [sp + 128] 00000000B129C061 <a Map>
+    0x0023f550: [top + 40] <- 0xb129c0f1 ; [sp + 136] 00000000B129C0F1 <an Object>
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 144] 1000000
+    0x0023f540: [top + 24] <- 1000000 ; [sp + 96] (smi)
+    0x0023f538: [top + 16] <- 1000000 ; [sp + 184] (smi)
+    0x0023f530: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xb129c109 ENTRY_FUNCTION_MAP_STRING => node=93, pc=0x0296b9bc, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP_STRING]
+**** DEOPT: get at bailout #13, address 0x0, frame size 48
+            ;;; Deferred code @266: tagged-to-i.
+[deoptimizing: begin 0xe4604631 get @13]
+  translating get => node=47, height=32
+    0x0023f520: [top + 72] <- 0xb129c061 ; rax 00000000B129C061 <a Map>
+    0x0023f518: [top + 64] <- 0xca504d49 ; [sp + 80] 00000000CA504D49 <String[1]: 0>
+    0x0023f510: [top + 56] <- 0x0296ba06 ; caller's pc
+    0x0023f508: [top + 48] <- 0x0023f578 ; caller's fp
+    0x0023f500: [top + 40] <- 0x95cc6609; context
+    0x0023f4f8: [top + 32] <- 0xe4604631; function
+    0x0023f4f0: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4e8: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f4e0: [top + 8] <- 0xe4604631 ; [sp + 32] 00000000E4604631 <JS Function get>
+    0x0023f4d8: [top + 0] <- 170954 ; r9 (smi)
+[deoptimizing: end 0xe4604631 get => node=47, pc=0x0298ea7c, state=TOS_REG, alignment=no padding, took 0.000 ms]
+[removing optimized code for: get]
+[optimizing: accessed / e4604b89 - took 0.000, 0.000, 0.000 ms]
+[marking get 0xe4604630 for recompilation, reason: small function, ICs with typeinfo: 6/6 (100%)]
+Inlined _keyAsBucketIndex called from get.
+Inlined _getEntryWithKey called from get.
+Inlined accessed called from get.
+[optimizing: get / e4604631 - took 0.000, 0.000, 0.000 ms]
+[marking ENTRY_FUNCTION_MAP_STRING 0xb129c108 for recompilation, reason: hot and stable, ICs with typeinfo: 6/34 (17%)]
+Did not inline set called from ENTRY_FUNCTION_MAP_STRING (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP_STRING / b129c109 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP_STRING at bailout #22, address 0x0, frame size 280
+            ;;; @210: deoptimize.
+[deoptimizing: begin 0xb129c109 ENTRY_FUNCTION_MAP_STRING @22]
+  translating ENTRY_FUNCTION_MAP_STRING => node=202, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 88] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970ad0 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0xb129c151; context
+    0x0023f568: [top + 72] <- 0xb129c109; function
+    0x0023f560: [top + 64] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 56] <- 0xb129c061 ; [sp + 104] 00000000B129C061 <a Map>
+    0x0023f550: [top + 48] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 40] <- 0xf424000000000 ; [sp + 112] 1000000
+    0x0023f540: [top + 32] <- 1000000 ; [sp + 72] (smi)
+    0x0023f538: [top + 24] <- 1000000 ; [sp + 176] (smi)
+    0x0023f530: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 0xebe6d781 ; rbx 00000000EBE6D781 <Number: 1370246870026>
+[deoptimizing: end 0xb129c109 ENTRY_FUNCTION_MAP_STRING => node=202, pc=0x0296bac9, state=TOS_REG, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP_STRING]
+[marking ENTRY_FUNCTION_MAP_STRING 0xb129c108 for recompilation, reason: hot and stable, ICs with typeinfo: 9/34 (26%)]
+Did not inline set called from ENTRY_FUNCTION_MAP_STRING (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP_STRING / b129c109 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP_STRING at bailout #30, address 0x0, frame size 288
+            ;;; @276: deoptimize.
+[deoptimizing: begin 0xb129c109 ENTRY_FUNCTION_MAP_STRING @30]
+  translating ENTRY_FUNCTION_MAP_STRING => node=280, height=64
+    0x0023f588: [top + 96] <- 0xe4606c91 ; [sp + 56] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 88] <- 0x02970ad0 ; caller's pc
+    0x0023f578: [top + 80] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 72] <- 0xb129c151; context
+    0x0023f568: [top + 64] <- 0xb129c109; function
+    0x0023f560: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 48] <- 0xb129c061 ; [sp + 72] 00000000B129C061 <a Map>
+    0x0023f550: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 32] <- 0xf424000000000 ; [sp + 80] 1000000
+    0x0023f540: [top + 24] <- 1000000 ; [sp + 40] (smi)
+    0x0023f538: [top + 16] <- 1000000 ; [sp + 88] (smi)
+    0x0023f530: [top + 8] <- 0xbfbca089 ; [sp + 184] 00000000BFBCA089 <Number: 1370246870026>
+    0x0023f528: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xb129c109 ENTRY_FUNCTION_MAP_STRING => node=280, pc=0x0296bbd5, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_MAP_STRING]
+[marking ENTRY_FUNCTION_MAP_STRING 0xb129c108 for recompilation, reason: hot and stable, ICs with typeinfo: 13/34 (38%)]
+Did not inline set called from ENTRY_FUNCTION_MAP_STRING (target text too big).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline get called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_MAP_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_MAP_STRING / b129c109 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_MAP_STRING at bailout #40, address 0x0, frame size 296
+            ;;; @340: deoptimize.
+[deoptimizing: begin 0xb129c109 ENTRY_FUNCTION_MAP_STRING @40]
+  translating ENTRY_FUNCTION_MAP_STRING => node=351, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 48] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970ad0 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0xb129c151; context
+    0x0023f568: [top + 72] <- 0xb129c109; function
+    0x0023f560: [top + 64] <- 00000000E4604121 <undefined> ; literal
+    0x0023f558: [top + 56] <- 0xb129c061 ; [sp + 64] 00000000B129C061 <a Map>
+    0x0023f550: [top + 48] <- 00000000E4604121 <undefined> ; literal
+    0x0023f548: [top + 40] <- 0xf424000000000 ; [sp + 72] 1000000
+    0x0023f540: [top + 32] <- 4294967295 ; [sp + 32] (heap number)
+    0x0023f538: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 16] <- 0xbfbca089 ; [sp + 192] 00000000BFBCA089 <Number: 1370246870026>
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 0xeaf3dd01 ; rax 00000000EAF3DD01 <Number: 1370246870224>
+[deoptimizing: end 0xb129c109 ENTRY_FUNCTION_MAP_STRING => node=351, pc=0x0296bce9, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+Materializing a new heap number FFFFFFFF00000000 [-1.000000e+000] in slot 000000000023F540
+[removing optimized code for: ENTRY_FUNCTION_MAP_STRING]
+[marking ENTRY_FUNCTION_NATIVE_STRING 0xebf04178 for recompilation, reason: not much type info but very hot, ICs with typeinfo: 3/36 (8%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE_STRING / ebf04179 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE_STRING at bailout #8, address 0x0, frame size 312
+            ;;; @120: deoptimize.
+[deoptimizing: begin 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING @8]
+  translating ENTRY_FUNCTION_NATIVE_STRING => node=72, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 128] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970b07 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0xebf04101; context
+    0x0023f568: [top + 72] <- 0xebf04179; function
+    0x0023f560: [top + 64] <- 0xebf04161 ; [sp + 144] 00000000EBF04161 <an Object>
+    0x0023f558: [top + 56] <- 0xebf04149 ; [sp + 152] 00000000EBF04149 <an Object>
+    0x0023f550: [top + 48] <- 0xf424000000000 ; [sp + 160] 1000000
+    0x0023f548: [top + 40] <- 1000000 ; [sp + 176] (smi)
+    0x0023f540: [top + 32] <- 1000000 ; [sp + 168] (smi)
+    0x0023f538: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING => node=72, pc=0x0296c074, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE_STRING]
+[marking ENTRY_FUNCTION_NATIVE_STRING 0xebf04178 for recompilation, reason: hot and stable, ICs with typeinfo: 6/36 (16%)]
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE_STRING / ebf04179 - took 0.000, 1.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE_STRING at bailout #14, address 0x0, frame size 304
+            ;;; @172: deoptimize.
+[deoptimizing: begin 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING @14]
+  translating ENTRY_FUNCTION_NATIVE_STRING => node=133, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 112] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970b07 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0xebf04101; context
+    0x0023f568: [top + 72] <- 0xebf04179; function
+    0x0023f560: [top + 64] <- 0xebf04161 ; [sp + 128] 00000000EBF04161 <an Object>
+    0x0023f558: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 48] <- 0xf424000000000 ; [sp + 136] 1000000
+    0x0023f548: [top + 40] <- 1000000 ; [sp + 96] (smi)
+    0x0023f540: [top + 32] <- 1000000 ; [sp + 176] (smi)
+    0x0023f538: [top + 24] <- 00000000E4604121 <undefined> ; literal
+    0x0023f530: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING => node=133, pc=0x0296c14c, state=NO_REGISTERS, alignment=no padding, took 1.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE_STRING]
+[marking hasOwnProperty 0xe46110e0 for recompilation, reason: small function, ICs with typeinfo: 0/5 (0%)]
+Did not inline NonStringToString called from hasOwnProperty (target not inlineable).
+Did not inline CallTrap1 called from hasOwnProperty (target not inlineable).
+Did not inline ToObject called from hasOwnProperty (target not inlineable).
+Did not inline NonStringToString called from hasOwnProperty (target not inlineable).
+[optimizing: hasOwnProperty / e46110e1 - took 0.000, 0.000, 0.000 ms]
+[marking ENTRY_FUNCTION_NATIVE_STRING 0xebf04178 for recompilation, reason: hot and stable, ICs with typeinfo: 10/36 (27%)]
+Did not inline call called from ENTRY_FUNCTION_NATIVE_STRING (target not inlineable).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE_STRING / ebf04179 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE_STRING at bailout #27, address 0x0, frame size 320
+            ;;; @270: deoptimize.
+[deoptimizing: begin 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING @27]
+  translating ENTRY_FUNCTION_NATIVE_STRING => node=224, height=72
+    0x0023f588: [top + 104] <- 0xe4606c91 ; [sp + 64] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 96] <- 0x02970b07 ; caller's pc
+    0x0023f578: [top + 88] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 80] <- 0xebf04101; context
+    0x0023f568: [top + 72] <- 0xebf04179; function
+    0x0023f560: [top + 64] <- 0xebf04161 ; [sp + 88] 00000000EBF04161 <an Object>
+    0x0023f558: [top + 56] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 48] <- 0xf424000000000 ; [sp + 96] 1000000
+    0x0023f548: [top + 40] <- 1000000 ; [sp + 48] (smi)
+    0x0023f540: [top + 32] <- 1000000 ; [sp + 104] (smi)
+    0x0023f538: [top + 24] <- 0xe46110e1 ; [sp + 112] 00000000E46110E1 <JS Function hasOwnProperty>
+    0x0023f530: [top + 16] <- 0xebee52c1 ; [sp + 192] 00000000EBEE52C1 <Number: 1370246870397>
+    0x0023f528: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 0] <- 00000000E4604121 <undefined> ; literal
+[deoptimizing: end 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING => node=224, pc=0x0296c2b5, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+[removing optimized code for: ENTRY_FUNCTION_NATIVE_STRING]
+[marking ENTRY_FUNCTION_NATIVE_STRING 0xebf04178 for recompilation, reason: hot and stable, ICs with typeinfo: 15/36 (41%)]
+Did not inline call called from ENTRY_FUNCTION_NATIVE_SCompleted 3000000 operations in 81 milliseconds.  37037037 OP/s when using when using DS.Map with integers
+Completed 3000000 operations in 43 milliseconds.  69767442 OP/s when using Native with integers
+Completed 2000000 operations in 198 milliseconds.  10101010 OP/s when using DS.Map with strings
+Completed 2000000 operations in 150 milliseconds.  13333333 OP/s when using Native with strings
+TRING (target not inlineable).
+Did not inline call called from ENTRY_FUNCTION_NATIVE_STRING (target not inlineable).
+Did not inline global.setTimeout called from ENTRY_FUNCTION_NATIVE_STRING (target requires context change).
+[optimizing: ENTRY_FUNCTION_NATIVE_STRING / ebf04179 - took 0.000, 0.000, 0.000 ms]
+**** DEOPT: ENTRY_FUNCTION_NATIVE_STRING at bailout #41, address 0x0, frame size 328
+            ;;; @368: deoptimize.
+[deoptimizing: begin 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING @41]
+  translating ENTRY_FUNCTION_NATIVE_STRING => node=384, height=80
+    0x0023f588: [top + 112] <- 0xe4606c91 ; [sp + 48] 00000000E4606C91 <JS Global Object>
+    0x0023f580: [top + 104] <- 0x02970b07 ; caller's pc
+    0x0023f578: [top + 96] <- 0x0023f628 ; caller's fp
+    0x0023f570: [top + 88] <- 0xebf04101; context
+    0x0023f568: [top + 80] <- 0xebf04179; function
+    0x0023f560: [top + 72] <- 0xebf04161 ; [sp + 72] 00000000EBF04161 <an Object>
+    0x0023f558: [top + 64] <- 00000000E4604121 <undefined> ; literal
+    0x0023f550: [top + 56] <- 0xf424000000000 ; [sp + 80] 1000000
+    0x0023f548: [top + 48] <- 4294967295 ; [sp + 32] (heap number)
+    0x0023f540: [top + 40] <- 00000000E4604121 <undefined> ; literal
+    0x0023f538: [top + 32] <- 0xe46110e1 ; [sp + 88] 00000000E46110E1 <JS Function hasOwnProperty>
+    0x0023f530: [top + 24] <- 0xebee52c1 ; [sp + 200] 00000000EBEE52C1 <Number: 1370246870397>
+    0x0023f528: [top + 16] <- 00000000E4604121 <undefined> ; literal
+    0x0023f520: [top + 8] <- 00000000E4604121 <undefined> ; literal
+    0x0023f518: [top + 0] <- 0xebee6e91 ; rax 00000000EBEE6E91 <Number: 1370246870547>
+[deoptimizing: end 0xebf04179 ENTRY_FUNCTION_NATIVE_STRING => node=384, pc=0x0296c401, state=NO_REGISTERS, alignment=no padding, took 0.000 ms]
+Materializing a new heap number FFFFFFFF00000000 [-1.000000e+000] in slot 000000000023F548
+[removing optimized code for: ENTRY_FUNCTION_NATIVE_STRING]
+[marking IN 0xe460ab70 for recompilation, reason: hot and stable, ICs with typeinfo: 1/2 (50%)]
+[disabled optimization for IN, reason: call to a JavaScript runtime function]
