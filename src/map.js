@@ -43,7 +43,7 @@ var Map = (function() {
             i = 0;
 
         for( var i = 0, l = str.length; i < l; ++i ) {
-            h = (((h << 5) + h ) +  str.charCodeAt( i ) ) >>> 0;
+            h = (((h << 5) + h ) ^ str.charCodeAt( i ) );
         }
 
         return h;
@@ -52,20 +52,7 @@ var Map = (function() {
     var hashNumber = (function() {
         //No support of reading the bits of a double directly as 2 unsigned ints
         function noSupport( num ) {
-            var hash = (num >>> 0);
-
-            if( hash === num ) { //return unsigned integers as is
-                return hash;
-            }
-            /*This seems to come very close to just xoring bits of a double together
-            */
-            var ret = ((988988137 * num) % 4294967295) >>> 0;
-            ret += ret << 13;
-            ret ^= ret >> 7;
-            ret += ret << 3;
-            ret ^= ret >> 17;
-            ret += ret << 5;
-            return ret >>> 0;
+            return num | 0;
         }
 
         if( haveTypedArrays ) {
