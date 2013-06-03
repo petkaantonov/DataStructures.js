@@ -1591,14 +1591,6 @@ var Map = (function() {
         return n + 1;
     };
 
-    var seeds = [3145739, 6291469, 12582917,
-        25165843, 50331653, 100663319,
-        201326611, 402653189, 805306457,
-        1610612741
-    ];
-
-    var random = seeds[( Math.random()*seeds.length ) | 0];
-
     var hashHash = function hashHash( key, tableSize ) {
         var h = key | 0;
         h =  h ^ (h >>> 20) ^ (h >>> 12);
@@ -1745,7 +1737,7 @@ var Map = (function() {
 
     method._makeBuckets = function _makeBuckets() {
         var capacity = this._capacity;
-        var b = this._buckets = new Array( capacity );
+        var b = this._buckets = new Array( capacity < 99999 ? capacity : 0 );
 
         for( var i = 0; i < capacity; ++i ) {
             b[i] = null;
@@ -2201,7 +2193,7 @@ var Map = (function() {
         };
 
         method.removed = function removed() {
-            this.key = this.value = null;
+            this.key = this.value = this.next = null;
         };
 
         method.accessed = function accessed() {
@@ -2479,7 +2471,7 @@ var OrderedMap = (function() {
                 prevIsNull = prev === null,
                 nextIsNull = next === null;
 
-            this.prevEntry = this.nextEntry = this.key = this.value = null;
+            this.prevEntry = this.nextEntry = this.key = this.value = this.next = null;
 
             if( prevIsNull && nextIsNull ) {
                 map._firstEntry = map._lastEntry = null;

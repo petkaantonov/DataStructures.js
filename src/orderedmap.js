@@ -255,7 +255,7 @@ var OrderedMap = (function() {
                 prevIsNull = prev === null,
                 nextIsNull = next === null;
 
-            this.prevEntry = this.nextEntry = this.key = this.value = null;
+            this.prevEntry = this.nextEntry = this.key = this.value = this.next = null;
 
             if( prevIsNull && nextIsNull ) {
                 map._firstEntry = map._lastEntry = null;
