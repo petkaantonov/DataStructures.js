@@ -5,8 +5,8 @@ var Deque = (function() {
 
     method.constructor = Deque;
 
-    function Deque( capacity, arrayImpl ) {
-        _super.constructor.call( this, capacity, arrayImpl );
+    function Deque( capacity, maxSize, arrayImpl ) {
+        _super.constructor.call( this, capacity, maxSize, arrayImpl );
     }
 
     method.unshift = method.insertFront = function( item ) {
@@ -24,7 +24,7 @@ var Deque = (function() {
         //integers can be emulated like this which returns capacity - 1 if this._front === 0
         var i = (((( this._front - 1 ) & ( capacity - 1) ) ^ capacity ) - capacity );
         this._queue[i] = item;
-        this._size = size + 1;
+        this._size = Math.min( size + 1, this._maxSize );
         this._front = i;
     };
 
@@ -60,9 +60,9 @@ var Deque = (function() {
     //I would use delete but that probably makes the
     //object degenerate into hash table for 20x slower performance.
 
-    function makeCtor( name, arrayImpl ) {
-        Deque[name] = function( arg ) {
-            return new Deque( arg, arrayImpl );
+    function makeCtor( name, maxSize, arrayImpl ) {
+        Deque[name] = function( capacity, maxSize ) {
+            return new Deque( capacity, maxSize, arrayImpl );
         };
     }
 

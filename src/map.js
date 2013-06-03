@@ -40,27 +40,24 @@ var Map = (function() {
         };
     })();
 
+    var haveTypedArrays = typeof ArrayBuffer !== "undefined" &&
+            typeof Uint32Array !== "undefined" &&
+            typeof Float64Array !== "undefined";
+
     var hashBoolean = function( bool ) {
         return bool | 0;
     };
 
-    var hashString = (function() {
-        //Even though enforcing no SMI overflow takes
-        //more operations, it performs almost 2 times faster
-        //see bench/string_hash.js
-        var smiMask = 0x39FFFFFF;
+    var hashString = function hashString( str ) {
+        var h = 5381,
+            i = 0;
 
-        return function( str ) {
-            var hash = 5381,
-                i = 0;
-
-            for( var i = 0, l = str.length; i < l; ++i ) {
-                hash = ( ( ( ( hash & smiMask ) << 5 ) + ( hash & 0x1F ) ) ^ str.charCodeAt( i ) );
-            }
-
-            return hash;
+        for( var i = 0, l = str.length; i < l; ++i ) {
+            h = (((h << 5) + h ) +  str.charCodeAt( i ) ) >>> 0;
         }
-    })();
+
+        return h;
+    };
 
     var hashNumber = (function() {
         //No support of reading the bits of a double directly as 2 unsigned ints
@@ -81,34 +78,19 @@ var Map = (function() {
             return ret >>> 0;
         }
 
-        if( typeof ArrayBuffer !== "undefined" &&
-            typeof Uint32Array !== "undefined" ) {
+        if( haveTypedArrays ) {
 
-            if( typeof Float64Array !== "undefined" ) {
+            var buffer = new ArrayBuffer( 8 );
+            var doubleView = new Float64Array( buffer );
+            var Uint32View = new Uint32Array( buffer );
 
-                var buffer = new ArrayBuffer( 8 );
-                var doubleView = new Float64Array( buffer );
-                var Uint32View = new Uint32Array( buffer );
-
-                return function( num ) {
-                    doubleView[0] = num;
-                    return ( Uint32View[0] ^ Uint32View[1] ) >>> 0;
-                };
-
-            }
-            else if( typeof Float32Array !== "undefined" ) {
-                var buffer = new ArrayBuffer( 4 );
-                var floatView = new Float32Array( buffer );
-                var Uint32View = new Uint32Array( buffer );
-
-                return function( num ) {
-                    floatView[0] = num;
-                    return Uint32View[0] >>> 0;
-                };
-            }
-            else {
-                return noSupport;
-            }
+            return function hashNumber( num ) {
+                if( (num >>> 0) === num ) {
+                    return num & 0x3fffffff;
+                }
+                doubleView[0] = num;
+                return ( Uint32View[0] ^ Uint32View[1] ) & 0x3FFFFFFF;
+            };
 
         }
         else if( typeof Buffer === "function" &&
@@ -116,7 +98,7 @@ var Map = (function() {
 
             var buffer = new Buffer( 8 );
 
-            return function( num ) {
+            return function hashNumber( num ) {
                 buffer.writeDoubleLE( num, 0 );
                 return ( buffer.readUInt32LE( 0 ) ^ buffer.readUInt32LE( 4 ) ) >>> 0;
             };
@@ -127,28 +109,31 @@ var Map = (function() {
 
     })();
 
-    var hash = function( val ) {
+    var hashObject = function hashObject( obj ) {
+        if( obj === null ) {
+            return 0;
+        }
+        var ret;
+        //valueOf returned a number
+        if( ( ret = obj.valueOf() ) !== obj ) {
+            return ret;
+        }
+        return uid( obj );
+    };
 
+    var hash = function hashFunction( val ) {
         switch( typeof val ) {
         case "number":
+            if( ( val | 0 ) === val ) {
+                return val & 0x3fffffff;
+            }
             return hashNumber( val );
         case "string":
             return hashString( val );
         case "boolean":
             return hashBoolean( val );
-
         default:
-            var ret;
-            if( val == null ) {
-                return 0;
-            }
-
-            //valueOf should return a number
-            if( ( ret = val.valueOf() ) !== val ) {
-                return hash( ret );
-            }
-
-            return uid( val );
+            return hashObject( val );
         }
     };
 
@@ -209,29 +194,30 @@ var Map = (function() {
         }
     }
 
-    method._makeBuckets = function() {
-        var b = this._buckets = new Array( this._capacity );
+    method._makeBuckets = function _makeBuckets() {
+        var capacity = this._capacity;
+        var b = this._buckets = new Array( capacity );
 
-        for( var i = 0; i < this._capacity; ++i ) {
+        for( var i = 0; i < capacity; ++i ) {
             b[i] = null;
         }
     };
 
-    method._hashAsBucketIndex = function( hash ) {
+    method._hashAsBucketIndex = function _hashAsBucketIndex( hash ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
         return hash % this._capacity;
     };
 
-    method._keyAsBucketIndex = function( key ) {
+    method._keyAsBucketIndex = function _keyAsBucketIndex( key ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
         return hash( key ) % this._capacity;
     };
 
-    method._resized = function( oldBuckets ) {
+    method._resized = function _resized( oldBuckets ) {
         var newBuckets = this._buckets,
             newLen = newBuckets.length,
             oldLength = oldBuckets.length;
@@ -251,7 +237,7 @@ var Map = (function() {
         }
     };
 
-    method._resizeTo = function( capacity ) {
+    method._resizeTo = function _resizeTo( capacity ) {
         capacity = clampCapacity( capacity );
         if( this._capacity >= capacity ) {
             return;
@@ -265,21 +251,21 @@ var Map = (function() {
         }
     };
 
-    method._getNextCapacity = function() {
+    method._getNextCapacity = function _getNextCapacity() {
         return primes.atLeast( this._capacity + 1 );
     };
 
-    method._isOverCapacity = function( size ) {
+    method._isOverCapacity = function _isOverCapacity( size ) {
         return size >= this._capacity * LOAD_FACTOR;
     };
 
-    method._checkResize = function() {
+    method._checkResize = function _checkResize() {
         if( this._isOverCapacity( this._size ) ) {
             this._resizeTo( this._getNextCapacity() );
         }
     };
 
-    method._getEntryWithKey = function( entry, key ) {
+    method._getEntryWithKey = function _getEntryWithKey( entry, key ) {
         var eq = this._equality;
         while( entry !== null ) {
             if( eq( entry.key, key ) ) {
@@ -290,7 +276,7 @@ var Map = (function() {
         return null;
     };
                                     //Used by set
-    method._setAll = function( obj, __value ) {
+    method._setAll = function _setAll( obj, __value ) {
         if( !obj.length ) {
             return;
         }
@@ -317,14 +303,17 @@ var Map = (function() {
     method.forEach = MapForEach;
 
 
-    method.clone = function() {
+    method.clone = function clone() {
         return new this.constructor(
             this.entries(),
             this._equality
         );
     };
 
-    method.containsValue = method.hasValue = function( value ) {
+    method.containsValue = method.hasValue = function hasValue( value ) {
+        if( value === void 0 ) {
+            return false;
+        }
         var it = this.iterator();
         while( it.next() ) {
             if( it.value === value ) {
@@ -334,12 +323,18 @@ var Map = (function() {
         return false;
     };
 
-    method.containsKey = method.hasKey = function( key ) {
+    method.containsKey = method.hasKey = function hasKey( key ) {
+        if( key === void 0 ) {
+            return false;
+        }
         var bucketIndex = this._keyAsBucketIndex( key );
         return this._getEntryWithKey( this._buckets[bucketIndex], key ) !== null;
     };
 
-    method.get = function( key ) {
+    method.get = function get( key ) {
+        if( key === void 0 ) {
+            return void 0;
+        }
         var bucketIndex = this._keyAsBucketIndex( key ),
             entry = this._getEntryWithKey( this._buckets[bucketIndex], key );
 
@@ -351,7 +346,10 @@ var Map = (function() {
     };
 
 
-    method["delete"] = method.unset = method.remove = function( key ) {
+    method["delete"] = method.unset = method.remove = function remove( key ) {
+        if( key === void 0 ) {
+            return void 0;
+        }
         this._modCount++;
         var bucketIndex = this._keyAsBucketIndex( key ),
             ret = void 0,
@@ -385,13 +383,13 @@ var Map = (function() {
         return ret;
     };
 
-
-
-
-    method.put = method.set = function( key, value ) {
+    method.put = method.set = function set( key, value ) {
+        if( key === void 0 || value === void 0) {
+            return void 0;
+        }
         this._modCount++;
-        var h = hash( key ),
-            bucketIndex = this._hashAsBucketIndex( h),
+        var h = hash( key ), //Did not inline hash called from hash
+            bucketIndex = this._hashAsBucketIndex( h ),
             ret = void 0,
             oldEntry = this._buckets[bucketIndex],
             entry = this._getEntryWithKey( oldEntry, key );
@@ -411,13 +409,13 @@ var Map = (function() {
         return ret;
     };
 
-    method.putAll = method.setAll = function( obj ) {
+    method.putAll = method.setAll = function setAll( obj ) {
         this._modCount++;
         var listOfTuples = toListOfTuples( obj );
         this._setAll( listOfTuples );
     };
 
-    method.clear = function() {
+    method.clear = function clear() {
         this._modCount++;
         if( this._buckets === null ) {
             return;
@@ -428,11 +426,11 @@ var Map = (function() {
         this._size = 0;
     };
 
-    method.length = method.size = function() {
+    method.length = method.size = function size() {
         return this._size;
     };
 
-    method.isEmpty = function() {
+    method.isEmpty = function isEmpty() {
         return this._size === 0;
     };
 
@@ -449,7 +447,7 @@ var Map = (function() {
 
     method.entries = MapEntries;
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return new Iterator( this );
     };
 
@@ -466,7 +464,7 @@ var Map = (function() {
 
         method._checkModCount = MapIteratorCheckModCount;
 
-        method._getNextEntryFromEntry = function( entry ) {
+        method._getNextEntryFromEntry = function _getNextEntryFromEntry( entry ) {
 
             if( entry !== null && entry.next !== null ) {
                 return entry.next;
@@ -487,7 +485,7 @@ var Map = (function() {
 
         };
 
-        method._getNextEntry = function() {
+        method._getNextEntry = function _getNextEntry() {
 
             if( this._backingEntry !== null ) {
                 var ret = this._backingEntry;
@@ -499,7 +497,7 @@ var Map = (function() {
             return this._getNextEntryFromEntry( this._currentEntry );
         };
 
-        method._getPrevEntry = function() {
+        method._getPrevEntry = function _getPrevEntry() {
             var buckets = this._map._buckets,
                 entry = this._currentEntry,
                 backingEntry;
@@ -539,7 +537,7 @@ var Map = (function() {
 
         //API
 
-        method.next = function() {
+        method.next = function next() {
             this._checkModCount();
             this._index++;
 
@@ -558,7 +556,7 @@ var Map = (function() {
             return true;
         };
 
-        method.prev = function() {
+        method.prev = function prev() {
             this._checkModCount();
             this._index--;
 
@@ -577,7 +575,7 @@ var Map = (function() {
             return true;
         };
 
-        method.moveToStart = function() {
+        method.moveToStart = function moveToStart() {
             this._checkModCount();
             this.key = this.value = void 0;
             this.index = -1;
@@ -588,7 +586,7 @@ var Map = (function() {
             return this;
         };
 
-        method.moveToEnd = function() {
+        method.moveToEnd = function moveToEnd() {
             this._checkModCount();
             this.key = this.value = void 0;
             this._index = this._map._size;
@@ -599,7 +597,7 @@ var Map = (function() {
             return this;
         };
 
-        method.set = method.put = function( value ) {
+        method.set = method.put = function put( value ) {
             this._checkModCount();
 
             if( this._currentEntry === null ) {
@@ -610,7 +608,7 @@ var Map = (function() {
             return ret;
         };
 
-        method["delete"] = method.remove = function() {
+        method["delete"] = method.remove = function remove() {
             this._checkModCount();
 
             if( this._currentEntry === null ) {
@@ -645,15 +643,15 @@ var Map = (function() {
             this.hash = hash;
         }
 
-        method.inserted = function() {
+        method.inserted = function inserted() {
 
         };
 
-        method.removed = function() {
+        method.removed = function removed() {
             this.key = this.value = null;
         };
 
-        method.accessed = function() {
+        method.accessed = function accessed() {
 
         };
 

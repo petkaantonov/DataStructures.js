@@ -33,8 +33,13 @@ var Queue = (function() {
 
     var Array = [].constructor;
 
-    function Queue( capacity, arrayImpl ) {
+    /**/
+    function Queue( capacity, maxSize, _arrayImpl ) {
         var items = null;
+
+        this._maxSize = (maxSize = maxSize >>> 0) > 0 ?
+            Math.min( maxSize, MAX_CAPACITY ) :
+            MAX_CAPACITY;
 
         switch( typeof capacity ) {
         case "number":
@@ -57,8 +62,8 @@ var Queue = (function() {
         this._front = 0;
         this._modCount = 0;
 
-        if( arrayImpl != null ) {
-            this._arrayImpl = arrayImpl;
+        if( _arrayImpl != null ) {
+            this._arrayImpl = _arrayImpl;
             this._fillValue = 0;
         }
         else {
@@ -73,10 +78,7 @@ var Queue = (function() {
     }
 
     method._checkCapacity = function( size ) {
-        if( size > MAX_CAPACITY ) {
-            throw new Error( "Too many items");
-        }
-        else if( size > this._capacity ) {
+        if( this._capacity < size && size < this._maxSize ) {
             this._resizeTo( this._capacity * 2 );
         }
     };
@@ -121,12 +123,13 @@ var Queue = (function() {
 
     method._addAll = function( items ) {
         this._modCount++;
+        var size = this._size;
 
         var len = items.length;
         if( len <= 0 ) {
             return;
         }
-        this._checkCapacity( len + this._size );
+        this._checkCapacity( len + size );
 
         if( this._queue === null ) {
             this._makeCapacity();
@@ -134,7 +137,7 @@ var Queue = (function() {
 
         var queue = this._queue,
             capacity = this._capacity,
-            insertionPoint = ( this._front + this._size ) & ( capacity - 1 );
+            insertionPoint = ( this._front + size) & ( capacity - 1 );
 
          //Can perform direct linear copy
         if( insertionPoint + len < capacity ) {
@@ -148,7 +151,7 @@ var Queue = (function() {
             arrayCopy( items, lengthBeforeWrapping, queue, 0, len - lengthBeforeWrapping );
         }
 
-        this._size += len;
+        this._size = Math.min( size + len, this._maxSize );
 
 
     };
@@ -185,13 +188,14 @@ var Queue = (function() {
 
     method.add = method.enqueue = function( item ) {
         this._modCount++;
+        var size = this._size;
         if( this._queue === null ) {
             this._makeCapacity();
         }
-        this._checkCapacity( this._size + 1 );
-        var i = ( this._front + this._size ) & ( this._capacity - 1 );
+        this._checkCapacity( size + 1 );
+        var i = ( this._front + size ) & ( this._capacity - 1 );
         this._queue[i] = item;
-        this._size++;
+        this._size = Math.min( size + 1, this._maxSize );
     };
 
     method.remove = method.dequeue = function() {
@@ -217,12 +221,13 @@ var Queue = (function() {
 
     method.clear = function() {
         this._modCount++;
-        this._front = this._size = 0;
         var queue = this._queue,
             fill = this._fillValue;
         for( var i = 0, len = queue.length; i < len; ++i ) {
             queue[i] = fill;
         }
+        this._size = 0;
+        this._front = 0;
     };
 
     method.size = function() {
@@ -361,8 +366,8 @@ var Queue = (function() {
     })();
 
     function makeCtor( name, arrayImpl ) {
-        Queue[name] = function( arg ) {
-            return new Queue( arg, arrayImpl );
+        Queue[name] = function( capacity, maxSize ) {
+            return new Queue( capacity, maxSize, arrayImpl );
         };
     }
 
