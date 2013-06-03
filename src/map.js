@@ -4,45 +4,35 @@
 /* exported Map */
 /* jshint -W079 */
 var Map = (function() {
-    //TODO equals,
-
-    var primes = (function() {
-        //Hash table sizes that roughly double each time, are prime, and as far as as possible from the nearest powers of 2
-        var primes = [
-            13, 23, 53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317, 196613,
-            393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653, 100663319,
-            201326611, 402653189, 805306457, 1610612741
-        ];
-
-        function getPrimeAtLeast( n ) {
-            for( var i = 0; i < primes.length; ++i ) {
-                if( primes[i] >= n ) {
-                    return primes[i];
-                }
-            }
-
-            return getHighestPrime();
-        }
-
-        function getSmallestPrime() {
-            return primes[0];
-        }
-
-        function getHighestPrime() {
-            return primes[primes.length-1];
-        }
-
-
-        return {
-            smallest: getSmallestPrime,
-            highest: getHighestPrime,
-            atLeast: getPrimeAtLeast
-        };
-    })();
-
     var haveTypedArrays = typeof ArrayBuffer !== "undefined" &&
             typeof Uint32Array !== "undefined" &&
             typeof Float64Array !== "undefined";
+
+    var pow2AtLeast = function pow2AtLeast( n ) {
+        n = n >>> 0;
+        n = n - 1;
+        n = n | (n >> 1);
+        n = n | (n >> 2);
+        n = n | (n >> 4);
+        n = n | (n >> 8);
+        n = n | (n >> 16);
+        return n + 1;
+    };
+
+    var seeds = [3145739, 6291469, 12582917,
+        25165843, 50331653, 100663319,
+        201326611, 402653189, 805306457,
+        1610612741
+    ];
+
+    var random = seeds[( Math.random()*seeds.length ) | 0];
+
+    var hashHash = function hashHash( key, tableSize ) {
+        var h = key | 0;
+        h =  h ^ (h >>> 20) ^ (h >>> 12);
+        return (h ^ (h >>> 7) ^ (h >>> 4)) & (tableSize - 1);
+    };
+
 
     var hashBoolean = function( bool ) {
         return bool | 0;
@@ -84,10 +74,7 @@ var Map = (function() {
             var doubleView = new Float64Array( buffer );
             var Uint32View = new Uint32Array( buffer );
 
-            return function hashNumber( num ) {
-                if( (num >>> 0) === num ) {
-                    return num & 0x3fffffff;
-                }
+            return function hashFloat( num ) {
                 doubleView[0] = num;
                 return ( Uint32View[0] ^ Uint32View[1] ) & 0x3FFFFFFF;
             };
@@ -98,9 +85,9 @@ var Map = (function() {
 
             var buffer = new Buffer( 8 );
 
-            return function hashNumber( num ) {
+            return function hashFloat( num ) {
                 buffer.writeDoubleLE( num, 0 );
-                return ( buffer.readUInt32LE( 0 ) ^ buffer.readUInt32LE( 4 ) ) >>> 0;
+                return ( buffer.readUInt32LE( 0 ) ^ buffer.readUInt32LE( 4 ) ) & 0x3FFFFFFF;
             };
         }
         else {
@@ -145,12 +132,10 @@ var Map = (function() {
         return Math.max( DEFAULT_CAPACITY, Math.min( MAX_CAPACITY, capacity ) );
     };
 
-    var DEFAULT_CAPACITY = primes.smallest();
-    var MAX_CAPACITY = primes.highest();
-    var LOAD_FACTOR = 0.67;
+    var DEFAULT_CAPACITY = 1 << 4;
+    var MAX_CAPACITY = 1 << 30;
 
     var method = Map.prototype;
-
     function Map( capacity, equality ) {
         if( typeof capacity === "function" ) {
             var tmp = equality;
@@ -162,7 +147,7 @@ var Map = (function() {
 
         switch( typeof capacity ) {
         case "number":
-            setCapacity = primes.atLeast( capacity );
+            setCapacity = pow2AtLeast( capacity );
             break;
         case "object":
             setCapacity = -1;
@@ -189,7 +174,12 @@ var Map = (function() {
         }
         else {
             var tuples = toListOfTuples( capacity );
-            this._capacity = primes.atLeast( tuples.length );
+            var size = tuples.length;
+            var capacity = pow2AtLeast( size );
+            if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
+                capacity = capacity << 1;
+            }
+            this._capacity = capacity;
             this._setAll( tuples );
         }
     }
@@ -207,14 +197,14 @@ var Map = (function() {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
-        return hash % this._capacity;
+        return hashHash( hash, this._capacity );
     };
 
     method._keyAsBucketIndex = function _keyAsBucketIndex( key ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
-        return hash( key ) % this._capacity;
+        return hashHash( hash( key ), this._capacity );
     };
 
     method._resized = function _resized( oldBuckets ) {
@@ -225,7 +215,7 @@ var Map = (function() {
         for( var i = 0; i < oldLength; ++i ) {
             var entry = oldBuckets[i];
             while( entry !== null ) {
-                var bucketIndex = entry.hash % newLen,
+                var bucketIndex = hashHash( entry.hash, newLen ),
                     next = entry.next;
 
                 entry.next = newBuckets[bucketIndex];
@@ -252,12 +242,12 @@ var Map = (function() {
     };
 
     method._getNextCapacity = function _getNextCapacity() {
-        return primes.atLeast( this._capacity + 1 );
+        return this._capacity * 2;
     };
 
     method._isOverCapacity = function _isOverCapacity( size ) {
-        return size >= this._capacity * LOAD_FACTOR;
-    };
+        return ( ( size << 2 ) - size ) >= ( this._capacity << 1 );
+    }; //Load factor of 0.67
 
     method._checkResize = function _checkResize() {
         if( this._isOverCapacity( this._size ) ) {
@@ -283,7 +273,11 @@ var Map = (function() {
         var newSize = obj.length + this._size;
 
         if( this._isOverCapacity( newSize ) ) {
-            this._resizeTo( primes.atLeast( ( 1 + newSize / LOAD_FACTOR ) | 0 ) );
+            var capacity = pow2AtLeast( newSize );
+            if( ( ( newSize << 2 ) - newSize ) >= ( capacity << 1 ) ) {
+                capacity = capacity << 1;
+            }
+            this._resizeTo( capacity );
         }
 
         if( arguments.length > 1 ) {

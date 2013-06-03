@@ -1,7 +1,7 @@
 /* global DS, test, strictEqual, deepEqual, ok */
 test( "Test map capacity", function() {
     var maps = [new DS.Map(10), new DS.Map(100), new DS.Map(1000), new DS.Map(10000), new DS.Map(35000)];
-    var expectedCapacity = [13, 193, 1543, 12289, 49157];
+    var expectedCapacity = [16, 128, 1024, 16384, 65536];
 
     for( var i = 0; i < maps.length; ++i ) {
 
