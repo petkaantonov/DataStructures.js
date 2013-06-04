@@ -1,4 +1,4 @@
-/* global Buffer, uid, MapForEach, toListOfTuples, NativeMap, exportCtor,
+/* global Buffer, uid, MapForEach, toListOfTuples,
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, MapValueOf,
     MapToJSON, MapToString */
 /* exported Map */
@@ -8,7 +8,7 @@ var Map = (function() {
             typeof Uint32Array !== "undefined" &&
             typeof Float64Array !== "undefined";
 
-    var pow2AtLeast = function pow2AtLeast( n ) {
+    function pow2AtLeast( n ) {
         n = n >>> 0;
         n = n - 1;
         n = n | (n >> 1);
@@ -17,20 +17,19 @@ var Map = (function() {
         n = n | (n >> 8);
         n = n | (n >> 16);
         return n + 1;
-    };
+    }
 
-    var hashHash = function hashHash( key, tableSize ) {
+    function hashHash( key, tableSize ) {
         var h = key | 0;
-        h =  h ^ (h >>> 20) ^ (h >>> 12);
-        return (h ^ (h >>> 7) ^ (h >>> 4)) & (tableSize - 1);
-    };
+        h =  h ^ ( h >> 20 ) ^ ( h >> 12 );
+        return ( h ^ ( h >> 7 ) ^ ( h >> 4 ) ) & ( tableSize - 1 );
+    }
 
-
-    var hashBoolean = function( bool ) {
+    function hashBoolean( bool ) {
         return bool | 0;
-    };
+    }
 
-    var hashString = function hashString( str ) {
+    function hashString( str ) {
         var h = 5381,
             i = 0;
 
@@ -39,14 +38,9 @@ var Map = (function() {
         }
 
         return h;
-    };
+    }
 
     var hashNumber = (function() {
-        //No support of reading the bits of a double directly as 2 unsigned ints
-        function noSupport( num ) {
-            return num | 0;
-        }
-
         if( haveTypedArrays ) {
 
             var buffer = new ArrayBuffer( 8 );
@@ -70,12 +64,14 @@ var Map = (function() {
             };
         }
         else {
-            return noSupport;
+            //No support of reading the bits of a double directly as 2 unsigned ints
+            return function hashFloat( num ) {
+                return num | 0;
+            };
         }
-
     })();
 
-    var hashObject = function hashObject( obj ) {
+    function hashObject( obj ) {
         if( obj === null ) {
             return 0;
         }
@@ -85,9 +81,9 @@ var Map = (function() {
             return ret;
         }
         return uid( obj );
-    };
+    }
 
-    var hash = function hashFunction( val ) {
+    function hash( val ) {
         switch( typeof val ) {
         case "number":
             if( ( val | 0 ) === val ) {
@@ -101,57 +97,49 @@ var Map = (function() {
         default:
             return hashObject( val );
         }
-    };
+    }
 
-    var equals = function( key1, key2 ) {
+    function equals( key1, key2 ) {
         return key1 === key2;
-    };
+    }
 
-    var clampCapacity = function( capacity ) {
+    function clampCapacity( capacity ) {
         return Math.max( DEFAULT_CAPACITY, Math.min( MAX_CAPACITY, capacity ) );
-    };
+    }
 
     var DEFAULT_CAPACITY = 1 << 4;
     var MAX_CAPACITY = 1 << 30;
 
     var method = Map.prototype;
     function Map( capacity, equality ) {
+        this._buckets = null;
+        this._size = 0;
+        this._modCount = 0;
+        this._capacity = DEFAULT_CAPACITY;
+        this._equality = equals;
+        this._init( capacity, equality );
+    }
+
+    method._init = function _init( capacity, equality ) {
         if( typeof capacity === "function" ) {
             var tmp = equality;
             equality = capacity;
             capacity = tmp;
         }
 
-        var setCapacity = DEFAULT_CAPACITY;
-
-        switch( typeof capacity ) {
-        case "number":
-            setCapacity = pow2AtLeast( capacity );
-            break;
-        case "object":
-            setCapacity = -1;
-            break;
-
-        default:
-            setCapacity = DEFAULT_CAPACITY;
-            break;
-        }
-
         if( typeof equality === "function" ) {
             this._equality = equality;
         }
-        else {
-            this._equality = equals;
+
+        if( capacity == null ) {
+            return;
         }
 
-        this._buckets = null;
-        this._size = 0;
-        this._modCount = 0;
-
-        if( setCapacity > -1 || !capacity ) {
-            this._capacity = clampCapacity( setCapacity );
-        }
-        else {
+        switch( typeof capacity ) {
+        case "number":
+            this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+            break;
+        case "object":
             var tuples = toListOfTuples( capacity );
             var size = tuples.length;
             var capacity = pow2AtLeast( size );
@@ -160,11 +148,13 @@ var Map = (function() {
             }
             this._capacity = capacity;
             this._setAll( tuples );
+            break;
         }
-    }
+    };
 
     method._makeBuckets = function _makeBuckets() {
         var capacity = this._capacity;
+                                //kInitialMaxFastElementArray = 100000
         var b = this._buckets = new Array( capacity < 99999 ? capacity : 0 );
 
         for( var i = 0; i < capacity; ++i ) {
@@ -244,7 +234,7 @@ var Map = (function() {
         }
         return null;
     };
-                                    //Used by set
+                                             //Used by Set and OrderedSet
     method._setAll = function _setAll( obj, __value ) {
         if( !obj.length ) {
             return;
@@ -361,7 +351,7 @@ var Map = (function() {
             return void 0;
         }
         this._modCount++;
-        var h = hash( key ), //Did not inline hash called from hash
+        var h = hash( key ),
             bucketIndex = this._hashAsBucketIndex( h ),
             ret = void 0,
             oldEntry = this._buckets[bucketIndex],
@@ -393,9 +383,7 @@ var Map = (function() {
         if( this._buckets === null ) {
             return;
         }
-        for( var i = 0, l = this._buckets.length; i < l; ++i ) {
-            this._buckets[i] = null;
-        }
+        this._buckets = null;
         this._size = 0;
     };
 
@@ -428,10 +416,15 @@ var Map = (function() {
         var method = Iterator.prototype;
 
         function Iterator( map ) {
-            this._map = map;
+            this.key = this.value = void 0;
+            this.index = -1;
             this._modCount = map._modCount;
+
+            this._index = -1;
+            this._map = map;
             this._backingEntry = null;
-            this.moveToStart();
+            this._currentEntry = null;
+            this._bucketIndex = -1;
 
         }
 
@@ -638,7 +631,7 @@ var Map = (function() {
     Map.hashBoolean = hashBoolean;
     Map.hash = hash;
 
-    Map.Native = exportCtor( NativeMap );
+    Map._hashHash = hashHash;
 
     return Map;
 })();

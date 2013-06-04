@@ -6,6 +6,11 @@ var SortedSet = (function() {
     var method = SortedSet.prototype;
 
     function SortedSet( values, comparator ) {
+        this._tree = null;
+        this._init( values, comparator );
+    }
+
+    method._init = function _init( values, comparator ) {
         if( typeof values === "function" ) {
             var tmp = comparator;
             comparator = values;
@@ -17,10 +22,13 @@ var SortedSet = (function() {
         }
 
         this._tree = new RedBlackTree( comparator );
-        this._addAll( toList(values) );
 
-    }
+        if( typeof values === "object" && values != null ) {
+            this._addAll( toList(values) );
+        }
+    };
 
+    //API
     method.forEach = SetForEach;
 
     method.getComparator = SortedMap.prototype.getComparator;
@@ -28,7 +36,7 @@ var SortedSet = (function() {
     method.clear = SortedMap.prototype.clear;
 
 
-    method.values = method.toArray = function() {
+    method.values = method.toArray = function toArray() {
         var values = [],
             it = this.iterator();
 
@@ -45,33 +53,33 @@ var SortedSet = (function() {
     method.size = method.length = SortedMap.prototype.size;
     method.isEmpty = SortedMap.prototype.isEmpty;
 
-    method.add = function( value ) {
+    method.add = function add( value ) {
         this._tree.set( value, true );
         return this;
     };
 
-    method._addAll = function( values ) {
+    method._addAll = function _addAll( values ) {
         for( var i = 0, l = values.length; i < l; ++i ) {
             this.add( values[i] );
         }
     };
 
-    method.addAll = function( arr ) {
+    method.addAll = function addAll( arr ) {
         var values = toList(arr);
         this._addAll( values );
         return this;
     };
 
-    method.clone = function() {
+    method.clone = function clone() {
         return new SortedSet( this.values() );
     };
 
-    method.remove = function( value ) {
+    method.remove = function remove( value ) {
         var ret = this._tree.unset( value );
         return ret ? ret.key : ret;
     };
 
-    method.subsetOf = function( set ) {
+    method.subsetOf = function subsetOf( set ) {
         var it = this.iterator();
 
         while( it.next() ) {
@@ -82,11 +90,11 @@ var SortedSet = (function() {
         return this.size() !== set.size();
     };
 
-    method.supersetOf = function( set ) {
+    method.supersetOf = function supersetOf( set ) {
         return set.subsetOf(this);
     };
 
-    method.allContainedIn = function( set ) {
+    method.allContainedIn = function allContainedIn( set ) {
         var it = this.iterator();
 
         while( it.next() ) {
@@ -97,7 +105,7 @@ var SortedSet = (function() {
         return true;
     };
 
-    method.containsAll = function( set ) {
+    method.containsAll = function containsAll( set ) {
         return set.allContainedIn( this );
     };
 
@@ -107,7 +115,7 @@ var SortedSet = (function() {
 
     method.toJSON = SetToJSON;
 
-    method.union = function(a) {
+    method.union = function union(a) {
         var ret = new SortedSet( this.getComparator() ),
 
             aHas, bHas,
@@ -132,7 +140,7 @@ var SortedSet = (function() {
     };
 
 
-    method.intersection = function(a) {
+    method.intersection = function intersection(a) {
         var ret = new SortedSet( this.getComparator() ),
             src = this.size() < a.size() ? this : a,
             dst = src === a ? this : a,
@@ -147,7 +155,7 @@ var SortedSet = (function() {
         return ret;
     };
 
-    method.complement = function( a ) {
+    method.complement = function complement( a ) {
         var ret = new SortedSet( this.getComparator() ),
             it = this.iterator();
 
@@ -161,7 +169,7 @@ var SortedSet = (function() {
     };
 
 
-    method.difference = function( a ) {
+    method.difference = function difference( a ) {
         var ret = this.union( a ),
             tmp = this.intersection( a ),
             it = tmp.iterator();
@@ -173,7 +181,7 @@ var SortedSet = (function() {
         return ret;
     };
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return new Iterator( this );
     };
 

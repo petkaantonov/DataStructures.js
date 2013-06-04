@@ -11,19 +11,19 @@ var OrderedSet = (function() {
 
     method._mapType = OrderedMap;
 
-    method.indexOf = function( value ) {
+    method.indexOf = function indexOf( value ) {
         return this._map.indexOfKey( value );
     };
 
-    method.first = function() {
+    method.first = function first() {
         return this._map.firstKey();
     };
 
-    method.last = function() {
+    method.last = function last() {
         return this._map.lastKey();
     };
 
-    method.get = method.nth = function( index ) {
+    method.get = method.nth = function nth( index ) {
         return this._map.nthKey( index );
     };
 

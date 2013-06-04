@@ -8,10 +8,9 @@ var RedBlackTree = (function() {
         this.length = 0;
         this.comparator = typeof comparator === "function" ? comparator : defaultComparer;
         this.modCount = 0;
-
     }
 
-    method.size = method.length = function() {
+    method.size = method.length = function length() {
         return this.length;
     };
 
@@ -19,7 +18,7 @@ var RedBlackTree = (function() {
     //simply find the node without parent is the new root
     //The cost is often 0 or 1-2 operations in worst case because
     //the root only changes when the rotations are happening near it
-    method.updateRootReference = function() {
+    method.updateRootReference = function updateRootReference() {
         var cur = this.root;
         if( cur && cur.parent ) {
             while( ( cur = cur.parent ) ) {
@@ -31,22 +30,22 @@ var RedBlackTree = (function() {
         }
     };
 
-    method.getComparator = function() {
+    method.getComparator = function getComparator() {
         return this.comparator;
     };
 
 
-    method.modified = function() {
+    method.modified = function modified() {
         this.modCount++;
     };
 
-    method.clear = function() {
+    method.clear = function clear() {
         this.modified();
         this.root = null;
         this.length = 0;
     };
 
-    method.set = function( key, value ) {
+    method.set = function set( key, value ) {
         if( key == null ) {
             return void 0;
         }
@@ -68,7 +67,7 @@ var RedBlackTree = (function() {
         return ret;
     };
 
-    method.setAt = function( index, value ) {
+    method.setAt = function setAt( index, value ) {
         if( value === void 0 ) {
             return;
         }
@@ -79,7 +78,7 @@ var RedBlackTree = (function() {
         }
     };
 
-    method.unsetAt = function( index ) {
+    method.unsetAt = function unsetAt( index ) {
         var node = this.nodeByIndex( index );
 
         if( node ) {
@@ -87,7 +86,7 @@ var RedBlackTree = (function() {
         }
     };
 
-    method.unset = function( key ) {
+    method.unset = function unset( key ) {
         if( key == null ) {
             return void 0;
         }
@@ -114,27 +113,27 @@ var RedBlackTree = (function() {
 
 
     //node with key >= inputKey
-    method.nodeByKeyAtLeast = function( key ) {
+    method.nodeByKeyAtLeast = function nodeByKeyAtLeast( key ) {
         return greaterKeys.call( this, key, true );
     };
 
     //node with key > inputKey
-    method.nodeByGreaterKey = function( key ) {
+    method.nodeByGreaterKey = function nodeByGreaterKey( key ) {
         return greaterKeys.call( this, key, false );
     };
 
     //node with key <= inputKey
-    method.nodeByKeyAtMost = function( key ) {
+    method.nodeByKeyAtMost = function nodeByKeyAtMost( key ) {
         return lesserKeys.call( this, key, true );
     };
 
     //node with key < inputKey
-    method.nodeByLesserKey = function( key ) {
+    method.nodeByLesserKey = function nodeByLesserKey( key ) {
         return lesserKeys.call( this, key, false );
 
     };
 
-    method.nodeByKey = function( key ) {
+    method.nodeByKey = function nodeByKey( key ) {
         if( key == null ) {
             return void 0;
         }
@@ -156,7 +155,7 @@ var RedBlackTree = (function() {
         return void 0;
     };
 
-    method.indexOfNode = function( node ) {
+    method.indexOfNode = function indexOfNode( node ) {
         if( !node ) {
             return -1;
         }
@@ -168,7 +167,7 @@ var RedBlackTree = (function() {
         return -1;
     };
 
-    method.indexOfKey = function( key ) {
+    method.indexOfKey = function indexOfKey( key ) {
         if( key == null ) {
             return void 0;
         }
@@ -176,7 +175,7 @@ var RedBlackTree = (function() {
         return this.indexOfNode( this.nodeByKey( key ) );
     };
 
-    method.nodeByIndex = function( index ) {
+    method.nodeByIndex = function nodeByIndex( index ) {
         index = +index;
         if( !isFinite( index ) ) {
             return void 0;
@@ -195,7 +194,7 @@ var RedBlackTree = (function() {
         return nthNode( this.root, index + 1 );
     };
 
-    method.firstNode = function() {
+    method.firstNode = function firstNode() {
         var cur = this.root,
             prev;
 
@@ -210,7 +209,7 @@ var RedBlackTree = (function() {
         return prev;
     };
 
-    method.lastNode = function() {
+    method.lastNode = function lastNode() {
         var cur = this.root,
             prev;
 
@@ -225,7 +224,7 @@ var RedBlackTree = (function() {
         return prev;
     };
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return new Iterator( this );
     };
 
@@ -554,20 +553,24 @@ var RedBlackTree = (function() {
     var Iterator = (function() {
         var method = Iterator.prototype;
 
-        function Iterator( tree) {
-            this._tree = tree;
+        function Iterator( tree ) {
+            this.key = this.value = void 0;
+            this.index = -1;
             this._modCount = tree.modCount;
+
+            this._index = -1;
+            this._tree = tree;
             this._backingNode = null;
-            this.moveToStart();
+            this._currentNode = null;
         }
 
-        method._checkModCount = function() {
+        method._checkModCount = function _checkModCount() {
             if( this._modCount !== this._tree.modCount ) {
                 throw new Error( "map cannot be mutated while iterating" );
             }
         };
 
-        method._getPrevNode = function() {
+        method._getPrevNode = function _getPrevNode() {
             var ret;
             if( this._currentNode === null ) {
                 if( this._backingNode !== null ) {
@@ -586,7 +589,7 @@ var RedBlackTree = (function() {
             return ret;
         };
 
-        method._getNextNode = function() {
+        method._getNextNode = function _getNextNode() {
 
             var ret;
             if( this._currentNode === null ) {
@@ -606,7 +609,7 @@ var RedBlackTree = (function() {
             return ret;
         };
 
-        method.next = function() {
+        method.next = function next() {
             this._checkModCount();
 
             this._index++;
@@ -626,7 +629,7 @@ var RedBlackTree = (function() {
             return true;
         };
 
-        method.prev = function() {
+        method.prev = function prev() {
             this._checkModCount();
 
             this._index--;
@@ -647,7 +650,7 @@ var RedBlackTree = (function() {
 
         };
 
-        method.moveToStart = function() {
+        method.moveToStart = function moveToStart() {
             this._checkModCount();
 
             this._index = -1;
@@ -658,7 +661,7 @@ var RedBlackTree = (function() {
             return this;
         };
 
-        method.moveToEnd = function() {
+        method.moveToEnd = function moveToEnd() {
             this._checkModCount();
 
             this._index = this._tree.size();
@@ -669,7 +672,7 @@ var RedBlackTree = (function() {
             return this;
         };
 
-        method.set = method.put = function( value ) {
+        method.set = method.put = function put( value ) {
             this._checkModCount();
 
             if( this._currentNode === null ) {
@@ -681,7 +684,7 @@ var RedBlackTree = (function() {
             return ret;
         };
 
-        method["delete"] = method.remove = function() {
+        method["delete"] = method.remove = function remove() {
             this._checkModCount();
 
             if( this._currentNode === null ) {

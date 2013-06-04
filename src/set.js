@@ -5,83 +5,81 @@ var Set = (function() {
     var method = Set.prototype;
 
     var __value = true;
+
     function Set( capacity, equality ) {
+        this._map = null;
+        this._init( capacity, equality );
+    }
+
+    method._init = function _init( capacity, equality ) {
         if( typeof capacity === "function" ) {
             var tmp = equality;
             equality = capacity;
             capacity = tmp;
         }
-        var items = null;
 
-        switch( typeof capacity ) {
-        case "number":
-            break;
-        case "object":
-            if( capacity ) {
-                items = toList( capacity );
-            }
-            break;
-        }
-
-        if( items ) {
-            this._map = new this._mapType( items.length, equality );
-            this._addAll( items );
-        }
-        else {
+        if( typeof capacity === "number" ) {
             this._map = new this._mapType( capacity, equality );
         }
-    }
+        else {
+            this._map = new this._mapType( equality );
+        }
 
-    method.forEach = SetForEach;
+        if( typeof capacity === "object" && capacity != null) {
+            this._addAll( toList( capacity ) );
+        }
+    };
 
     method._mapType = Map;
 
-    method._addAll = function( items ) {
+    method._addAll = function _addAll( items ) {
         this._map._setAll( items, __value );
     };
 
     //API
 
-    method.clone = function() {
+    method.forEach = SetForEach;
+
+    method.clone = function clone() {
         return new this.constructor(
             this._map.keys(),
             this._map._equality
         );
     };
 
-    method.add = function( value ) {
+    method.add = function add( value ) {
         return this._map.put( value, __value );
     };
 
-    method.remove = function( value ) {
+    method.remove = function remove( value ) {
         return this._map.remove( value ) === __value;
     };
 
-    method.addAll = function( items ) {
+    method.addAll = function addAll( items ) {
         this._addAll( toList( items ) );
     };
 
-    method.clear = function() {
+    method.clear = function clear() {
         this._map.clear();
     };
 
-    method.values = method.toArray = function() {
+    method.values = method.toArray = function toArray() {
         return this._map.keys();
     };
 
-    method.contains = function( value ) {
+    method.contains = function contains( value ) {
         return this._map.containsKey( value );
     };
 
-    method.size = method.length = function() {
+    method.size = method.length = function length() {
         return this._map.size();
     };
 
-    method.isEmpty = function() {
+    method.isEmpty = function isEmpty() {
         return this.size() === 0;
     };
 
-    method.subsetOf = function( set ) {
+    method.subsetOf = function subsetOf( set ) {
         var it = this.iterator();
         while( it.next() ) {
             if( !set.contains( it.value ) ) {
@@ -91,11 +89,11 @@ var Set = (function() {
         return this.size() !== set.size();
     };
 
-    method.supersetOf = function( set ) {
+    method.supersetOf = function supersetOf( set ) {
         return set.subsetOf( this );
     };
 
-    method.allContainedIn = function( set ) {
+    method.allContainedIn = function allContainedIn( set ) {
         var it = this.iterator();
         while( it.next() ) {
             if( !set.contains( it.value ) ) {
@@ -105,7 +103,7 @@ var Set = (function() {
         return true;
     };
 
-    method.containsAll = function( set ) {
+    method.containsAll = function containsAll( set ) {
         return set.allContainedIn( this );
     };
 
@@ -115,7 +113,7 @@ var Set = (function() {
 
     method.toJSON = SetToJSON;
 
-    method.union = function( a ) {
+    method.union = function union( a ) {
         var ret = new this.constructor( this.size() + a.size(), this._map._equality );
 
         var aHas, bHas,
@@ -138,7 +136,7 @@ var Set = (function() {
         return ret;
     };
 
-    method.intersection = function( a ) {
+    method.intersection = function intersection( a ) {
         var ret = new this.constructor( Math.max( this.size(), a.size() ), this._map._equality );
 
         var src = this.size() < a.size() ? this : a,
@@ -154,7 +152,7 @@ var Set = (function() {
         return ret;
     };
 
-    method.complement = function( a ) {
+    method.complement = function complement( a ) {
         var ret = new this.constructor( Math.max( this.size(), a.size() ), this._map._equality );
 
         var it = this.iterator();
@@ -167,7 +165,7 @@ var Set = (function() {
         return ret;
     };
 
-    method.difference = function( a ) {
+    method.difference = function difference( a ) {
         var ret = this.union( a ),
             tmp = this.intersection( a ),
             it = tmp.iterator();
@@ -179,7 +177,7 @@ var Set = (function() {
         return ret;
     };
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return new Iterator( this );
     };
 

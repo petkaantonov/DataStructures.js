@@ -1,8 +1,6 @@
 /* global Set, OrderedSet, SortedSet, Map, OrderedMap, SortedMap,
     defaultComparer, invertedComparator, arePrimitive, composeComparators,
-    comparePosition, global, exportCtor, NativeSet, Queue, Deque */
-
-Set.Native = exportCtor( NativeSet );
+    comparePosition, global, exportCtor, Queue, Deque */
 
 var DS = {
 

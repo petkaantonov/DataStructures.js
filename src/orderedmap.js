@@ -1,29 +1,37 @@
 var OrderedMap = (function() {
     var _super = Map.prototype,
+        hashHash = Map._hashHash,
         method = OrderedMap.prototype = Object.create( _super );
 
     method.constructor = OrderedMap;
 
-    var INSERTION_ORDER = OrderedMap.INSERTION_ORDER = {};
-    var ACCESS_ORDER = OrderedMap.ACCESS_ORDER = {};
+    var INSERTION_ORDER = OrderedMap._INSERTION_ORDER = {};
+    var ACCESS_ORDER = OrderedMap._ACCESS_ORDER = {};
 
-    function OrderedMap( capacity, equality, ordering ) {
-        this._ordering = ordering === ACCESS_ORDER ? ACCESS_ORDER : INSERTION_ORDER;
-        this._firstEntry = this._lastEntry = null;
+    function OrderedMap( capacity, equality ) {
         _super.constructor.call( this, capacity, equality );
+        this._ordering = INSERTION_ORDER;
+        this._firstEntry = this._lastEntry = null;
+        _super._init.call( this, capacity, equality );
     }
 
-    OrderedMap.inAccessOrder = function( capacity, equality ) {
-        return new OrderedMap( capacity, equality, ACCESS_ORDER );
+    OrderedMap.inAccessOrder = function inAccessOrder( capacity, equality ) {
+        var ret = new OrderedMap( capacity, equality );
+        ret._ordering = ACCESS_ORDER;
+        return ret;
     };
 
-    method._resized = function() {
+    //Override init because it is only valid to call it after
+    //_firstEntry and _lastEntry properties are created
+    method._init = function _init() {};
+
+    method._resized = function _resized() {
         var newBuckets = this._buckets,
             newLen = newBuckets.length,
             entry = this._firstEntry;
 
         while( entry !== null ) {
-            var bucketIndex = entry.hash % newLen;
+            var bucketIndex = hashHash( entry.hash, newLen );
 
             entry.next = newBuckets[bucketIndex];
             newBuckets[bucketIndex] = entry;
@@ -32,7 +40,7 @@ var OrderedMap = (function() {
         }
     };
 
-    method.indexOfKey = function( key ) {
+    method.indexOfKey = function indexOfKey( key ) {
         if( this._firstEntry === null ) {
             return -1;
         }
@@ -50,7 +58,7 @@ var OrderedMap = (function() {
         return -1;
     };
 
-    method.indexOfValue = function( value ) {
+    method.indexOfValue = function indexOfValue( value ) {
         if( this._firstEntry === null ) {
             return -1;
         }
@@ -67,18 +75,18 @@ var OrderedMap = (function() {
         return -1;
     };
 
-    method.firstKey = function() {
+    method.firstKey = function firstKey() {
         if( this._firstEntry === null ) {
             return void 0;
         }
         return this._firstEntry.key;
     };
 
-    method.first = function() {
+    method.first = function first() {
         return this.get( this.firstKey() );
     };
 
-    method.lastKey = function( ) {
+    method.lastKey = function lastKey( ) {
         if( this._firstEntry === null ) {
             return void 0;
         }
@@ -86,12 +94,12 @@ var OrderedMap = (function() {
         return this._lastEntry.key;
     };
 
-    method.last = function() {
+    method.last = function last() {
         return this.get( this.lastKey() );
     };
 
 
-    method.nthKey = function( index ) {
+    method.nthKey = function nthKey( index ) {
         if( index < 0 || index >= this._size ) {
             return void 0;
         }
@@ -104,20 +112,20 @@ var OrderedMap = (function() {
         return entry.key;
     };
 
-    method.nth = function( index ) {
+    method.nth = function nth( index ) {
         return this.get( this.nthKey( index ) );
     };
 
-    method.containsValue = method.hasValue = function( value ) {
+    method.containsValue = method.hasValue = function hasValue( value ) {
         return this.indexOfValue( value ) > -1;
     };
 
-    method.clear = function() {
+    method.clear = function clear() {
         _super.clear.call( this );
         this._firstEntry = this._lastEntry = null;
     };
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return new Iterator( this );
     };
 
@@ -125,18 +133,23 @@ var OrderedMap = (function() {
         var method = Iterator.prototype;
 
         function Iterator( map ) {
-            this._map = map;
+            this.key = this.value = void 0;
+            this.index = -1;
             this._modCount = map._modCount;
-            this.moveToStart();
+
+            this._index = -1;
+            this._map = map;
+            this._backingEntry = null;
+            this._currentEntry = null;
         }
 
-        method._checkModCount = function() {
+        method._checkModCount = function _checkModCount() {
             if( this._modCount !== this._map._modCount ) {
                 throw new Error( "map cannot be mutated while iterating" );
             }
         };
 
-        method._getNextEntry = function() {
+        method._getNextEntry = function _getNextEntry() {
             if( this._backingEntry !== null ) {
                 var ret = this._backingEntry;
                 this._backingEntry = null;
@@ -151,7 +164,7 @@ var OrderedMap = (function() {
             }
         };
 
-        method._getPrevEntry = function() {
+        method._getPrevEntry = function _getPrevEntry() {
             if( this._backingEntry !== null ) {
                 var ret = this._backingEntry;
                 this._backingEntry = null;
@@ -168,7 +181,7 @@ var OrderedMap = (function() {
         method.next = _super.next;
         method.prev = _super.prev;
 
-        method.moveToStart = function() {
+        method.moveToStart = function moveToStart() {
             this._checkModCount();
             this.key = this.value = void 0;
             this.index = -1;
@@ -178,7 +191,7 @@ var OrderedMap = (function() {
             return this;
         };
 
-        method.moveToEnd = function() {
+        method.moveToEnd = function moveToEnd() {
             this._checkModCount();
             this.key = this.value = void 0;
             this._index = this._map._size;
@@ -190,7 +203,7 @@ var OrderedMap = (function() {
 
         method.set = method.put = _super.set;
 
-        method["delete"] = method.remove = function() {
+        method["delete"] = method.remove = function remove() {
             this._checkModCount();
 
             if( this._currentEntry === null ) {
@@ -232,7 +245,7 @@ var OrderedMap = (function() {
             this.prevEntry = this.nextEntry = null;
         }
 
-        method.inserted = function( map ) {
+        method.inserted = function inserted( map ) {
             if( map._firstEntry === null ) {
                 map._firstEntry = map._lastEntry = this;
             }
@@ -249,7 +262,7 @@ var OrderedMap = (function() {
             }
         };
 
-        method.removed = function( map ) {
+        method.removed = function removed( map ) {
             var prev = this.prevEntry,
                 next = this.nextEntry,
                 prevIsNull = prev === null,
@@ -274,7 +287,7 @@ var OrderedMap = (function() {
             }
         };
 
-        method.accessed = function( map ) {
+        method.accessed = function accessed( map ) {
             if( map._ordering === ACCESS_ORDER &&
                 map._firstEntry !== null &&
                 map._firstEntry !== map._lastEntry &&

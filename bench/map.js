@@ -10,12 +10,12 @@ for( var i = 0; i < half; ++i ) {
 
 var ds = typeof require !== "undefined" && require('../dist/data_structures.js') || DS;
 var Map = ds.Map;
-var datenow = typeof performance!== "undefined" && function(){return performance.now()} || Date.now;
+var datenow = typeof performance!== "undefined" && function(){return performance.now()} || Date.now || function(){ return +new Date();};
 
-
+var maps = [];
 
 (function ENTRY_FUNCTION_MAP(){ //Naming to distinguish in v8 dumps
-    var a = new Map(itemCount);
+    var a = new Map(itemCount / 0.67);
     var o = {};
 
     var half = itemCount;
@@ -97,7 +97,7 @@ var datenow = typeof performance!== "undefined" && function(){return performance
 
 (function ENTRY_FUNCTION_MAP_STRING(){ //Naming to distinguish in v8 dumps
 
-    var a = new Map(itemCount);
+    var a = new Map(itemCount / 0.67);
     var o = {};
 
     var half = itemCount;

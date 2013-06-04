@@ -4,26 +4,74 @@
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, SetToJSON,
     SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString, arrayCopy, arraySearch
 */
-var hasOwn = {}.hasOwnProperty,
+/* jshint -W079 */
+var Array = [].constructor,
+
+    Function = function(){}.constructor,
+
+    hasOwn = {}.hasOwnProperty,
+
     toString = {}.toString,
+
+    ownNames = {}.constructor.getOwnPropertyNames || function( obj ) {
+        var r = [];
+
+        for( var key in obj ) {
+            if( hasOwn.call( obj, key ) ) {
+                r.push( key );
+            }
+        }
+        return r;
+    },
 
     isArray = [].constructor.isArray || function(arr) {
         return toString.call(arr) === "[object Array]";
     };
 
-function exportCtor( Ctor ) {
-    var ret = function( arg1, arg2, arg3 ) {
-        return new Ctor( arg1, arg2, arg3 );
-    };
 
-    for( var key in Ctor ) {
-        if( hasOwn.call( Ctor, key ) ) {
-            ret[key] = Ctor[key];
+//Takes a constructor function and returns a function that can instantiate the constructor
+//Without using the new- keyword.
+
+//Also copies any properties of the constructor unless they are underscore prefixed
+//(includes .prototype, so it can still be monkey-patched from outside)
+var exportCtor = (function() {
+
+    var rnocopy = /(?:^_|^(?:length|name|arguments|caller|callee)$)/;
+    return function exportCtor( Constructor ) {
+        var params = new Array( Constructor.length ),
+            instantiateCode = "";
+
+        for( var i = 0, len = params.length; i < len; ++i ) {
+            params[i] = "param$" + i;
         }
-    }
 
-    return ret;
-}
+        if( params.length ) {
+            instantiateCode = "switch( arguments.length ) {\n";
+            for( var i = params.length - 1; i >= 0; --i ) {
+                instantiateCode += "case "+ (i + 1) + ": return new Constructor(" + params.slice(0, i + 1).join( ", " ) + ");\n";
+            }
+            instantiateCode += "case 0: return new Constructor();\n}\nthrow new Error(\"too many arguments\");\n";
+        }
+        else {
+            instantiateCode = "return new Constructor();";
+        }
+
+        var code = "return function ConstructorProxy(" + params.join( ", " ) + ") { \"use strict\"; " + instantiateCode + "};";
+
+        var ret = new Function( "Constructor", code )( Constructor );
+
+        var names = ownNames( Constructor );
+
+        for( var i = 0, len = names.length; i < len; ++i ) {
+            if( !rnocopy.test( names[ i ] ) ) {
+                ret[ names[ i ] ] = Constructor[ names[ i ] ];
+            }
+        }
+
+        return ret;
+    };
+})();
+
 
 var uid = (function() {
     var id = 0,

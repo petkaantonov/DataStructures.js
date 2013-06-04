@@ -4,6 +4,11 @@ var SortedMap = (function() {
     var method = SortedMap.prototype;
 
     function SortedMap( keyValues, comparator ) {
+        this._tree = null;
+        this._init( keyValues, comparator );
+    }
+
+    method._init = function _init( keyValues, comparator ) {
         if( typeof keyValues === "function" ) {
             var tmp = comparator;
             comparator = keyValues;
@@ -15,46 +20,49 @@ var SortedMap = (function() {
         }
 
         this._tree = new RedBlackTree( comparator );
-        this._setAll( toListOfTuples( keyValues ) );
-    }
 
-    method.forEach = MapForEach;
+        if( typeof keyValues === "object" ) {
+            this._setAll( toListOfTuples( keyValues ) );
+        }
+    };
 
-    method._setAll = function( items ) {
+    method._setAll = function _setAll( items ) {
         for( var i = 0, l = items.length; i < l; ++i ) {
             this.set( items[i][0], items[i][1] );
         }
     };
+    //API
+    method.forEach = MapForEach;
 
-    method.getComparator = function() {
+    method.getComparator = function getComparator() {
         return this._tree.getComparator();
     };
 
-    method.clone = function() {
+    method.clone = function clone() {
         return new SortedMap( this.entries(), this.comparator );
     };
 
-    method.clear = function() {
+    method.clear = function clear() {
         this._tree.clear();
         return this;
     };
 
-    method.put = method.set = function( key, value ) {
+    method.put = method.set = function set( key, value ) {
         return this._tree.set( key, value );
     };
 
-    method.putAll = method.setAll = function( arr ) {
+    method.putAll = method.setAll = function setAll( arr ) {
         var items = toListOfTuples( arr );
         this._setAll( items );
         return this;
     };
 
-    method["delete"] = method.remove = method.unset = function( key ) {
+    method["delete"] = method.remove = method.unset = function unset( key ) {
         var ret = this._tree.unset( key );
         return ret ? ret.getValue() : ret;
     };
 
-    method.get = function( key ) {
+    method.get = function get( key ) {
         var node = this._tree.nodeByKey(key);
         if( !node ) {
             return void 0;
@@ -62,11 +70,11 @@ var SortedMap = (function() {
         return node.getValue();
     };
 
-    method.containsKey = method.hasKey = function( key ) {
+    method.containsKey = method.hasKey = function hasKey( key ) {
         return !!this._tree.nodeByKey( key );
     };
 
-    method.containsValue = method.hasValue = function( value ) {
+    method.containsValue = method.hasValue = function hasValue( value ) {
         var it = this.iterator();
 
         while( it.next() ) {
@@ -77,19 +85,19 @@ var SortedMap = (function() {
         return false;
     };
 
-    method.first = function() {
+    method.first = function first() {
         return this.get( this.firstKey() );
     };
 
-    method.last = function() {
+    method.last = function last() {
         return this.get( this.lastKey() );
     };
 
-    method.nth = function( index ) {
+    method.nth = function nth( index ) {
         return this.get( this.nthKey( index ) );
     };
 
-    method.nthKey = function( index ) {
+    method.nthKey = function nthKey( index ) {
         var node = this._tree.nodeByIndex(index);
         if( !node ) {
             return void 0;
@@ -97,7 +105,7 @@ var SortedMap = (function() {
         return node.key;
     };
 
-    method.firstKey = function() {
+    method.firstKey = function firstKey() {
         var first = this._tree.firstNode();
 
         if( !first ) {
@@ -106,7 +114,7 @@ var SortedMap = (function() {
         return first.key;
     };
 
-    method.lastKey = function() {
+    method.lastKey = function lastKey() {
         var last = this._tree.lastNode();
 
         if( !last) {
@@ -115,13 +123,11 @@ var SortedMap = (function() {
         return last.key;
     };
 
-
-
-    method.size = method.length = function() {
+    method.size = method.length = function length() {
         return this._tree.size();
     };
 
-    method.isEmpty = function() {
+    method.isEmpty = function isEmpty() {
         return this._tree.size() === 0;
     };
 
@@ -131,7 +137,7 @@ var SortedMap = (function() {
 
     method.entries = MapEntries;
 
-    method.iterator = function() {
+    method.iterator = function iterator() {
         return this._tree.iterator();
     };
 
