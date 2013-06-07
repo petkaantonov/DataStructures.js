@@ -1384,51 +1384,88 @@ var Map = (function() {
         return n + 1;
     }
 
-    function hashBoolean( bool ) {
-        return bool | 0;
+    var seedTable = (function(){
+        var r = new (typeof Int32Array !== "undefined" ? Int32Array : Array)(2048);
+        if( typeof crypto !== "undefined" && crypto !== null &&
+            typeof crypto.getRandomValues === "function" ) {
+            crypto.getRandomValues( r );
+            return r;
+        }
+        else {
+            var max = Math.pow( 2, 32 );
+            for( var i = 0; i < r.length; ++i ) {
+                r[i] = ((Math.random() * max) | 0);
+            }
+            return r;
+        }
+    })();
+
+    function hashBoolean( b) {
+        var x = seedTable[0];
+        var a = (b ? 7 : 3 );
+        x = (seedTable[a] ^ x);
+        return x;
     }
 
     function hashString( str ) {
-        var h = 5381,
+        var len = str.length - 1,
+            x = seedTable[0],
             i = 0;
 
-        for( var i = 0, l = str.length; i < l; ++i ) {
-            h = (((h << 5) + h ) ^ str.charCodeAt( i ) );
+        while ( len > -1 ) {
+            var p = str.charCodeAt( i++ ) & 0xFF;
+            var index = p | ( ( len & 7 ) << 8 );
+            x = (seedTable[index] >> ( len & 15 ) ) ^ x;
+            len--;
         }
-
-        return h;
+        return x;
     }
 
-    var hashFloat = (function() {
-        if( haveTypedArrays ) {
+    function hashInt( i ) {
+        var x = seedTable[0];
+        var a = ((i >> 24) & 0xFF) | 0x300;
+        x = (seedTable[a] >> 3) ^ x;
+        a = ((i >> 16) & 0xFF) | 0x200;
+        x = (seedTable[a] >> 2) ^ x;
+        a = ((i >> 8) & 0xFF) | 0x100;
+        x = (seedTable[a] >> 1) ^ x;
+        a = (i & 0xFF);
+        x = (seedTable[a]) ^ x;
+        return x;
+    }
 
-            var buffer = new ArrayBuffer( 8 );
-            var doubleView = new Float64Array( buffer );
-            var Uint32View = new Uint32Array( buffer );
+    if( haveTypedArrays ) {
+        var FLOAT_BUFFER = new ArrayBuffer( 8 ),
+            FLOAT_BUFFER_FLOAT_VIEW = new Float64Array( FLOAT_BUFFER ),
+            FLOAT_BUFFER_INT_VIEW = new Int32Array( FLOAT_BUFFER );
 
-            return function hashFloat( num ) {
-                doubleView[0] = num;
-                return ( Uint32View[0] ^ Uint32View[1] ) & 0x3FFFFFFF;
-            };
-
+        var hashFloat = function hashFloat( f ) {
+            var x = seedTable[0];
+            FLOAT_BUFFER_FLOAT_VIEW[0] = f;
+            var i = FLOAT_BUFFER_INT_VIEW[0];
+            var a = ((i >> 24) & 0xFF) | 0x700;
+            x = (seedTable[a] >> 7) ^ x;
+            a = ((i >> 16) & 0xFF) | 0x600;
+            x = (seedTable[a] >> 6) ^ x;
+            a = ((i >> 8) & 0xFF) | 0x500;
+            x = (seedTable[a] >> 5) ^ x;
+            a = (i & 0xFF) | 0x400;
+            x = (seedTable[a] >> 4) ^ x;
+            i = FLOAT_BUFFER_INT_VIEW[1];
+            a = ((i >> 24) & 0xFF) | 0x300;
+            x = (seedTable[a] >> 3) ^ x;
+            a = ((i >> 16) & 0xFF) | 0x200;
+            x = (seedTable[a] >> 2) ^ x;
+            a = ((i >> 8) & 0xFF) | 0x100;
+            x = (seedTable[a] >> 1) ^ x;
+            a = (i & 0xFF);
+            x = (seedTable[a]) ^ x;
+            return x;
         }
-        else if( typeof Buffer === "function" &&
-                 typeof ((new Buffer()).writeDoubleLE) === "function" ) {
-
-            var buffer = new Buffer( 8 );
-
-            return function hashFloat( num ) {
-                buffer.writeDoubleLE( num, 0 );
-                return ( buffer.readUInt32LE( 0 ) ^ buffer.readUInt32LE( 4 ) ) & 0x3FFFFFFF;
-            };
-        }
-        else {
-            //No support of reading the bits of a double directly as 2 unsigned ints
-            return function hashFloat( num ) {
-                return num | 0;
-            };
-        }
-    })();
+    }
+    else {
+        var hashFloat = hashInt;
+    }
 
     function hashObject( obj ) {
         if( obj === null ) {
@@ -1446,7 +1483,7 @@ var Map = (function() {
         switch( typeof val ) {
         case "number":
             if( ( val | 0 ) === val ) {
-                return val & ( tableSize - 1 );
+                return hashInt( val )  & ( tableSize - 1 );
             }
             return hashFloat( val ) & ( tableSize - 1 );
         case "string":
@@ -1489,7 +1526,7 @@ var Map = (function() {
         if( typeof equality === "function" ) {
             this._equality = equality;
         }
-
+        this._makeBuckets();
         if( capacity == null ) {
             return;
         }
@@ -1497,6 +1534,7 @@ var Map = (function() {
         switch( typeof capacity ) {
         case "number":
             this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+            this._makeBuckets();
             break;
         case "object":
             var tuples = toListOfTuples( capacity );
@@ -1506,44 +1544,47 @@ var Map = (function() {
                 capacity = capacity << 1;
             }
             this._capacity = capacity;
+            this._makeBuckets();
             this._setAll( tuples );
             break;
+        default:
+            this._makeBuckets();
         }
+
+
+
     };
 
     method._makeBuckets = function _makeBuckets() {
-        var capacity = this._capacity;
-                                //kInitialMaxFastElementArray = 100000
-        var b = this._buckets = new Array( capacity < 99999 ? capacity : 0 );
+        var length = this._capacity << 1;
 
-        for( var i = 0; i < capacity; ++i ) {
-            b[i] = null;
-        }
-    };
+        var b = this._buckets = new Array( length < 100000 ? length : 0 );
 
-    method._keyAsBucketIndex = function _keyAsBucketIndex( key ) {
-        if( this._buckets === null ) {
-            this._makeBuckets();
+        if( length >= 100000 ) {
+            for( var i = 0; i < length; ++i ) {
+                b[i] = void 0;
+            }
         }
-        return hash( key, this._capacity );
     };
 
     method._resized = function _resized( oldBuckets ) {
         var newBuckets = this._buckets,
             oldLength = oldBuckets.length;
 
-        for( var i = 0; i < oldLength; ++i ) {
-            var entry = oldBuckets[i];
-            while( entry !== null ) {
-                var bucketIndex = this._keyAsBucketIndex( entry.key ),
-                    next = entry.next;
+        for( var i = 0; i < oldLength; i+=2 ) {
 
-                entry.next = newBuckets[bucketIndex];
-                newBuckets[bucketIndex] = entry;
-                entry = next;
+            var key = oldBuckets[i];
+            if( key !== void 0) {
+                var newIndex = hash( key, this._capacity );
 
+                while( newBuckets[ newIndex << 1 ] !== void 0 ) {
+                    newIndex = ( this._capacity - 1 ) & ( newIndex + 1 );
+                }
+                newBuckets[ newIndex << 1 ] = oldBuckets[ i ];
+                newBuckets[ ( newIndex << 1 ) + 1 ] = oldBuckets[ i + 1 ];
+
+                oldBuckets[i] = oldBuckets[i+1] = void 0;
             }
-            oldBuckets[i] = null;
         }
     };
 
@@ -1562,7 +1603,7 @@ var Map = (function() {
     };
 
     method._getNextCapacity = function _getNextCapacity() {
-        return this._capacity * 2;
+        return (this._capacity < 200000 ? this._capacity << 2 : this._capacity << 1);
     };
 
     method._isOverCapacity = function _isOverCapacity( size ) {
@@ -1575,16 +1616,6 @@ var Map = (function() {
         }
     };
 
-    method._getEntryWithKey = function _getEntryWithKey( entry, key ) {
-        var eq = this._equality;
-        while( entry !== null ) {
-            if( eq( entry.key, key ) ) {
-                return entry;
-            }
-            entry = entry.next;
-        }
-        return null;
-    };
                                              //Used by Set and OrderedSet
     method._setAll = function _setAll( obj, __value ) {
         if( !obj.length ) {
@@ -1595,7 +1626,10 @@ var Map = (function() {
         if( this._isOverCapacity( newSize ) ) {
             var capacity = pow2AtLeast( newSize );
             if( ( ( newSize << 2 ) - newSize ) >= ( capacity << 1 ) ) {
-                capacity = capacity << 1;
+                capacity <<= 1;
+                if( capacity < 100000 ) {
+                    capacity <<= 1;
+                }
             }
             this._resizeTo( capacity );
         }
@@ -1638,89 +1672,113 @@ var Map = (function() {
     };
 
     method.containsKey = method.hasKey = function hasKey( key ) {
-        if( key === void 0 ) {
-            return false;
-        }
-        var bucketIndex = this._keyAsBucketIndex( key );
-        return this._getEntryWithKey( this._buckets[bucketIndex], key ) !== null;
+        return this.get( key ) !== void 0;
     };
 
     method.get = function get( key ) {
         if( key === void 0 ) {
-            return void 0;
+            throw new Error( "Cannot use undefined as a key or value" );
         }
-        var bucketIndex = this._keyAsBucketIndex( key ),
-            entry = this._getEntryWithKey( this._buckets[bucketIndex], key );
+        var capacity = this._capacity,
+            buckets = this._buckets,
+            bucketIndex = hash( key, capacity );
 
-        if( entry !== null ) {
-            entry.accessed( this );
-            return entry.value;
-        }
-        return void 0;
-    };
-
-
-    method["delete"] = method.unset = method.remove = function remove( key ) {
-        if( key === void 0 ) {
-            return void 0;
-        }
-        this._modCount++;
-        var bucketIndex = this._keyAsBucketIndex( key ),
-            ret = void 0,
-            entry = this._buckets[bucketIndex],
-            eq = this._equality,
-            prevEntry = null;
-
-        var eq = this._equality;
-
-        //Find the entry in the bucket
-        while( entry !== null ) {
-            if( eq( entry.key, key ) ) {
-                break;
+        while( true ) {
+            var k = buckets[ bucketIndex << 1 ];
+            if( k === void 0 ) {
+                return void 0;
             }
-            prevEntry = entry;
-            entry = entry.next;
-        }
-
-        //It was found in the bucket, remove
-        if( entry !== null ) {
-            ret = entry.value;
-            if( prevEntry === null) { //It was the first entry in the bucket
-                this._buckets[bucketIndex] = entry.next;
+            else if( this._equality( k, key ) ) {
+                return buckets[ ( bucketIndex << 1 ) + 1 ];
             }
-            else {
-                prevEntry.next = entry.next;
-            }
-            this._size--;
-            entry.removed( this );
+            bucketIndex = ( 1 + bucketIndex ) & ( capacity - 1 );
         }
-        return ret;
     };
 
     method.put = method.set = function set( key, value ) {
-        if( key === void 0 || value === void 0) {
+        if( key === void 0 || value === void 0 ) {
             throw new Error( "Cannot use undefined as a key or value" );
         }
         this._modCount++;
-        var bucketIndex = this._keyAsBucketIndex( key ),
-            ret = void 0,
-            oldEntry = this._buckets[bucketIndex],
-            entry = this._getEntryWithKey( oldEntry, key );
+        var bucketIndex = hash( key, this._capacity ),
+            capacity = this._capacity - 1,
+            buckets = this._buckets;
+        while( true ) {
+            var k = buckets[ bucketIndex << 1 ];
 
-        if( entry === null ) {
-            this._size++;
-            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry );
-            entry.inserted( this );
-            this._checkResize();
+            if( k === void 0 ) {
+                //Insertion
+                buckets[ bucketIndex << 1 ] = key;
+                buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+                this._size++;
+                this._checkResize();
+                return void 0;
+            }
+            else if( this._equality( k, key ) ) {
+                //update
+                var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
+                buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+                return ret;
+            }
+
+            bucketIndex = ( 1 + bucketIndex ) & capacity;
         }
-        else {
-            ret = entry.value;
-            entry.value = value;
-            entry.accessed( this );
+    };
+
+
+    //From http://en.wikipedia.org/wiki/Open_addressing
+    method["delete"] = method.unset = method.remove = function remove( key ) {
+        if( key === void 0 ) {
+            throw new Error( "Cannot use undefined as a key or value" );
+        }
+        this._modCount++;
+        var bucketIndex = hash( key, this._capacity ),
+            capacity = this._capacity - 1,
+            buckets = this._buckets;
+        while( true ) {
+            var k = buckets[ bucketIndex << 1 ];
+
+            if( k === void 0 ) {
+                //key is not in table
+                return void 0;
+            }
+            else if( this._equality( k, key ) ) {
+                break;
+            }
+
+            bucketIndex = ( 1 + bucketIndex ) & capacity;
         }
 
+        var entryIndex = bucketIndex;
+        var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
+        buckets[ ( bucketIndex << 1 ) ] = buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+        while( true ) {
+            entryIndex = ( 1 + entryIndex ) & capacity;
+
+            var slotKey = buckets[ entryIndex << 1 ];
+
+            if( slotKey === void 0 ) {
+                break;
+            }
+
+            var k = hash( slotKey, capacity + 1 );
+
+            if ( ( bucketIndex <= entryIndex ) ?
+                ( ( bucketIndex < k ) && ( k <= entryIndex ) ) :
+                ( ( bucketIndex < k ) || ( k <= entryIndex ) ) ) {
+                continue;
+            }
+            buckets[ ( bucketIndex << 1 ) ] = buckets[ ( entryIndex << 1 ) ];
+            buckets[ ( bucketIndex << 1 ) + 1 ] = buckets[ ( entryIndex << 1 ) + 1 ];
+            bucketIndex = entryIndex;
+            buckets[ ( bucketIndex << 1 ) ] = buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+        }
+
+        this._size--;
         return ret;
     };
+
+
 
     method.putAll = method.setAll = function setAll( obj ) {
         this._modCount++;
@@ -1730,10 +1788,7 @@ var Map = (function() {
 
     method.clear = function clear() {
         this._modCount++;
-        if( this._buckets === null ) {
-            return;
-        }
-        this._buckets = null;
+        this._makeBuckets();
         this._size = 0;
     };
 
@@ -1770,104 +1825,55 @@ var Map = (function() {
             this.index = -1;
             this._modCount = map._modCount;
 
+            this._indexDelta = 1;
             this._index = -1;
             this._map = map;
-            this._backingEntry = null;
-            this._currentEntry = null;
             this._bucketIndex = -1;
-
         }
 
         method._checkModCount = MapIteratorCheckModCount;
 
-        method._getNextEntryFromEntry = function _getNextEntryFromEntry( entry ) {
-
-            if( entry !== null && entry.next !== null ) {
-                return entry.next;
-            }
-
-            var buckets = this._map._buckets;
-
-            for( var i = this._bucketIndex + 1, l = buckets.length; i < l; ++i ) {
-                entry = buckets[i];
-
-                if( entry !== null ) {
-                    this._bucketIndex = i;
-                    return entry;
+        method._moveToNextBucketIndex = function _moveToNextBucketIndex() {
+            var i = ( this._bucketIndex << 1 ) + ( this._indexDelta << 1 ),
+                b = this._map._buckets,
+                l = b.length;
+            for( ; i < l; i += 2 ) {
+                if( b[i] !== void 0 ) {
+                    this.key = b[i];
+                    this.value = b[i+1];
+                    this._bucketIndex = i >> 1;
+                    break;
                 }
             }
-
-            return null;
-
         };
 
-        method._getNextEntry = function _getNextEntry() {
-
-            if( this._backingEntry !== null ) {
-                var ret = this._backingEntry;
-                this._backingEntry = null;
-                this._index--;
-                return ret;
-            }
-
-            return this._getNextEntryFromEntry( this._currentEntry );
-        };
-
-        method._getPrevEntry = function _getPrevEntry() {
-            var buckets = this._map._buckets,
-                entry = this._currentEntry,
-                backingEntry;
-
-            if( entry === null &&
-                ( ( backingEntry = this._backingEntry ) !== null ) ) {
-                this._backingEntry = null;
-                entry = backingEntry;
-            }
-
-            if( entry !== null ) {
-                var first = buckets[this._bucketIndex];
-                if( first !== entry ) {
-                    var next = entry;
-                    entry = first;
-                    while( entry.next !== next ) {
-                        entry = entry.next;
-                    }
-                    return entry;
+        method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
+            var i = ( this._bucketIndex << 1 ) - 2,
+                b = this._map._buckets;
+            for( ; i >= 0; i -= 2 ) {
+                if( b[i] !== void 0 ) {
+                    this.key = b[i];
+                    this.value = b[i+1];
+                    this._bucketIndex = i >> 1;
+                    break;
                 }
             }
-
-            for( var i = this._bucketIndex - 1; i >= 0; --i ) {
-                entry = buckets[i];
-
-                if( entry !== null ) {
-                    this._bucketIndex = i;
-                    while( entry.next !== null ) {
-                        entry = entry.next;
-                    }
-                    return entry;
-                }
-            }
-
-            return entry;
         };
 
         //API
 
         method.next = function next() {
             this._checkModCount();
-            this._index++;
+            this._index += this._indexDelta;
 
-            if( this._backingEntry === null &&
-                this._index >= this._map._size ) {
+            if( this._index >= this._map._size ) {
                 this.moveToEnd();
                 return false;
             }
 
-            var entry = this._currentEntry = this._getNextEntry();
-
-            this.key = entry.key;
-            this.value = entry.value;
+            this._moveToNextBucketIndex();
             this.index = this._index;
+            this._indexDelta = 1;
 
             return true;
         };
@@ -1881,12 +1887,11 @@ var Map = (function() {
                 this.moveToStart();
                 return false;
             }
-            var entry = this._currentEntry = this._getPrevEntry();
 
-            this.key = entry.key;
-            this.value = entry.value;
+            this._moveToPrevBucketIndex();
             this.index = this._index;
 
+            this._indexDelta = 1;
 
             return true;
         };
@@ -1897,7 +1902,7 @@ var Map = (function() {
             this.index = -1;
             this._index = -1;
             this._bucketIndex = -1;
-            this._backingEntry = this._currentEntry = null;
+            this._indexDelta = 1;
 
             return this;
         };
@@ -1908,39 +1913,39 @@ var Map = (function() {
             this._index = this._map._size;
             this.index = -1;
             this._bucketIndex = this._map._capacity;
-            this._backingEntry = this._currentEntry = null;
+            this._indexDelta = 1;
 
             return this;
         };
 
         method.set = method.put = function put( value ) {
             this._checkModCount();
+            var i = this._bucketIndex;
 
-            if( this._currentEntry === null ) {
+            if( i < 0 || i >= this._map._capacity ) {
                 return;
             }
+
             var ret = this.value;
-            this._currentEntry.value = this.value = value;
+            this._map._buckets[ ( i << 1 ) + 1 ] = this.value = value;
             return ret;
         };
 
         method["delete"] = method.remove = function remove() {
             this._checkModCount();
 
-            if( this._currentEntry === null ) {
+            var i = this._bucketIndex;
+
+            if( i < 0 || i >= this._map._capacity ) {
                 return;
             }
-            this._backingEntry = this._getNextEntryFromEntry( this._currentEntry );
-            this._currentEntry = null;
+
             var ret = this._map.remove( this.key );
             this._modCount = this._map._modCount;
-
             this.key = this.value = void 0;
             this.index = -1;
 
-            if( this._backingEntry === null ) {
-                this.moveToEnd();
-            }
+            this._indexDelta = 0;
 
             return ret;
         };
@@ -1950,34 +1955,6 @@ var Map = (function() {
 
     method._Iterator = Iterator;
 
-    var Entry = (function() {
-        var method = Entry.prototype;
-        function Entry( key, value, next ) {
-            this.key = key;
-            this.value = value;
-            this.next = next;
-        }
-
-        method.inserted = function inserted() {
-
-        };
-
-        method.removed = function removed() {
-            this.key = this.value = this.next = null;
-        };
-
-        method.accessed = function accessed() {
-
-        };
-
-        return Entry;
-    })();
-
-    method._entryType = Entry;
-
-    Map.hashString = hashString;
-    Map.hashFloat = hashFloat;
-    Map.hashBoolean = hashBoolean;
 
     return Map;
 })();;

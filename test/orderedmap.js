@@ -190,7 +190,6 @@ test( "Test ordered map capacity", function() {
     for( var i = 0; i < maps.length; ++i ) {
 
         strictEqual( maps[i]._capacity, expectedCapacity[i], "expected capacity" );
-        strictEqual( maps[i]._buckets, null, "buckets are lazily initialized" );
     }
 });
 
