@@ -77,7 +77,7 @@ var uid = (function() {
     var id = 0,
         key = "__uid" + (Math.random() + "").replace(/[^0-9]/g, "").substr(5) + "__";
 
-    return function( obj ) {
+    return function uid( obj ) {
         if( !hasOwn.call( obj, key ) ) {
             var ret = id++;
             obj[key] = ret;
@@ -172,42 +172,42 @@ function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
 }
 
 var setIteratorMethods = {
-    next: function() {
+    next: function next() {
         var ret = this._iterator.next();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    prev: function() {
+    prev: function prev() {
         var ret = this._iterator.prev();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    moveToStart: function() {
+    moveToStart: function moveToStart() {
         this._iterator.moveToStart();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return this;
     },
 
-    moveToEnd: function() {
+    moveToEnd: function moveToEnd() {
         this._iterator.moveToEnd();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return this;
     },
 
-    "delete": function() {
+    "delete": function $delete() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    remove: function() {
+    remove: function remove() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
@@ -266,16 +266,7 @@ function MapToString() {
 }
 
 function MapValueOf() {
-    var it = this.iterator();
-    var ret = 31;
-    while( it.next() ) {
-        ret += (
-            Map.hash( it.key === this ? null : it.key ) ^
-            Map.hash( it.value === this ? null : it.value )
-        );
-        ret >>>= 0;
-    }
-    return ret >>> 0;
+    return 1;
 }
 
 function MapToJSON() {
@@ -294,13 +285,7 @@ function SetToString() {
 }
 
 function SetValueOf() {
-    var it = this.iterator();
-    var ret = 31;
-    while( it.next() ) {
-        ret += ( Map.hash( it.value === this ? null : it.value ) );
-        ret >>>= 0;
-    }
-    return ret >>> 0;
+    return 1;
 }
 
 function SetToJSON() {

@@ -10,39 +10,49 @@ for( var i = 0; i < half; ++i ) {
 
 var ds = typeof require !== "undefined" && require('../dist/data_structures.js') || DS;
 var Map = ds.Map;
-var datenow = typeof performance!== "undefined" && function(){return performance.now()} || Date.now || function(){ return +new Date();};
+var datenow = typeof performance!== "undefined" && function(){return performance.now()} || Date.now;
 
-var maps = [];
+
 
 (function ENTRY_FUNCTION_MAP(){ //Naming to distinguish in v8 dumps
     var a = new Map(itemCount / 0.67);
     var o = {};
-
+    var c;
     var half = itemCount;
 
     for( var i = 0; i < half; ++i ) {
         a.put( i, o );
     }
 
-    for( var i = 0; i < half; ++i ) {
+    for( var i = 0; i < 1e5; ++i ) {
         a.get(i);
     }
 
     var now = datenow();
 
     for( var i = 0; i < half; ++i ) {
-        a.get(i);
+        c = a.get(i);
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
     for( var i = half * 2, l = half * 2 + half; i < l; ++i ) {
-        a.get(i);
+        c = a.get(i);
     }
 
+    if( c === 3 ) {
+        Math.rand()
+    }
 
     for( var i = half-1; i >= 0; --i ) {
-        a.get(i);
+        c = a.get(i);
     }
 
+    if( c === 3 ) {
+        Math.rand()
+    }
 
     var duration = ( datenow() - now );
     var ops = (half + (half * 2));
@@ -58,28 +68,42 @@ var maps = [];
     var a = {};
     var o = {};
 
+    var c;
+
     var half = itemCount;
 
     for( var i = 0; i < half; ++i ) {
         a[i] = o;
     }
 
-    for( var i = 0; i < half; ++i ) {
+    for( var i = 0; i < 1e5; ++i ) {
         a[i];
     }
 
     var now = datenow();
 
     for( var i = 0; i < half; ++i ) {
-        a[i];
+        c = a[i];
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
     for( var i = half * 2, l = half * 2 + half; i < l; ++i ) {
-        a[i];
+        c = a[i];
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
     for( var i = half-1; i >= 0; --i ) {
-        a[i];
+        c = a[i];
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
 
@@ -99,28 +123,37 @@ var maps = [];
 
     var a = new Map(itemCount / 0.67);
     var o = {};
+    var c;
 
     var half = itemCount;
 
 
     for( var i = 0, len = items.length; i < len; ++i ) {
-        a.put( items[i], o );
+        c = a.put( items[i], o );
     }
 
-    for( var i = 0, len = items.length; i < len; ++i ) {
-        a.get( items[i] );
+    for( var i = 0, len = items.length; i < 1e5; ++i ) {
+        c = a.get( items[i] );
     }
 
     var now = datenow();
 
     for( var i = 0, len = items.length; i < len; ++i ) {
-        a.get( items[i] );
+        c = a.get( items[i] );
     }
 
-    a.get( "notfound" );
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    c = a.get( "notfound" );
 
     for( var i = items.length - 1; i >= 0; --i ) {
-        a.get( items[i] );
+        c = a.get( items[i] );
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
 
@@ -136,6 +169,7 @@ var maps = [];
 (function ENTRY_FUNCTION_NATIVE_STRING(){ //Naming to distinguish in v8 dumps
     var a = {};
     var o = {};
+    var c;
 
     var half = itemCount;
 
@@ -143,7 +177,7 @@ var maps = [];
         a[items[i]]= o;
     }
 
-    for( var i = 0, len = items.length; i < len; ++i ) {
+    for( var i = 0, len = items.length; i < 1e5; ++i ) {
         a[ items[i] ];
     }
 var hpr = {}.hasOwnProperty;
@@ -152,17 +186,25 @@ var hpr = {}.hasOwnProperty;
     for( var i = 0, len = items.length; i < len; ++i ) {
         var it = items[i];
         if( hpr.call(  a, it ) ) {
-            a[ it ];
+            c = a[ it ];
         }
     }
+    if( c === 3 ) {
+        Math.rand()
+    }
+
 
     a[ "notfound" ];
 
     for( var i = items.length - 1; i >= 0; --i ) {
         var it = items[i];
         if( hpr.call(  a, it ) ) {
-            a[ it ];
+            c = a[ it ];
         }
+    }
+
+    if( c === 3 ) {
+        Math.rand()
     }
 
 

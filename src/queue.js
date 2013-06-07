@@ -31,8 +31,6 @@ var Queue = (function() {
         to do so efficiently. Could be useful if you need queue/deque but also random access...
     */
 
-    var Array = [].constructor;
-
     /**/
     function Queue( capacity, maxSize, _arrayImpl ) {
         var items = null;

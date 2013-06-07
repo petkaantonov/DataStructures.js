@@ -19,12 +19,6 @@ var Map = (function() {
         return n + 1;
     }
 
-    function hashHash( key, tableSize ) {
-        var h = key | 0;
-        h =  h ^ ( h >> 20 ) ^ ( h >> 12 );
-        return ( h ^ ( h >> 7 ) ^ ( h >> 4 ) ) & ( tableSize - 1 );
-    }
-
     function hashBoolean( bool ) {
         return bool | 0;
     }
@@ -40,7 +34,7 @@ var Map = (function() {
         return h;
     }
 
-    var hashNumber = (function() {
+    var hashFloat = (function() {
         if( haveTypedArrays ) {
 
             var buffer = new ArrayBuffer( 8 );
@@ -83,19 +77,19 @@ var Map = (function() {
         return uid( obj );
     }
 
-    function hash( val ) {
+    function hash( val, tableSize ) {
         switch( typeof val ) {
         case "number":
             if( ( val | 0 ) === val ) {
-                return val & 0x3fffffff;
+                return val & ( tableSize - 1 );
             }
-            return hashNumber( val );
+            return hashFloat( val ) & ( tableSize - 1 );
         case "string":
-            return hashString( val );
+            return hashString( val ) & ( tableSize - 1 );
         case "boolean":
-            return hashBoolean( val );
+            return hashBoolean( val ) & ( tableSize - 1 );
         default:
-            return hashObject( val );
+            return hashObject( val ) & ( tableSize - 1 );
         }
     }
 
@@ -162,29 +156,21 @@ var Map = (function() {
         }
     };
 
-    method._hashAsBucketIndex = function _hashAsBucketIndex( hash ) {
-        if( this._buckets === null ) {
-            this._makeBuckets();
-        }
-        return hashHash( hash, this._capacity );
-    };
-
     method._keyAsBucketIndex = function _keyAsBucketIndex( key ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
-        return hashHash( hash( key ), this._capacity );
+        return hash( key, this._capacity );
     };
 
     method._resized = function _resized( oldBuckets ) {
         var newBuckets = this._buckets,
-            newLen = newBuckets.length,
             oldLength = oldBuckets.length;
 
         for( var i = 0; i < oldLength; ++i ) {
             var entry = oldBuckets[i];
             while( entry !== null ) {
-                var bucketIndex = hashHash( entry.hash, newLen ),
+                var bucketIndex = this._keyAsBucketIndex( entry.key ),
                     next = entry.next;
 
                 entry.next = newBuckets[bucketIndex];
@@ -348,18 +334,17 @@ var Map = (function() {
 
     method.put = method.set = function set( key, value ) {
         if( key === void 0 || value === void 0) {
-            return void 0;
+            throw new Error( "Cannot use undefined as a key or value" );
         }
         this._modCount++;
-        var h = hash( key ),
-            bucketIndex = this._hashAsBucketIndex( h ),
+        var bucketIndex = this._keyAsBucketIndex( key ),
             ret = void 0,
             oldEntry = this._buckets[bucketIndex],
             entry = this._getEntryWithKey( oldEntry, key );
 
         if( entry === null ) {
             this._size++;
-            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry, h );
+            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry );
             entry.inserted( this );
             this._checkResize();
         }
@@ -602,11 +587,10 @@ var Map = (function() {
 
     var Entry = (function() {
         var method = Entry.prototype;
-        function Entry( key, value, next, hash ) {
+        function Entry( key, value, next ) {
             this.key = key;
             this.value = value;
             this.next = next;
-            this.hash = hash;
         }
 
         method.inserted = function inserted() {
@@ -627,11 +611,8 @@ var Map = (function() {
     method._entryType = Entry;
 
     Map.hashString = hashString;
-    Map.hashNumber = hashNumber;
+    Map.hashFloat = hashFloat;
     Map.hashBoolean = hashBoolean;
-    Map.hash = hash;
-
-    Map._hashHash = hashHash;
 
     return Map;
 })();

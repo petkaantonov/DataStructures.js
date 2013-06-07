@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-;(function(global) {
+;(function $package(global) {
     "use strict";;
 /* exported hasOwn, toString, isArray, uid,
     toList, toListOfTuples,
@@ -100,7 +100,7 @@ var uid = (function() {
     var id = 0,
         key = "__uid" + (Math.random() + "").replace(/[^0-9]/g, "").substr(5) + "__";
 
-    return function( obj ) {
+    return function uid( obj ) {
         if( !hasOwn.call( obj, key ) ) {
             var ret = id++;
             obj[key] = ret;
@@ -195,42 +195,42 @@ function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
 }
 
 var setIteratorMethods = {
-    next: function() {
+    next: function next() {
         var ret = this._iterator.next();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    prev: function() {
+    prev: function prev() {
         var ret = this._iterator.prev();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    moveToStart: function() {
+    moveToStart: function moveToStart() {
         this._iterator.moveToStart();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return this;
     },
 
-    moveToEnd: function() {
+    moveToEnd: function moveToEnd() {
         this._iterator.moveToEnd();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return this;
     },
 
-    "delete": function() {
+    "delete": function $delete() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
         return ret;
     },
 
-    remove: function() {
+    remove: function remove() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
         this.index = this._iterator.index;
@@ -289,16 +289,7 @@ function MapToString() {
 }
 
 function MapValueOf() {
-    var it = this.iterator();
-    var ret = 31;
-    while( it.next() ) {
-        ret += (
-            Map.hash( it.key === this ? null : it.key ) ^
-            Map.hash( it.value === this ? null : it.value )
-        );
-        ret >>>= 0;
-    }
-    return ret >>> 0;
+    return 1;
 }
 
 function MapToJSON() {
@@ -317,13 +308,7 @@ function SetToString() {
 }
 
 function SetValueOf() {
-    var it = this.iterator();
-    var ret = 31;
-    while( it.next() ) {
-        ret += ( Map.hash( it.value === this ? null : it.value ) );
-        ret >>>= 0;
-    }
-    return ret >>> 0;
+    return 1;
 }
 
 function SetToJSON() {
@@ -1399,12 +1384,6 @@ var Map = (function() {
         return n + 1;
     }
 
-    function hashHash( key, tableSize ) {
-        var h = key | 0;
-        h =  h ^ ( h >> 20 ) ^ ( h >> 12 );
-        return ( h ^ ( h >> 7 ) ^ ( h >> 4 ) ) & ( tableSize - 1 );
-    }
-
     function hashBoolean( bool ) {
         return bool | 0;
     }
@@ -1420,7 +1399,7 @@ var Map = (function() {
         return h;
     }
 
-    var hashNumber = (function() {
+    var hashFloat = (function() {
         if( haveTypedArrays ) {
 
             var buffer = new ArrayBuffer( 8 );
@@ -1463,19 +1442,19 @@ var Map = (function() {
         return uid( obj );
     }
 
-    function hash( val ) {
+    function hash( val, tableSize ) {
         switch( typeof val ) {
         case "number":
             if( ( val | 0 ) === val ) {
-                return val & 0x3fffffff;
+                return val & ( tableSize - 1 );
             }
-            return hashNumber( val );
+            return hashFloat( val ) & ( tableSize - 1 );
         case "string":
-            return hashString( val );
+            return hashString( val ) & ( tableSize - 1 );
         case "boolean":
-            return hashBoolean( val );
+            return hashBoolean( val ) & ( tableSize - 1 );
         default:
-            return hashObject( val );
+            return hashObject( val ) & ( tableSize - 1 );
         }
     }
 
@@ -1542,29 +1521,21 @@ var Map = (function() {
         }
     };
 
-    method._hashAsBucketIndex = function _hashAsBucketIndex( hash ) {
-        if( this._buckets === null ) {
-            this._makeBuckets();
-        }
-        return hashHash( hash, this._capacity );
-    };
-
     method._keyAsBucketIndex = function _keyAsBucketIndex( key ) {
         if( this._buckets === null ) {
             this._makeBuckets();
         }
-        return hashHash( hash( key ), this._capacity );
+        return hash( key, this._capacity );
     };
 
     method._resized = function _resized( oldBuckets ) {
         var newBuckets = this._buckets,
-            newLen = newBuckets.length,
             oldLength = oldBuckets.length;
 
         for( var i = 0; i < oldLength; ++i ) {
             var entry = oldBuckets[i];
             while( entry !== null ) {
-                var bucketIndex = hashHash( entry.hash, newLen ),
+                var bucketIndex = this._keyAsBucketIndex( entry.key ),
                     next = entry.next;
 
                 entry.next = newBuckets[bucketIndex];
@@ -1728,18 +1699,17 @@ var Map = (function() {
 
     method.put = method.set = function set( key, value ) {
         if( key === void 0 || value === void 0) {
-            return void 0;
+            throw new Error( "Cannot use undefined as a key or value" );
         }
         this._modCount++;
-        var h = hash( key ),
-            bucketIndex = this._hashAsBucketIndex( h ),
+        var bucketIndex = this._keyAsBucketIndex( key ),
             ret = void 0,
             oldEntry = this._buckets[bucketIndex],
             entry = this._getEntryWithKey( oldEntry, key );
 
         if( entry === null ) {
             this._size++;
-            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry, h );
+            this._buckets[ bucketIndex ] = entry = new this._entryType( key, value, oldEntry );
             entry.inserted( this );
             this._checkResize();
         }
@@ -1982,11 +1952,10 @@ var Map = (function() {
 
     var Entry = (function() {
         var method = Entry.prototype;
-        function Entry( key, value, next, hash ) {
+        function Entry( key, value, next ) {
             this.key = key;
             this.value = value;
             this.next = next;
-            this.hash = hash;
         }
 
         method.inserted = function inserted() {
@@ -2007,17 +1976,13 @@ var Map = (function() {
     method._entryType = Entry;
 
     Map.hashString = hashString;
-    Map.hashNumber = hashNumber;
+    Map.hashFloat = hashFloat;
     Map.hashBoolean = hashBoolean;
-    Map.hash = hash;
-
-    Map._hashHash = hashHash;
 
     return Map;
 })();;
 var OrderedMap = (function() {
     var _super = Map.prototype,
-        hashHash = Map._hashHash,
         method = OrderedMap.prototype = Object.create( _super );
 
     method.constructor = OrderedMap;
@@ -2044,11 +2009,10 @@ var OrderedMap = (function() {
 
     method._resized = function _resized() {
         var newBuckets = this._buckets,
-            newLen = newBuckets.length,
             entry = this._firstEntry;
 
         while( entry !== null ) {
-            var bucketIndex = hashHash( entry.hash, newLen );
+            var bucketIndex = this._keyAsBucketIndex( entry.key );
 
             entry.next = newBuckets[bucketIndex];
             newBuckets[bucketIndex] = entry;
@@ -2253,11 +2217,10 @@ var OrderedMap = (function() {
     var Entry = (function() {
         var method = Entry.prototype;
 
-        function Entry( key, value, next, hash ) {
+        function Entry( key, value, next ) {
             this.key = key;
             this.value = value;
             this.next = next;
-            this.hash = hash;
 
             this.prevEntry = this.nextEntry = null;
         }
@@ -2961,8 +2924,6 @@ var Queue = (function() {
         objects and have better spatial locality of reference. I implemented the random access methods just because it was possible
         to do so efficiently. Could be useful if you need queue/deque but also random access...
     */
-
-    var Array = [].constructor;
 
     /**/
     function Queue( capacity, maxSize, _arrayImpl ) {

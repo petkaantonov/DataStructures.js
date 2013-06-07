@@ -1,6 +1,5 @@
 var OrderedMap = (function() {
     var _super = Map.prototype,
-        hashHash = Map._hashHash,
         method = OrderedMap.prototype = Object.create( _super );
 
     method.constructor = OrderedMap;
@@ -27,11 +26,10 @@ var OrderedMap = (function() {
 
     method._resized = function _resized() {
         var newBuckets = this._buckets,
-            newLen = newBuckets.length,
             entry = this._firstEntry;
 
         while( entry !== null ) {
-            var bucketIndex = hashHash( entry.hash, newLen );
+            var bucketIndex = this._keyAsBucketIndex( entry.key );
 
             entry.next = newBuckets[bucketIndex];
             newBuckets[bucketIndex] = entry;
@@ -236,11 +234,10 @@ var OrderedMap = (function() {
     var Entry = (function() {
         var method = Entry.prototype;
 
-        function Entry( key, value, next, hash ) {
+        function Entry( key, value, next ) {
             this.key = key;
             this.value = value;
             this.next = next;
-            this.hash = hash;
 
             this.prevEntry = this.nextEntry = null;
         }
