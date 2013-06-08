@@ -8,6 +8,8 @@ var Map = (function() {
             typeof Uint32Array !== "undefined" &&
             typeof Float64Array !== "undefined";
 
+    var Error = global.Error;
+
     function pow2AtLeast( n ) {
         n = n >>> 0;
         n = n - 1;
@@ -43,30 +45,23 @@ var Map = (function() {
     }
 
     function hashString( str ) {
-        var len = str.length - 1,
-            x = seedTable[0],
-            i = 0;
-
-        while ( len > -1 ) {
-            var p = str.charCodeAt( i++ ) & 0xFF;
-            var index = p | ( ( len & 7 ) << 8 );
-            x = (seedTable[index] >> ( len & 15 ) ) ^ x;
-            len--;
+        var x = seedTable[0];
+        for ( var i = 0, len = str.length; i < len; ++i ) {
+            var t = len - i - 1;
+            var index = ( ( t & 7 ) << 8 ) | ( str.charCodeAt( i ) );
+            x = (seedTable[ index ] >> ( t & 15 ) ) ^ x;
         }
         return x;
     }
 
     function hashInt( i ) {
-        var x = seedTable[0];
-        var a = ((i >> 24) & 0xFF) | 0x300;
-        x = (seedTable[a] >> 3) ^ x;
-        a = ((i >> 16) & 0xFF) | 0x200;
-        x = (seedTable[a] >> 2) ^ x;
-        a = ((i >> 8) & 0xFF) | 0x100;
-        x = (seedTable[a] >> 1) ^ x;
-        a = (i & 0xFF);
-        x = (seedTable[a]) ^ x;
-        return x;
+        var j = i | 0;
+        j = ( seedTable[ ( j & 0xFF) ] ) ^
+            ( ( seedTable[ ( ( j >> 8 ) & 0xFF ) | 0x100 ] >> 1) ^
+            ( ( seedTable[ ( ( j >> 16 ) & 0xFF ) | 0x200 ] >> 2) ^
+            ( ( seedTable[ ( j >>> 24 ) | 0x300 ] >> 3) ^
+            seedTable[ 0 ] ) ) );
+        return j;
     }
 
     if( haveTypedArrays ) {
@@ -115,17 +110,20 @@ var Map = (function() {
     }
 
     function hash( val, tableSize ) {
-        switch( typeof val ) {
-        case "number":
+        var t = typeof val;
+        if( t === "string" ) {
+            return hashString( val ) & ( tableSize - 1 );
+        }
+        else if( t === "number" ) {
             if( ( val | 0 ) === val ) {
-                return hashInt( val )  & ( tableSize - 1 );
+                return hashInt( val ) & ( tableSize - 1 );
             }
             return hashFloat( val ) & ( tableSize - 1 );
-        case "string":
-            return hashString( val ) & ( tableSize - 1 );
-        case "boolean":
+        }
+        else if( t === "boolean" ) {
             return hashBoolean( val ) & ( tableSize - 1 );
-        default:
+        }
+        else {
             return hashObject( val ) & ( tableSize - 1 );
         }
     }
@@ -161,8 +159,9 @@ var Map = (function() {
         if( typeof equality === "function" ) {
             this._equality = equality;
         }
-        this._makeBuckets();
+
         if( capacity == null ) {
+            this._makeBuckets();
             return;
         }
 

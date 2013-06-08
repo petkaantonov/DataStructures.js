@@ -166,8 +166,6 @@ var datenow = typeof performance!== "undefined" && function(){return performance
         Math.rand()
     }
 
-    c = a.get( "notfound" );
-
     for( var i = stringItems.length - 1; i >= 0; --i ) {
         c = a.get( stringItems[i] );
     }
@@ -212,9 +210,6 @@ var hpr = {}.hasOwnProperty;
     if( c === 3 ) {
         Math.rand()
     }
-
-
-    a[ "notfound" ];
 
     for( var i = stringItems.length - 1; i >= 0; --i ) {
         var it = stringItems[i];
