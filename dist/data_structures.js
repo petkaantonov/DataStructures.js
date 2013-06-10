@@ -1387,7 +1387,7 @@ var Map = (function() {
     }
 
     var seedTable = (function(){
-        var r = new (typeof Int32Array !== "undefined" ? Int32Array : Array)(2048);
+        var r = new ( typeof Int32Array !== "undefined" ? Int32Array : Array )( 8192 );
         if( typeof crypto !== "undefined" && crypto !== null &&
             typeof crypto.getRandomValues === "function" ) {
             crypto.getRandomValues( r );
@@ -1410,23 +1410,28 @@ var Map = (function() {
     }
 
     function hashString( str ) {
-        var x = seedTable[0];
-        for ( var i = 0, len = str.length; i < len; ++i ) {
-            var t = len - i - 1;
-            var index = ( ( t & 7 ) << 8 ) | ( str.charCodeAt( i ) );
-            x = (seedTable[ index ] >> ( t & 15 ) ) ^ x;
+        var x = seedTable[0],
+            len = str.length & 0x3FFFFFFF;
+
+        if( len > 8191 ) {
+            return hashInt( len );
         }
-        return x;
+
+        for( var i = 0; i < len; ++i ) {
+            x = ( ( str.charCodeAt( i ) & 0xFF ) * seedTable[ i ] + x ) | 0;
+        }
+
+        return x & 0x3FFFFFFF;
     }
 
+
     function hashInt( i ) {
-        var j = i | 0;
-        j = ( seedTable[ ( j & 0xFF) ] ) ^
-            ( ( seedTable[ ( ( j >> 8 ) & 0xFF ) | 0x100 ] >> 1) ^
-            ( ( seedTable[ ( ( j >> 16 ) & 0xFF ) | 0x200 ] >> 2) ^
-            ( ( seedTable[ ( j >>> 24 ) | 0x300 ] >> 3) ^
-            seedTable[ 0 ] ) ) );
-        return j;
+        var r = ( ( seedTable[ ( i & 0xFF) ] ) ^
+            ( ( seedTable[ ( ( i >> 8 ) & 0xFF ) | 0x100 ] >> 1) ^
+            ( ( seedTable[ ( ( i >> 16 ) & 0xFF ) | 0x200 ] >> 2) ^
+            ( ( seedTable[ ( ( i >> 24 ) & 0xFF) | 0x300 ] >> 3) ^
+            seedTable[ 0 ] ) ) ) );
+        return r & 0x3FFFFFFF;
     }
 
     if( haveTypedArrays ) {
@@ -1455,7 +1460,7 @@ var Map = (function() {
             x = (seedTable[a] >> 1) ^ x;
             a = (i & 0xFF);
             x = (seedTable[a]) ^ x;
-            return x;
+            return x & 0x3FFFFFFF;
         }
     }
     else {
@@ -1481,7 +1486,7 @@ var Map = (function() {
         }
         else if( t === "number" ) {
             if( ( val | 0 ) === val ) {
-                return hashInt( val ) & ( tableSize - 1 );
+                return hashInt( val & 0x3FFFFFFF) & ( tableSize - 1 );
             }
             return hashFloat( val ) & ( tableSize - 1 );
         }
@@ -1675,15 +1680,13 @@ var Map = (function() {
     };
 
     method.get = function get( key ) {
-        if( key === void 0 ) {
-            throw new Error( "Cannot use undefined as a key or value" );
-        }
         var capacity = this._capacity,
             buckets = this._buckets,
             bucketIndex = hash( key, capacity );
 
         while( true ) {
             var k = buckets[ bucketIndex << 1 ];
+
             if( k === void 0 ) {
                 return void 0;
             }
@@ -1691,6 +1694,7 @@ var Map = (function() {
                 return buckets[ ( bucketIndex << 1 ) + 1 ];
             }
             bucketIndex = ( 1 + bucketIndex ) & ( capacity - 1 );
+
         }
     };
 
@@ -1727,9 +1731,6 @@ var Map = (function() {
 
     //From http://en.wikipedia.org/wiki/Open_addressing
     method["delete"] = method.unset = method.remove = function remove( key ) {
-        if( key === void 0 ) {
-            throw new Error( "Cannot use undefined as a key or value" );
-        }
         this._modCount++;
         var bucketIndex = hash( key, this._capacity ),
             capacity = this._capacity - 1,

@@ -20,6 +20,24 @@ function seqString( i ) {
     return dst + dst + dst + dst + dst + dst;
 }
 
+function asdString( i ) {
+    return seqString(i) + (new Array((i%100)+1).join("d"));
+}
+
+function numString( i ) {
+    return i +"";
+}
+
+function randomString( i ) {
+    var ret = "";
+
+    for( var i = 0; i < 16; ++i ) {
+        ret += String.fromCharCode( Math.random() * 0x100 | 0 );
+    }
+
+    return ret;
+}
+
 var itemCount = 500000;
 
 var stringItems = [];
@@ -27,8 +45,9 @@ var stringItems = [];
 var half = itemCount;
 
 for( var i = 0; i < half; ++i ) {
-    stringItems.push( seqString(i));
+    stringItems.push(seqString(i));
 }
+
 
 var intItems = [];
 
@@ -41,8 +60,6 @@ var floatItems = [];
 for( var i = 0; i < half; ++i ) {
     floatItems.push( 130.14341 * i * 134013 / 0.14 + 1304.434 );
 }
-
-
 
 var ds = typeof require !== "undefined" && require('../dist/data_structures.js') || DS;
 var Map = ds.Map;
@@ -87,15 +104,17 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var ops = (half* 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "integers");
-    },50);
+
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "integers");
 })();
 
 
 (function ENTRY_FUNCTION_NATIVE(){ //Naming to distinguish in v8 dumps
     var a = {};
     var o = {};
+
+    a.fast = false;
+    delete a.fast;
 
     var c;
 
@@ -132,9 +151,7 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "integers");
-    },50);
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "integers");
 })();
 
 
@@ -179,15 +196,18 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "strings");
-    },50);
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "strings");
+
 })();
 
 (function ENTRY_FUNCTION_NATIVE_STRING(){ //Naming to distinguish in v8 dumps
     var a = {};
     var o = {};
     var c;
+
+    a.fast = false;
+    delete a.fast;
+
 
     var half = itemCount;
 
@@ -227,9 +247,8 @@ var hpr = {}.hasOwnProperty;
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "strings");
-    },50);
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "strings");
+
 })();
 
 (function ENTRY_FUNCTION_MAP_FLOAT(){ //Naming to distinguish in v8 dumps
@@ -269,15 +288,18 @@ var hpr = {}.hasOwnProperty;
     var ops = (half* 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using when using DS.Map filled with", itemCount, "floats");
-    },50);
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using when using DS.Map filled with", itemCount, "floats");
+
 })();
 
 
 (function ENTRY_FUNCTION_NATIVE_FLOAT(){ //Naming to distinguish in v8 dumps
     var a = {};
     var o = {};
+
+    a.fast = false;
+    delete a.fast;
+
 
     var c;
 
@@ -314,7 +336,6 @@ var hpr = {}.hasOwnProperty;
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    setTimeout(function(){
-        console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "floats");
-    },50);
+    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "floats");
+
 })();
