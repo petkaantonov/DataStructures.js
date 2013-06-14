@@ -2,7 +2,7 @@
 var RedBlackNode = (function() {
     var method = RedBlackNode.prototype;
 
-    function RedBlackNode(key, value, parent) {
+    function RedBlackNode( key, value, parent ) {
         this.left = NIL;
         this.right = NIL;
         this.parent = parent;

@@ -475,7 +475,7 @@ NIL.color = BLACK;;
 var RedBlackNode = (function() {
     var method = RedBlackNode.prototype;
 
-    function RedBlackNode(key, value, parent) {
+    function RedBlackNode( key, value, parent ) {
         this.left = NIL;
         this.right = NIL;
         this.parent = parent;
@@ -1363,600 +1363,1362 @@ var RedBlackTree = (function() {
 })();
 
 ;
+/*
+  I've wrapped Makoto Matsumoto and Takuji Nishimura's code in a namespace
+  so it's better encapsulated. Now you can have multiple random number generators
+  and they won't stomp all over eachother's state.
+
+  If you want to use this as a substitute for Math.random(), use the random()
+  method like so:
+
+  var m = new MersenneTwister();
+  var randomNumber = m.random();
+
+  You can also call the other genrand_{foo}() methods on the instance.
+
+  If you want to use a specific seed in order to get a repeatable random
+  sequence, pass an integer into the constructor:
+
+  var m = new MersenneTwister(123);
+
+  and that will always produce the same random sequence.
+
+  Sean McCullough (banksean@gmail.com)
+*/
+
+/*
+   A C-program for MT19937, with initialization improved 2002/1/26.
+   Coded by Takuji Nishimura and Makoto Matsumoto.
+
+   Before using, initialize the state by using init_genrand(seed)
+   or init_by_array(init_key, key_length).
+
+   Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+
+     3. The names of its contributors may not be used to endorse or promote
+        products derived from this software without specific prior written
+        permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+   Any feedback is very welcome.
+   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+   email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
+*/
+var MersenneTwister = (function() {
+var MersenneTwister = function(seed) {
+  if (seed == undefined) {
+    seed = new Date().getTime();
+  }
+  /* Period parameters */
+  this.N = 624;
+  this.M = 397;
+  this.MATRIX_A = 0x9908b0df;   /* constant vector a */
+  this.UPPER_MASK = 0x80000000; /* most significant w-r bits */
+  this.LOWER_MASK = 0x7fffffff; /* least significant r bits */
+
+  this.mt = new Array(this.N); /* the array for the state vector */
+  this.mti=this.N+1; /* mti==N+1 means mt[N] is not initialized */
+
+  this.init_genrand(seed);
+}
+
+/* initializes mt[N] with a seed */
+MersenneTwister.prototype.init_genrand = function(s) {
+  this.mt[0] = s >>> 0;
+  for (this.mti=1; this.mti<this.N; this.mti++) {
+      var s = this.mt[this.mti-1] ^ (this.mt[this.mti-1] >>> 30);
+   this.mt[this.mti] = (((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253)
+  + this.mti;
+      /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+      /* In the previous versions, MSBs of the seed affect   */
+      /* only MSBs of the array mt[].                        */
+      /* 2002/01/09 modified by Makoto Matsumoto             */
+      this.mt[this.mti] >>>= 0;
+      /* for >32 bit machines */
+  }
+}
+
+/* initialize by an array with array-length */
+/* init_key is the array for initializing keys */
+/* key_length is its length */
+/* slight change for C++, 2004/2/26 */
+MersenneTwister.prototype.init_by_array = function(init_key, key_length) {
+  var i, j, k;
+  this.init_genrand(19650218);
+  i=1; j=0;
+  k = (this.N>key_length ? this.N : key_length);
+  for (; k; k--) {
+    var s = this.mt[i-1] ^ (this.mt[i-1] >>> 30)
+    this.mt[i] = (this.mt[i] ^ (((((s & 0xffff0000) >>> 16) * 1664525) << 16) + ((s & 0x0000ffff) * 1664525)))
+      + init_key[j] + j; /* non linear */
+    this.mt[i] >>>= 0; /* for WORDSIZE > 32 machines */
+    i++; j++;
+    if (i>=this.N) { this.mt[0] = this.mt[this.N-1]; i=1; }
+    if (j>=key_length) j=0;
+  }
+  for (k=this.N-1; k; k--) {
+    var s = this.mt[i-1] ^ (this.mt[i-1] >>> 30);
+    this.mt[i] = (this.mt[i] ^ (((((s & 0xffff0000) >>> 16) * 1566083941) << 16) + (s & 0x0000ffff) * 1566083941))
+      - i; /* non linear */
+    this.mt[i] >>>= 0; /* for WORDSIZE > 32 machines */
+    i++;
+    if (i>=this.N) { this.mt[0] = this.mt[this.N-1]; i=1; }
+  }
+
+  this.mt[0] = 0x80000000; /* MSB is 1; assuring non-zero initial array */
+}
+
+/* generates a random number on [0,0xffffffff]-interval */
+MersenneTwister.prototype.genrand_int32 = function() {
+  var y;
+  var mag01 = new Array(0x0, this.MATRIX_A);
+  /* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+  if (this.mti >= this.N) { /* generate N words at one time */
+    var kk;
+
+    if (this.mti == this.N+1)   /* if init_genrand() has not been called, */
+      this.init_genrand(5489); /* a default initial seed is used */
+
+    for (kk=0;kk<this.N-this.M;kk++) {
+      y = (this.mt[kk]&this.UPPER_MASK)|(this.mt[kk+1]&this.LOWER_MASK);
+      this.mt[kk] = this.mt[kk+this.M] ^ (y >>> 1) ^ mag01[y & 0x1];
+    }
+    for (;kk<this.N-1;kk++) {
+      y = (this.mt[kk]&this.UPPER_MASK)|(this.mt[kk+1]&this.LOWER_MASK);
+      this.mt[kk] = this.mt[kk+(this.M-this.N)] ^ (y >>> 1) ^ mag01[y & 0x1];
+    }
+    y = (this.mt[this.N-1]&this.UPPER_MASK)|(this.mt[0]&this.LOWER_MASK);
+    this.mt[this.N-1] = this.mt[this.M-1] ^ (y >>> 1) ^ mag01[y & 0x1];
+
+    this.mti = 0;
+  }
+
+  y = this.mt[this.mti++];
+
+  /* Tempering */
+  y ^= (y >>> 11);
+  y ^= (y << 7) & 0x9d2c5680;
+  y ^= (y << 15) & 0xefc60000;
+  y ^= (y >>> 18);
+
+  return y >>> 0;
+}
+
+/* generates a random number on [0,0x7fffffff]-interval */
+MersenneTwister.prototype.genrand_int31 = function() {
+  return (this.genrand_int32()>>>1);
+}
+
+/* generates a random number on [0,1]-real-interval */
+MersenneTwister.prototype.genrand_real1 = function() {
+  return this.genrand_int32()*(1.0/4294967295.0);
+  /* divided by 2^32-1 */
+}
+
+/* generates a random number on [0,1)-real-interval */
+MersenneTwister.prototype.random = function() {
+  return this.genrand_int32()*(1.0/4294967296.0);
+  /* divided by 2^32 */
+}
+
+/* generates a random number on (0,1)-real-interval */
+MersenneTwister.prototype.genrand_real3 = function() {
+  return (this.genrand_int32() + 0.5)*(1.0/4294967296.0);
+  /* divided by 2^32 */
+}
+
+/* generates a random number on [0,1) with 53-bit resolution*/
+MersenneTwister.prototype.genrand_res53 = function() {
+  var a=this.genrand_int32()>>>5, b=this.genrand_int32()>>>6;
+  return(a*67108864.0+b)*(1.0/9007199254740992.0);
+}
+
+/* These real versions are due to Isaku Wada, 2002/01/09 added */
+
+return MersenneTwister;
+})();;
+/**
+ * Get the closest next power of two of the given integer
+ * or the number itself if it is a power of two.
+ *
+ * @param {number} n Must be greater than zero.
+ * @return {number} The power of two integer.
+ *
+ */
+function pow2AtLeast( n ) {
+    n = n >>> 0;
+    n = n - 1;
+    n = n | (n >> 1);
+    n = n | (n >> 2);
+    n = n | (n >> 4);
+    n = n | (n >> 8);
+    n = n | (n >> 16);
+    return n + 1;
+}
+
+/**
+ * Forces the capacity integer to be in the sane range.
+ *
+ * @param {int} capacity The capacity integer to sanitize.
+ * @return {int} The sanitized capacity.
+ *
+ */
+function clampCapacity( capacity ) {
+    return Math.max( DEFAULT_CAPACITY, Math.min( MAX_CAPACITY, capacity ) );
+}
+
+var DEFAULT_CAPACITY = 1 << 4;
+var MAX_CAPACITY = 1 << 30;;
+var equality = (function() {
+    /**
+     * See if two values are equal. Considers -0 and +0 equal as
+     * those are hashed by hashInt and there is only one 0 as
+     * integer.
+     *
+     * Doesn't support arrays. If array checks are needed, the hash
+     * table should transition into using the slower equals()
+     * function.
+     *
+     * @param {dynamic} key1 Description of key1 parameter.
+     * @param {dynamic} key2 Description of key2 parameter.
+     * @return {boolean}
+     *
+     */
+    function simpleEquals( key1, key2 ) {
+                                //fast NaN equality
+        return key1 === key2 || (key1 !== key1 && key2 !== key2);
+    }
+
+
+    /**
+     * See if two values are equal. Considers -0 and +0 equal as
+     * those are hashed by hashInt and there is only one 0 as
+     * integer.
+     *
+     * Supports non-circular arrays with deep comparison.
+     *
+     * @param {dynamic} key1 The first key.
+     * @param {dynamic} key2 The second key.
+     * @return {boolean}
+     *
+     */
+    function equals( key1, key2 ) {
+        if( isArray( key1 ) &&
+            isArray( key2 ) ) {
+            if( key1.length === key2.length ) {
+                for( var i = 0, len = key1.length; i < len; ++i ) {
+                    var val1 = key1[i],
+                        val2 = key2[i];
+
+                    if( !simpleEquals( val1, val2 ) ) {
+                        //Skip infinite recursion
+                        if( !( val1 === key1 || val1 === key2 ||
+                            val2 === key1 || val2 === key1 ) ) {
+                            if( !equals( val1, val2 ) ) {
+                                return false;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        return simpleEquals( key1, key2 );
+    }
+
+    return {
+        simpleEquals: simpleEquals,
+        equals: equals
+    };
+})();
+;
+var hash = (function() {
+
+var haveTypedArrays = typeof ArrayBuffer !== "undefined" &&
+        typeof Uint32Array !== "undefined" &&
+        typeof Float64Array !== "undefined";
+
+var seeds = [
+    5610204, 986201666, 907942159, 902349351, 797161895, 789759260,
+    711023356, 576887056, 554056888, 546816461, 546185508, 524085435,
+    459334166, 456527883, 383222467, 301138872, 147250593, 103672245,
+    44482651, 874080556, 634220932, 600693396, 598579635, 575448586,
+    450435477, 320251763, 315455317, 171499680, 164922379, 113615305,
+    891544618, 787150959, 781424867, 692252409, 681534962, 600000618,
+    507066596, 449273102, 169958990, 878159962, 794651257, 696691070,
+    575407780, 567682439, 533628822, 458239955, 387357286, 373364136,
+    345493840, 312464221, 303942867, 53740513, 874713788, 737200732,
+    689774193, 557290539, 491474729, 463844961, 381345944, 235288247,
+    146111809, 952752630, 870989848, 850671622, 818854957, 579958572,
+    376499176, 93332135, 24878659, 969563338, 876939429, 863026139,
+    877798289, 409188290, 382588822, 170007484, 456227876, 95501317,
+    577863864, 559755423, 972015729, 582556160, 543151278, 451276979,
+    401520780, 285701754, 101224795
+];
+
+
+var seed = seeds[ ( Math.random() * seeds.length ) | 0 ];
+
+var seedTable = (function(){
+    var r = new ( typeof Int32Array !== "undefined" ?
+            Int32Array :
+            Array )( 8192 );
+
+    var m = new MersenneTwister( seed );
+
+    for( var i = 0; i < r.length; ++i ) {
+        r[i] = ( m.genrand_int32() & 0xFFFFFFFF );
+    }
+    return r;
+
+})();
+
+
+/**
+ * Calculates a hash integer value for the given boolean.
+ *
+ * @param {boolean} b The input boolean.
+ * @return {int} The hash.
+ *
+ */
+function hashBoolean( b ) {
+    var x = seedTable[0];
+    var a = (b ? 7 : 3 );
+    x = (seedTable[a] ^ x);
+    return x;
+}
+
+/**
+ * Calculates a hash integer value for the given string.
+ * Strings with .length > 8191 will have a simple hash
+ * based on the length only.
+ *
+ * @param {string} str The input string.
+ * @return {int} The hash.
+ *
+ */
+function hashString( str ) {
+    var x = seedTable[0],
+        len = str.length & 0x3FFFFFFF;
+
+    if( len > 8191 ) {
+        return hashInt( len );
+    }
+
+    for( var i = 0; i < len; ++i ) {
+        x = ( ( str.charCodeAt( i ) & 0xFF ) * seedTable[ i ] + x ) | 0;
+    }
+
+    return x & 0x3FFFFFFF;
+}
+
+/**
+ * Calculates a hash integer value for the given integer.
+ * Using the integer itself would cause a lot of probing.
+ *
+ * @param {int} i The input integer.
+ * @return {int} The hash.
+ *
+ */
+function hashInt( i ) {
+    var r = ( ( seedTable[ ( i & 0xFF) ] ) ^
+        ( ( seedTable[ ( ( i >> 8 ) & 0xFF ) | 0x100 ] >> 1) ^
+        ( ( seedTable[ ( ( i >> 16 ) & 0xFF ) | 0x200 ] >> 2) ^
+        ( ( seedTable[ ( ( i >> 24 ) & 0xFF) | 0x300 ] >> 3) ^
+        seedTable[ 0 ] ) ) ) );
+    return r & 0x3FFFFFFF;
+}
+
+if( haveTypedArrays ) {
+    var FLOAT_BUFFER = new ArrayBuffer( 8 ),
+        FLOAT_BUFFER_FLOAT_VIEW = new Float64Array( FLOAT_BUFFER ),
+        FLOAT_BUFFER_INT_VIEW = new Int32Array( FLOAT_BUFFER );
+
+    /**
+     * Calculates a hash integer value for the given floating
+     * point number. Relies on the ability to read binary
+     * representation of the float for a good hash.
+     *
+     * @param {float} f The input float.
+     * @return {int} The hash.
+     *
+     */
+    var hashFloat = function hashFloat( f ) {
+        var x = seedTable[0];
+        FLOAT_BUFFER_FLOAT_VIEW[0] = f;
+        var i = FLOAT_BUFFER_INT_VIEW[0];
+        var a = ((i >> 24) & 0xFF) | 0x700;
+        x = (seedTable[a] >> 7) ^ x;
+        a = ((i >> 16) & 0xFF) | 0x600;
+        x = (seedTable[a] >> 6) ^ x;
+        a = ((i >> 8) & 0xFF) | 0x500;
+        x = (seedTable[a] >> 5) ^ x;
+        a = (i & 0xFF) | 0x400;
+        x = (seedTable[a] >> 4) ^ x;
+        i = FLOAT_BUFFER_INT_VIEW[1];
+        a = ((i >> 24) & 0xFF) | 0x300;
+        x = (seedTable[a] >> 3) ^ x;
+        a = ((i >> 16) & 0xFF) | 0x200;
+        x = (seedTable[a] >> 2) ^ x;
+        a = ((i >> 8) & 0xFF) | 0x100;
+        x = (seedTable[a] >> 1) ^ x;
+        a = (i & 0xFF);
+        x = (seedTable[a]) ^ x;
+        return x & 0x3FFFFFFF;
+    }
+}
+else {
+    var hashFloat = hashInt;
+}
+
+/**
+ * Calculates a int hash value for the given input
+ * array.
+ *
+ * @param {Array.<dynamic>} array The input array.
+ * @return {int} The hash.
+ *
+ */
+function hashArray( array ) {
+    var x = seedTable[0],
+        len = array.length & 0x3FFFFFFF;
+
+    for( var i = 0; i < len; ++i ) {
+        var val = array[i];
+        if( val === array ) {//Skip infinite recursion
+            continue;
+        }
+        x = ( ( hash( array[i], 0x40000000 ) +
+            seedTable[ i & 8191 ] ) ^ x ) | 0;
+    }
+
+    return x & 0x3FFFFFFF;
+}
+
+/**
+ * Returns a hash integer value for the given object. Calls
+ * .valueOf() of the object which should return an integer.
+ * However, by default it will return the object itself, in
+ * which case identity hash is used.
+ *
+ * @param {Object|null} obj The object to hash. Can be null.
+ * @return {int} The hash.
+ *
+ */
+function hashObject( obj ) {
+    if( obj == null ) {
+        return seedTable[134];
+    }
+    var ret;
+    //valueOf returned a number
+    if( ( ret = obj.valueOf() ) !== obj ) {
+        return ret;
+    }
+    return uid( obj );
+}
+
+/**
+ * Returns an integer hash of the given value. Supported
+ * types are:
+ *
+ * Strings, integers, floats, objects and arrays of
+ * them.
+ *
+ * @param {dynamic} val The value to hash.
+ * @param {int} tableSize The amount of buckets in the hash table.
+ * Must be a power of two.
+ * @return {int}
+ *
+ */
+function hash( val, tableSize ) {
+    var t = typeof val,
+        bitAnd = tableSize - 1;
+    if( t === "string" ) {
+        return hashString( val ) & bitAnd;
+    }
+    else if( t === "number" ) {
+        if( ( val | 0 ) === val ) {
+            return hashInt( val & 0x3FFFFFFF ) & bitAnd;
+        }
+        return hashFloat( val ) & bitAnd;
+    }
+    else if( t === "boolean" ) {
+        return hashBoolean( val ) & bitAnd;
+    }
+    else {
+        if( isArray( val ) ) {
+            return hashArray( val ) & bitAnd;
+        }
+        return hashObject( val ) & bitAnd;
+    }
+}
+
+return hash;})();
+;
 /* global Buffer, uid, MapForEach, toListOfTuples,
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, MapValueOf,
     MapToJSON, MapToString */
 /* exported Map */
 /* jshint -W079 */
 var Map = (function() {
-    var haveTypedArrays = typeof ArrayBuffer !== "undefined" &&
-            typeof Uint32Array !== "undefined" &&
-            typeof Float64Array !== "undefined";
+var Error = global.Error;
 
-    var Error = global.Error;
+/**
+ * Constructor for Maps. Map is a simple lookup structure without
+ * any ordering. Fast lookup, slow iteration. Memory
+ * efficient.
+ *
+ * The undefined value is not supported as a key nor as a value. Use
+ * null instead.
+ *
+ * If ordering is needed consider OrderedMap or SortedMap.
+ *
+ * Array of tuples initialization:
+ *
+ * var map = new Map([
+ *      [0, "zero"],
+ *      [5, "five"],
+ *      [10, "ten"],
+ *      [13, "thirteen"]
+ * ]);
+ *
+ * @param {int=|Object=|Array.<Tuple>|Map} capacity The initial capacity.
+ * Can also be a object, array of tuples or another map to initialize
+ * the map.
+ * @constructor
+ */
+function Map( capacity ) {
+    this._buckets = null;
+    this._size = 0;
+    this._modCount = 0;
+    this._capacity = DEFAULT_CAPACITY;
+    this._equality = equality.simpleEquals;
+    this._usingSimpleEquals = true;
+    this._init( capacity );
+}
+var method = Map.prototype;
 
-    function pow2AtLeast( n ) {
-        n = n >>> 0;
-        n = n - 1;
-        n = n | (n >> 1);
-        n = n | (n >> 2);
-        n = n | (n >> 4);
-        n = n | (n >> 8);
-        n = n | (n >> 16);
-        return n + 1;
+/**
+ * Internal.
+ *
+ * @param {int=} capacity Description of capacity parameter.
+ * @return {void}
+ *
+ */
+method._init = function _init( capacity ) {
+    if( capacity == null ) {
+        this._makeBuckets();
+        return;
     }
 
-    var seedTable = (function(){
-        var r = new ( typeof Int32Array !== "undefined" ? Int32Array : Array )( 8192 );
-        if( typeof crypto !== "undefined" && crypto !== null &&
-            typeof crypto.getRandomValues === "function" ) {
-            crypto.getRandomValues( r );
-            return r;
+    switch( typeof capacity ) {
+    case "number":
+        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._makeBuckets();
+        break;
+    case "object":
+        var tuples = toListOfTuples( capacity );
+        var size = tuples.length;
+        var capacity = pow2AtLeast( size );
+        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
+            capacity = capacity << 1;
         }
-        else {
-            var max = Math.pow( 2, 32 );
-            for( var i = 0; i < r.length; ++i ) {
-                r[i] = ((Math.random() * max) | 0);
-            }
-            return r;
-        }
-    })();
-
-    function hashBoolean( b) {
-        var x = seedTable[0];
-        var a = (b ? 7 : 3 );
-        x = (seedTable[a] ^ x);
-        return x;
-    }
-
-    function hashString( str ) {
-        var x = seedTable[0],
-            len = str.length & 0x3FFFFFFF;
-
-        if( len > 8191 ) {
-            return hashInt( len );
-        }
-
-        for( var i = 0; i < len; ++i ) {
-            x = ( ( str.charCodeAt( i ) & 0xFF ) * seedTable[ i ] + x ) | 0;
-        }
-
-        return x & 0x3FFFFFFF;
-    }
-
-
-    function hashInt( i ) {
-        var r = ( ( seedTable[ ( i & 0xFF) ] ) ^
-            ( ( seedTable[ ( ( i >> 8 ) & 0xFF ) | 0x100 ] >> 1) ^
-            ( ( seedTable[ ( ( i >> 16 ) & 0xFF ) | 0x200 ] >> 2) ^
-            ( ( seedTable[ ( ( i >> 24 ) & 0xFF) | 0x300 ] >> 3) ^
-            seedTable[ 0 ] ) ) ) );
-        return r & 0x3FFFFFFF;
-    }
-
-    if( haveTypedArrays ) {
-        var FLOAT_BUFFER = new ArrayBuffer( 8 ),
-            FLOAT_BUFFER_FLOAT_VIEW = new Float64Array( FLOAT_BUFFER ),
-            FLOAT_BUFFER_INT_VIEW = new Int32Array( FLOAT_BUFFER );
-
-        var hashFloat = function hashFloat( f ) {
-            var x = seedTable[0];
-            FLOAT_BUFFER_FLOAT_VIEW[0] = f;
-            var i = FLOAT_BUFFER_INT_VIEW[0];
-            var a = ((i >> 24) & 0xFF) | 0x700;
-            x = (seedTable[a] >> 7) ^ x;
-            a = ((i >> 16) & 0xFF) | 0x600;
-            x = (seedTable[a] >> 6) ^ x;
-            a = ((i >> 8) & 0xFF) | 0x500;
-            x = (seedTable[a] >> 5) ^ x;
-            a = (i & 0xFF) | 0x400;
-            x = (seedTable[a] >> 4) ^ x;
-            i = FLOAT_BUFFER_INT_VIEW[1];
-            a = ((i >> 24) & 0xFF) | 0x300;
-            x = (seedTable[a] >> 3) ^ x;
-            a = ((i >> 16) & 0xFF) | 0x200;
-            x = (seedTable[a] >> 2) ^ x;
-            a = ((i >> 8) & 0xFF) | 0x100;
-            x = (seedTable[a] >> 1) ^ x;
-            a = (i & 0xFF);
-            x = (seedTable[a]) ^ x;
-            return x & 0x3FFFFFFF;
-        }
-    }
-    else {
-        var hashFloat = hashInt;
-    }
-
-    function hashObject( obj ) {
-        if( obj === null ) {
-            return 0;
-        }
-        var ret;
-        //valueOf returned a number
-        if( ( ret = obj.valueOf() ) !== obj ) {
-            return ret;
-        }
-        return uid( obj );
-    }
-
-    function hash( val, tableSize ) {
-        var t = typeof val;
-        if( t === "string" ) {
-            return hashString( val ) & ( tableSize - 1 );
-        }
-        else if( t === "number" ) {
-            if( ( val | 0 ) === val ) {
-                return hashInt( val & 0x3FFFFFFF) & ( tableSize - 1 );
-            }
-            return hashFloat( val ) & ( tableSize - 1 );
-        }
-        else if( t === "boolean" ) {
-            return hashBoolean( val ) & ( tableSize - 1 );
-        }
-        else {
-            return hashObject( val ) & ( tableSize - 1 );
-        }
-    }
-
-    function equals( key1, key2 ) {
-        return key1 === key2;
-    }
-
-    function clampCapacity( capacity ) {
-        return Math.max( DEFAULT_CAPACITY, Math.min( MAX_CAPACITY, capacity ) );
-    }
-
-    var DEFAULT_CAPACITY = 1 << 4;
-    var MAX_CAPACITY = 1 << 30;
-
-    var method = Map.prototype;
-    function Map( capacity, equality ) {
-        this._buckets = null;
-        this._size = 0;
-        this._modCount = 0;
-        this._capacity = DEFAULT_CAPACITY;
-        this._equality = equals;
-        this._init( capacity, equality );
-    }
-
-    method._init = function _init( capacity, equality ) {
-        if( typeof capacity === "function" ) {
-            var tmp = equality;
-            equality = capacity;
-            capacity = tmp;
-        }
-
-        if( typeof equality === "function" ) {
-            this._equality = equality;
-        }
-
-        if( capacity == null ) {
-            this._makeBuckets();
-            return;
-        }
-
-        switch( typeof capacity ) {
-        case "number":
-            this._capacity = clampCapacity( pow2AtLeast( capacity ) );
-            this._makeBuckets();
-            break;
-        case "object":
-            var tuples = toListOfTuples( capacity );
-            var size = tuples.length;
-            var capacity = pow2AtLeast( size );
-            if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
-                capacity = capacity << 1;
-            }
-            this._capacity = capacity;
-            this._makeBuckets();
-            this._setAll( tuples );
-            break;
-        default:
-            this._makeBuckets();
-        }
-
-
-
-    };
-
-    method._makeBuckets = function _makeBuckets() {
-        var length = this._capacity << 1;
-
-        var b = this._buckets = new Array( length < 100000 ? length : 0 );
-
-        if( length >= 100000 ) {
-            for( var i = 0; i < length; ++i ) {
-                b[i] = void 0;
-            }
-        }
-    };
-
-    method._resized = function _resized( oldBuckets ) {
-        var newBuckets = this._buckets,
-            oldLength = oldBuckets.length;
-
-        for( var i = 0; i < oldLength; i+=2 ) {
-
-            var key = oldBuckets[i];
-            if( key !== void 0) {
-                var newIndex = hash( key, this._capacity );
-
-                while( newBuckets[ newIndex << 1 ] !== void 0 ) {
-                    newIndex = ( this._capacity - 1 ) & ( newIndex + 1 );
-                }
-                newBuckets[ newIndex << 1 ] = oldBuckets[ i ];
-                newBuckets[ ( newIndex << 1 ) + 1 ] = oldBuckets[ i + 1 ];
-
-                oldBuckets[i] = oldBuckets[i+1] = void 0;
-            }
-        }
-    };
-
-    method._resizeTo = function _resizeTo( capacity ) {
-        capacity = clampCapacity( capacity );
-        if( this._capacity >= capacity ) {
-            return;
-        }
-        var oldBuckets = this._buckets;
         this._capacity = capacity;
         this._makeBuckets();
+        this._setAll( tuples );
+        break;
+    default:
+        this._makeBuckets();
+    }
+};
 
-        if( oldBuckets !== null ) {
-            this._resized( oldBuckets );
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
+method._checkEquals = function _checkEquals() {
+    if( this._usingSimpleEquals === true ) {
+        this._usingSimpleEquals = false;
+        this._equality = equality.equals;
+    }
+};
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
+method._makeBuckets = function _makeBuckets() {
+    var length = this._capacity << 1;
+
+    var b = this._buckets = new Array( length < 100000 ? length : 0 );
+
+    if( length >= 100000 ) {
+        for( var i = 0; i < length; ++i ) {
+            b[i] = void 0;
         }
-    };
+    }
+};
 
-    method._getNextCapacity = function _getNextCapacity() {
-        return (this._capacity < 200000 ? this._capacity << 2 : this._capacity << 1);
-    };
+/**
+ * Internal.
+ *
+ * @param {Array.<dynamic>} oldBuckets Description of oldBuckets parameter.
+ * @return {void}
+ *
+ */
+method._resized = function _resized( oldBuckets ) {
+    var newBuckets = this._buckets,
+        oldLength = oldBuckets.length;
 
-    method._isOverCapacity = function _isOverCapacity( size ) {
-        return ( ( size << 2 ) - size ) >= ( this._capacity << 1 );
-    }; //Load factor of 0.67
+    for( var i = 0; i < oldLength; i+=2 ) {
 
-    method._checkResize = function _checkResize() {
-        if( this._isOverCapacity( this._size ) ) {
-            this._resizeTo( this._getNextCapacity() );
+        var key = oldBuckets[i];
+        if( key !== void 0) {
+            var newIndex = hash( key, this._capacity );
+
+            while( newBuckets[ newIndex << 1 ] !== void 0 ) {
+                newIndex = ( this._capacity - 1 ) & ( newIndex + 1 );
+            }
+            newBuckets[ newIndex << 1 ] = oldBuckets[ i ];
+            newBuckets[ ( newIndex << 1 ) + 1 ] = oldBuckets[ i + 1 ];
+
+            oldBuckets[i] = oldBuckets[i+1] = void 0;
         }
-    };
+    }
+};
 
-                                             //Used by Set and OrderedSet
-    method._setAll = function _setAll( obj, __value ) {
-        if( !obj.length ) {
-            return;
-        }
-        var newSize = obj.length + this._size;
+/**
+ * Internal.
+ *
+ * @param {int} capacity Description of capacity parameter.
+ * @return {void}
+ *
+ */
+method._resizeTo = function _resizeTo( capacity ) {
+    capacity = clampCapacity( capacity );
+    if( this._capacity >= capacity ) {
+        return;
+    }
+    var oldBuckets = this._buckets;
+    this._capacity = capacity;
+    this._makeBuckets();
 
-        if( this._isOverCapacity( newSize ) ) {
-            var capacity = pow2AtLeast( newSize );
-            if( ( ( newSize << 2 ) - newSize ) >= ( capacity << 1 ) ) {
+    if( oldBuckets !== null ) {
+        this._resized( oldBuckets );
+    }
+};
+
+/**
+ * Internal.
+ *
+ * @return {int}
+ *
+ */
+method._getNextCapacity = function _getNextCapacity() {
+    return (this._capacity < 200000 ?
+        this._capacity << 2 :
+        this._capacity << 1);
+};
+
+/**
+ * Internal.
+ *
+ * @param {int} size Description of size parameter.
+ * @return {boolean}
+ *
+ */
+method._isOverCapacity = function _isOverCapacity( size ) {
+    return ( ( size << 2 ) - size ) >= ( this._capacity << 1 );
+}; //Load factor of 0.67
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
+method._checkResize = function _checkResize() {
+    if( this._isOverCapacity( this._size ) ) {
+        this._resizeTo( this._getNextCapacity() );
+    }
+};
+
+/**
+ * Internal.
+ *
+ * @param {Array.<Tuple>} obj Description of obj parameter.
+ * @return {void}
+ *
+ */
+method._setAll = function _setAll( obj ) {
+    if( !obj.length ) {
+        return;
+    }
+    var newSize = obj.length + this._size;
+
+    if( this._isOverCapacity( newSize ) ) {
+        var capacity = pow2AtLeast( newSize );
+        if( ( ( newSize << 2 ) - newSize ) >= ( capacity << 1 ) ) {
+            capacity <<= 1;
+            if( capacity < 100000 ) {
                 capacity <<= 1;
-                if( capacity < 100000 ) {
-                    capacity <<= 1;
-                }
             }
-            this._resizeTo( capacity );
+        }
+        this._resizeTo( capacity );
+    }
+
+    for( var i = 0; i < obj.length; ++i ) {
+        this.set( obj[i][0], obj[i][1] );
+    }
+
+};
+
+//API
+
+/**
+ * Simple way to iterate the map. The callback fn receives arguments:
+ *
+ * {dynamic} value, {dynamic} key, {integer} index
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @param {function} fn Description of fn parameter.
+ * @param {Object=} ctx Description of ctx parameter.
+ * @return {void}
+ *
+ */
+method.forEach = MapForEach;
+
+/**
+ * Returns a shallow clone of the map.
+ *
+ * @return {Map}
+ *
+ */
+method.clone = function clone() {
+    return new this.constructor(
+        this.entries()
+    );
+};
+
+/**
+ * See if the value is contained in the map.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @param {dynamic} value The value to lookup.
+ * @return {boolean}
+ *
+ */
+method.containsValue = method.hasValue = function hasValue( value ) {
+    if( value === void 0 ) {
+        return false;
+    }
+    var it = this.iterator();
+    while( it.next() ) {
+        if( it.value === value ) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
+ * See if the key is contained in the map.
+ *
+ * @param {dynamic} key The key to lookup.
+ * @return {boolean}
+ *
+ */
+method.containsKey = method.hasKey = function hasKey( key ) {
+    return this.get( key ) !== void 0;
+};
+
+/**
+ * Get the value associated with the given key in this map.
+ *
+ * Returns undefined if not found. Key cannot be undefined.
+ *
+ * @param {dynamic} key The key to lookup value for.
+ * @return {dynamic}
+ * @return {void}
+ *
+ */
+method.get = function get( key ) {
+    var capacity = this._capacity,
+        buckets = this._buckets,
+        bucketIndex = hash( key, capacity );
+
+    while( true ) {
+        var k = buckets[ bucketIndex << 1 ];
+
+        if( k === void 0 ) {
+            return void 0;
+        }
+        else if( this._equality( k, key ) ) {
+            return buckets[ ( bucketIndex << 1 ) + 1 ];
+        }
+        bucketIndex = ( 1 + bucketIndex ) & ( capacity - 1 );
+
+    }
+};
+
+/**
+ * Associate a value with a key. If the key is already in the
+ * map, that key is updated with the given value. Otherwise a
+ * new entry is added.
+ *
+ * If a value was updated, returns the old value. If the key was
+ * inserted into the map, returns undefined.
+ *
+ * The undefined value is not supported as a key nor as a value. Use
+ * null instead.
+ *
+ * @param {dynamic} key The key to associate with value.
+ * @param {dynamic} value The value to associate with key.
+ * @return {dynamic}
+ * @return {void}
+ * @throws {Error} When key or value is undefined
+ *
+ */
+method.put = method.set = function set( key, value ) {
+    if( key === void 0 || value === void 0 ) {
+        throw new Error( "Cannot use undefined as a key or value" );
+    }
+    if( isArray( key ) ) {
+        this._checkEquals();
+    }
+    this._modCount++;
+    var bucketIndex = hash( key, this._capacity ),
+        capacity = this._capacity - 1,
+        buckets = this._buckets;
+    while( true ) {
+        var k = buckets[ bucketIndex << 1 ];
+
+        if( k === void 0 ) {
+            //Insertion
+            buckets[ bucketIndex << 1 ] = key;
+            buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+            this._size++;
+            this._checkResize();
+            return void 0;
+        }
+        else if( this._equality( k, key ) === true ) {
+            //update
+            var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
+            buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+            return ret;
         }
 
-        if( arguments.length > 1 ) {
-            for( var i = 0; i < obj.length; ++i ) {
-                this.set( obj[i], __value );
+        bucketIndex = ( 1 + bucketIndex ) & capacity;
+    }
+};
+
+/**
+ * Removes a value associated with the given key in the map. If the
+ * key is not in the map, returns undefined. If the key is in the map,
+ * returns the value associated with the key.
+ *
+ * You can check if the removal was successful by checking
+ *
+ * map.remove( myKey ) !== void 0
+ *
+ * The undefined value as a key or value is not supported. Use null instead.
+ *
+ * @param {dynamic} key The key to remove from the map.
+ * @return {dynamic}
+ * @return {void}
+ *
+ */
+//Linear probing with step of 1 can use
+//the instant clean-up algorithm from
+//http://en.wikipedia.org/wiki/Open_addressing
+//instead of marking slots as deleted.
+method["delete"] = method.unset = method.remove = function remove( key ) {
+    this._modCount++;
+    var bucketIndex = hash( key, this._capacity ),
+        capacity = this._capacity - 1,
+        buckets = this._buckets;
+    while( true ) {
+        var k = buckets[ bucketIndex << 1 ];
+
+        if( k === void 0 ) {
+            //key is not in table
+            return void 0;
+        }
+        else if( this._equality( k, key ) ) {
+            break;
+        }
+
+        bucketIndex = ( 1 + bucketIndex ) & capacity;
+    }
+
+    var entryIndex = bucketIndex;
+    var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
+
+    buckets[ ( bucketIndex << 1 ) ] =
+        buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+
+    while( true ) {
+        entryIndex = ( 1 + entryIndex ) & capacity;
+
+        var slotKey = buckets[ entryIndex << 1 ];
+
+        if( slotKey === void 0 ) {
+            break;
+        }
+
+        var k = hash( slotKey, capacity + 1 );
+
+        if ( ( bucketIndex <= entryIndex ) ?
+            ( ( bucketIndex < k ) && ( k <= entryIndex ) ) :
+            ( ( bucketIndex < k ) || ( k <= entryIndex ) ) ) {
+            continue;
+        }
+
+        buckets[ ( bucketIndex << 1 ) ] = buckets[ ( entryIndex << 1 ) ];
+        buckets[ ( bucketIndex << 1 ) + 1 ] =
+            buckets[ ( entryIndex << 1 ) + 1 ];
+
+        bucketIndex = entryIndex;
+
+        buckets[ ( bucketIndex << 1 ) ] =
+            buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+    }
+
+    this._size--;
+    return ret;
+};
+
+/**
+ * Insert the given key-value pairs into the map. Can be given in the form
+ * of an array of tuples, another Map, or an Object which will be
+ * reflectively iterated over for string keys.
+ *
+ * Array of tuples example:
+ *
+ * map.setAll([
+ *      [0, "zero"],
+ *      [5, "five"],
+ *      [10, "ten"],
+ *      [13, "thirteen"]
+ * ]);
+ *
+ * The array of tuples syntax supports all types of keys, not just strings.
+ *
+ * @param {Array.<Tuple>|Map|Object} obj Description of obj parameter.
+ * @return {void}
+ *
+ */
+method.putAll = method.setAll = function setAll( obj ) {
+    this._modCount++;
+    var listOfTuples = toListOfTuples( obj );
+    this._setAll( listOfTuples );
+};
+
+/**
+ * Remove everything in the map.
+ *
+ * @return {void}
+ *
+ */
+method.clear = function clear() {
+    this._modCount++;
+    this._capacity = DEFAULT_CAPACITY;
+    this._size = 0;
+    this._makeBuckets();
+};
+
+/**
+ * Returns the amount of items in the map.
+ *
+ * @return {int}
+ *
+ */
+method.length = method.size = function size() {
+    return this._size;
+};
+
+/**
+ * See if the map doesn't contain anything.
+ *
+ * @return {boolean}
+ *
+ */
+method.isEmpty = function isEmpty() {
+    return this._size === 0;
+};
+
+/**
+ * Automatically called by JSON.stringify. If you later parse the JSON
+ * you can pass the array of tuples to a map constructor.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
+method.toJSON = MapToJSON;
+
+/**
+ * Returns a string representation of the map.
+ *
+ * @return {String}
+ *
+ */
+method.toString = MapToString;
+
+/**
+ * Returns a hash code for the map.
+ *
+ * @return {int}
+ *
+ */
+method.valueOf = MapValueOf;
+
+/**
+ * Returns the keys in the map as an array.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
+method.keys = MapKeys;
+
+/**
+ * Returns the values in the map as an array.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
+method.values = MapValues;
+
+/**
+ * Returns the key-value pairs in the map as an array of tuples.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
+method.entries = MapEntries;
+
+/**
+ * Returns an Iterator for the map. The iterator will become invalid
+ * if the map is modified outside that iterator.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {MapIterator}
+ *
+ */
+method.iterator = function iterator() {
+    return new Iterator( this );
+};
+
+var Iterator = (function() {
+    var method = Iterator.prototype;
+
+    /**
+     * Iterator constructor for the unordered map.
+     *
+     * If the iterator cursor is currently pointing at a valid
+     * entry, you can retrieve the entry's key, value and index
+     * from the iterator .key, .value and .index properties
+     * respectively.
+     *
+     * For performance, they are just simple properties but
+     * they are meant to be read-only.
+     *
+     * You may reset the cursor at no cost to the beginning (
+     * .moveToStart()) or to the end (.moveToEnd()).
+     *
+     * You may move the cursor one item forward (.next())
+     * or backward (.prev()).
+     *
+     * Example:
+     *
+     * var it = map.iterator();
+     *
+     * while( it.next() ) {
+     *      console.log( it.key, it.value, it.index );
+     * }
+     * //Cursor is now *after* the last entry
+     * while( it.prev() ) { //Iterate backwards
+     *      console.log( it.key, it.value, it.index );
+     * }
+     * //Cursor is now *before*the first entry
+     *
+     * Iteration can be very slow in an unordered map.
+     *
+     * @param {Map} map Description of map parameter.
+     * @constructor
+     */
+    function Iterator( map ) {
+        this.key = this.value = void 0;
+        this.index = -1;
+        this._modCount = map._modCount;
+
+        this._indexDelta = 1;
+        this._index = -1;
+        this._map = map;
+        this._bucketIndex = -1;
+    }
+
+    /**
+     * Internal
+     *
+     * @return {void}
+     *
+     */
+    method._checkModCount = MapIteratorCheckModCount;
+
+    /**
+     * Internal.
+     *
+     * @return {void}
+     *
+     */
+    method._moveToNextBucketIndex = function _moveToNextBucketIndex() {
+        var i = ( this._bucketIndex << 1 ) + ( this._indexDelta << 1 ),
+            b = this._map._buckets,
+            l = b.length;
+        for( ; i < l; i += 2 ) {
+            if( b[i] !== void 0 ) {
+                this.key = b[i];
+                this.value = b[i+1];
+                this._bucketIndex = i >> 1;
+                break;
             }
         }
-        else {
-            for( var i = 0; i < obj.length; ++i ) {
-                this.set( obj[i][0], obj[i][1] );
+    };
+
+    /**
+     * Internal.
+     *
+     * @return {void}
+     *
+     */
+    method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
+        var i = ( this._bucketIndex << 1 ) - 2,
+            b = this._map._buckets;
+        for( ; i >= 0; i -= 2 ) {
+            if( b[i] !== void 0 ) {
+                this.key = b[i];
+                this.value = b[i+1];
+                this._bucketIndex = i >> 1;
+                break;
             }
         }
     };
 
     //API
 
-    method.forEach = MapForEach;
+    /**
+     * Move the cursor forward by one position. Returns true if the cursor is
+     * pointing at a valid entry. Returns false otherwise.
+     *
+     * @return {boolean}
+     *
+     */
+    method.next = function next() {
+        this._checkModCount();
+        this._index += this._indexDelta;
 
-
-    method.clone = function clone() {
-        return new this.constructor(
-            this.entries(),
-            this._equality
-        );
-    };
-
-    method.containsValue = method.hasValue = function hasValue( value ) {
-        if( value === void 0 ) {
+        if( this._index >= this._map._size ) {
+            this.moveToEnd();
             return false;
         }
-        var it = this.iterator();
-        while( it.next() ) {
-            if( it.value === value ) {
-                return true;
-            }
-        }
-        return false;
+
+        this._moveToNextBucketIndex();
+        this.index = this._index;
+        this._indexDelta = 1;
+
+        return true;
     };
 
-    method.containsKey = method.hasKey = function hasKey( key ) {
-        return this.get( key ) !== void 0;
+    /**
+     * Move the cursor backward by one position. Returns true if the cursor is
+     * pointing at a valid entry. Returns false otherwise.
+     *
+     * @return {boolean}
+     *
+     */
+    method.prev = function prev() {
+        this._checkModCount();
+        this._index--;
+
+        if( this._index < 0 ||
+            this._map._size === 0 ) {
+            this.moveToStart();
+            return false;
+        }
+
+        this._moveToPrevBucketIndex();
+        this.index = this._index;
+
+        this._indexDelta = 1;
+
+        return true;
     };
 
-    method.get = function get( key ) {
-        var capacity = this._capacity,
-            buckets = this._buckets,
-            bucketIndex = hash( key, capacity );
+    /**
+     * Move the cursor before the first entry. The cursor is not
+     * pointing at a valid entry, you may move to the first entry after
+     * calling this method by calling .next().
+     *
+     * This method operates in constant time.
+     *
+     * @return {MapIterator}
+     *
+     */
+    method.moveToStart = function moveToStart() {
+        this._checkModCount();
+        this.key = this.value = void 0;
+        this.index = -1;
+        this._index = -1;
+        this._bucketIndex = -1;
+        this._indexDelta = 1;
 
-        while( true ) {
-            var k = buckets[ bucketIndex << 1 ];
-
-            if( k === void 0 ) {
-                return void 0;
-            }
-            else if( this._equality( k, key ) ) {
-                return buckets[ ( bucketIndex << 1 ) + 1 ];
-            }
-            bucketIndex = ( 1 + bucketIndex ) & ( capacity - 1 );
-
-        }
+        return this;
     };
 
-    method.put = method.set = function set( key, value ) {
-        if( key === void 0 || value === void 0 ) {
-            throw new Error( "Cannot use undefined as a key or value" );
-        }
-        this._modCount++;
-        var bucketIndex = hash( key, this._capacity ),
-            capacity = this._capacity - 1,
-            buckets = this._buckets;
-        while( true ) {
-            var k = buckets[ bucketIndex << 1 ];
+    /**
+     * Move the cursor after the last entry. The cursor is not pointing at
+     * a valid entry, you may move to the last entry after calling this
+     * method by calling .prev().
+     *
+     * This method operates in constant time.
+     *
+     * @return {MapIterator}
+     *
+     */
+    method.moveToEnd = function moveToEnd() {
+        this._checkModCount();
+        this.key = this.value = void 0;
+        this._index = this._map._size;
+        this.index = -1;
+        this._bucketIndex = this._map._capacity;
+        this._indexDelta = 1;
 
-            if( k === void 0 ) {
-                //Insertion
-                buckets[ bucketIndex << 1 ] = key;
-                buckets[ ( bucketIndex << 1 ) + 1 ] = value;
-                this._size++;
-                this._checkResize();
-                return void 0;
-            }
-            else if( this._equality( k, key ) ) {
-                //update
-                var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
-                buckets[ ( bucketIndex << 1 ) + 1 ] = value;
-                return ret;
-            }
-
-            bucketIndex = ( 1 + bucketIndex ) & capacity;
-        }
+        return this;
     };
 
+    /**
+     * If the cursor is pointing at a valid entry, you may update
+     * the entry's value with this method without invalidating
+     * the iterator.
+     *
+     * An iterator becomes invalid if the map is modified behind
+     * its back.
+     *
+     * You may call this method multiple times while the cursor
+     * is pointing at the same entry, with each call replacing the
+     * last call's value for the key.
+     *
+     * Returns the previous value that was associated with the key.
+     * Returns undefined if the cursor was not pointing at an entry.
+     *
+     * @param {dynamic} value The value to associate
+     * with the current cursor's key in the map.
+     * @return {dynamic}
+     * @return {void}
+     *
+     */
+    method.set = method.put = function put( value ) {
+        this._checkModCount();
+        var i = this._bucketIndex;
 
-    //From http://en.wikipedia.org/wiki/Open_addressing
-    method["delete"] = method.unset = method.remove = function remove( key ) {
-        this._modCount++;
-        var bucketIndex = hash( key, this._capacity ),
-            capacity = this._capacity - 1,
-            buckets = this._buckets;
-        while( true ) {
-            var k = buckets[ bucketIndex << 1 ];
-
-            if( k === void 0 ) {
-                //key is not in table
-                return void 0;
-            }
-            else if( this._equality( k, key ) ) {
-                break;
-            }
-
-            bucketIndex = ( 1 + bucketIndex ) & capacity;
+        if( i < 0 || i >= this._map._capacity ) {
+            return;
         }
 
-        var entryIndex = bucketIndex;
-        var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
-        buckets[ ( bucketIndex << 1 ) ] = buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
-        while( true ) {
-            entryIndex = ( 1 + entryIndex ) & capacity;
-
-            var slotKey = buckets[ entryIndex << 1 ];
-
-            if( slotKey === void 0 ) {
-                break;
-            }
-
-            var k = hash( slotKey, capacity + 1 );
-
-            if ( ( bucketIndex <= entryIndex ) ?
-                ( ( bucketIndex < k ) && ( k <= entryIndex ) ) :
-                ( ( bucketIndex < k ) || ( k <= entryIndex ) ) ) {
-                continue;
-            }
-            buckets[ ( bucketIndex << 1 ) ] = buckets[ ( entryIndex << 1 ) ];
-            buckets[ ( bucketIndex << 1 ) + 1 ] = buckets[ ( entryIndex << 1 ) + 1 ];
-            bucketIndex = entryIndex;
-            buckets[ ( bucketIndex << 1 ) ] = buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
-        }
-
-        this._size--;
+        var ret = this.value;
+        this._map._buckets[ ( i << 1 ) + 1 ] = this.value = value;
         return ret;
     };
 
+    /**
+     * If the cursor is pointing at a valid entry, you may delete
+     * the entry's associated key-value mapping from the map with
+     * this method without invalidating the iterator.
+     *
+     * An iterator becomes invalid if the map is modified behind
+     * its back.
+     *
+     * After successfully calling this method (deletion happend),
+     * the cursor does not point at anything. After deletion, you
+     * may move the cursor normally with the cursor traversal
+     * methods.
+     *
+     * If deletion happened, returns the value that was associated
+     * with the deleted key. Returns undefined otherwise.
+     *
+     * @return {dynamic}
+     * @return {void}
+     *
+     */
+    method["delete"] = method.remove = function remove() {
+        this._checkModCount();
 
+        var i = this._bucketIndex;
 
-    method.putAll = method.setAll = function setAll( obj ) {
-        this._modCount++;
-        var listOfTuples = toListOfTuples( obj );
-        this._setAll( listOfTuples );
-    };
-
-    method.clear = function clear() {
-        this._modCount++;
-        this._makeBuckets();
-        this._size = 0;
-    };
-
-    method.length = method.size = function size() {
-        return this._size;
-    };
-
-    method.isEmpty = function isEmpty() {
-        return this._size === 0;
-    };
-
-
-    method.toJSON = MapToJSON;
-
-    method.toString = MapToString;
-
-    method.valueOf = MapValueOf;
-
-    method.keys = MapKeys;
-
-    method.values = MapValues;
-
-    method.entries = MapEntries;
-
-    method.iterator = function iterator() {
-        return new Iterator( this );
-    };
-
-    var Iterator = (function() {
-        var method = Iterator.prototype;
-
-        function Iterator( map ) {
-            this.key = this.value = void 0;
-            this.index = -1;
-            this._modCount = map._modCount;
-
-            this._indexDelta = 1;
-            this._index = -1;
-            this._map = map;
-            this._bucketIndex = -1;
+        if( i < 0 || i >= this._map._capacity ||
+            this.key === void 0 ) {
+            return;
         }
 
-        method._checkModCount = MapIteratorCheckModCount;
+        var ret = this._map.remove( this.key );
+        this._modCount = this._map._modCount;
+        this.key = this.value = void 0;
+        this.index = -1;
 
-        method._moveToNextBucketIndex = function _moveToNextBucketIndex() {
-            var i = ( this._bucketIndex << 1 ) + ( this._indexDelta << 1 ),
-                b = this._map._buckets,
-                l = b.length;
-            for( ; i < l; i += 2 ) {
-                if( b[i] !== void 0 ) {
-                    this.key = b[i];
-                    this.value = b[i+1];
-                    this._bucketIndex = i >> 1;
-                    break;
-                }
-            }
-        };
+        this._indexDelta = 0;
 
-        method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
-            var i = ( this._bucketIndex << 1 ) - 2,
-                b = this._map._buckets;
-            for( ; i >= 0; i -= 2 ) {
-                if( b[i] !== void 0 ) {
-                    this.key = b[i];
-                    this.value = b[i+1];
-                    this._bucketIndex = i >> 1;
-                    break;
-                }
-            }
-        };
+        return ret;
+    };
 
-        //API
+    return Iterator;
+})();
 
-        method.next = function next() {
-            this._checkModCount();
-            this._index += this._indexDelta;
-
-            if( this._index >= this._map._size ) {
-                this.moveToEnd();
-                return false;
-            }
-
-            this._moveToNextBucketIndex();
-            this.index = this._index;
-            this._indexDelta = 1;
-
-            return true;
-        };
-
-        method.prev = function prev() {
-            this._checkModCount();
-            this._index--;
-
-            if( this._index < 0 ||
-                this._map._size === 0 ) {
-                this.moveToStart();
-                return false;
-            }
-
-            this._moveToPrevBucketIndex();
-            this.index = this._index;
-
-            this._indexDelta = 1;
-
-            return true;
-        };
-
-        method.moveToStart = function moveToStart() {
-            this._checkModCount();
-            this.key = this.value = void 0;
-            this.index = -1;
-            this._index = -1;
-            this._bucketIndex = -1;
-            this._indexDelta = 1;
-
-            return this;
-        };
-
-        method.moveToEnd = function moveToEnd() {
-            this._checkModCount();
-            this.key = this.value = void 0;
-            this._index = this._map._size;
-            this.index = -1;
-            this._bucketIndex = this._map._capacity;
-            this._indexDelta = 1;
-
-            return this;
-        };
-
-        method.set = method.put = function put( value ) {
-            this._checkModCount();
-            var i = this._bucketIndex;
-
-            if( i < 0 || i >= this._map._capacity ) {
-                return;
-            }
-
-            var ret = this.value;
-            this._map._buckets[ ( i << 1 ) + 1 ] = this.value = value;
-            return ret;
-        };
-
-        method["delete"] = method.remove = function remove() {
-            this._checkModCount();
-
-            var i = this._bucketIndex;
-
-            if( i < 0 || i >= this._map._capacity ) {
-                return;
-            }
-
-            var ret = this._map.remove( this.key );
-            this._modCount = this._map._modCount;
-            this.key = this.value = void 0;
-            this.index = -1;
-
-            this._indexDelta = 0;
-
-            return ret;
-        };
-
-        return Iterator;
-    })();
-
-    method._Iterator = Iterator;
+method._Iterator = Iterator;
 
 
-    return Map;
+return Map;
 })();;
 var OrderedMap = (function() {
     var _super = Map.prototype,
@@ -2431,204 +3193,479 @@ var SortedMap = (function() {
     SetToJSON, SetToString, SetValueOf */
 /* jshint -W079 */
 var Set = (function() {
-    var method = Set.prototype;
 
-    var __value = true;
+var method = Set.prototype;
 
-    function Set( capacity, equality ) {
-        this._map = null;
-        this._init( capacity, equality );
+
+/**
+ * Constructor for sets. Set is a unique collection of values, without
+ * any ordering. It is not backed by a map and the memory usage is thus
+ * incredibly low.
+ *
+ * The undefined value is not supported as a value. Use
+ * null instead.
+ *
+ * If ordering is needed consider OrderedSet or SortedSet.
+ *
+ * @param {int=|Array.<dynamic>|Set} capacity The initial capacity.
+ * Can also be an array or another set to initialize the set.
+ * @constructor
+ */
+function Set( capacity ) {
+    this._buckets = null;
+    this._size = 0;
+    this._modCount = 0;
+    this._capacity = DEFAULT_CAPACITY;
+    this._equality = equality.simpleEquals;
+    this._usingSimpleEquals = true;
+    this._init( capacity );
+}
+
+/**
+ * Internal.
+ *
+ * @param {int=} capacity Description of capacity parameter.
+ * @return {void}
+ *
+ */
+method._init = function _init( capacity ) {
+    if( capacity == null ) {
+        this._makeBuckets();
+        return;
     }
 
-    method._init = function _init( capacity, equality ) {
-        if( typeof capacity === "function" ) {
-            var tmp = equality;
-            equality = capacity;
-            capacity = tmp;
+    switch( typeof capacity ) {
+    case "number":
+        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._makeBuckets();
+        break;
+    case "object":
+        var items = toList( capacity );
+        var size = items.length;
+        var capacity = pow2AtLeast( size );
+        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
+            capacity = capacity << 1;
         }
+        this._capacity = capacity;
+        this._makeBuckets();
+        this._addAll( items );
+        break;
+    default:
+        this._makeBuckets();
+    }
+};
 
-        if( typeof capacity === "number" ) {
-            this._map = new this._mapType( capacity, equality );
+method._checkEquals = Map.prototype._checkEquals;
+method._resizeTo = Map.prototype._resizeTo;
+method._getNextCapacity = Map.prototype._getNextCapacity;
+method._isOverCapacity = Map.prototype._isOverCapacity;
+method._checkResize = Map.prototype._checkResize;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
+method._makeBuckets = function _makeBuckets() {
+    var length = this._capacity << 0;
+
+    var b = this._buckets = new Array( length < 100000 ? length : 0 );
+
+    if( length >= 100000 ) {
+        for( var i = 0; i < length; ++i ) {
+            b[i] = void 0;
         }
-        else {
-            this._map = new this._mapType( equality );
+    }
+};
+
+/**
+ * Internal.
+ *
+ * @param {Array.<dynamic>} oldBuckets Description of oldBuckets parameter.
+ * @return {void}
+ *
+ */
+method._resized = function _resized( oldBuckets ) {
+    var newBuckets = this._buckets,
+        oldLength = oldBuckets.length;
+
+    for( var i = 0; i < oldLength; i++ ) {
+
+        var key = oldBuckets[i];
+        if( key !== void 0) {
+            var newIndex = hash( key, this._capacity );
+
+            while( newBuckets[ newIndex ] !== void 0 ) {
+                newIndex = ( this._capacity - 1 ) & ( newIndex + 1 );
+            }
+            newBuckets[ newIndex ] = oldBuckets[ i ];
+            oldBuckets[i] =  = void 0;
         }
+    }
+};
 
-        if( typeof capacity === "object" && capacity != null) {
-            this._addAll( toList( capacity ) );
-        }
-    };
 
-    method._mapType = Map;
+/**
+ * Internal.
+ *
+ * @param {Array.<dynamic>} obj Description of obj parameter.
+ * @return {void}
+ *
+ */
+method._addAll = function _addAll( obj ) {
+    if( !obj.length ) {
+        return;
+    }
+    var newSize = obj.length + this._size;
 
-    method._addAll = function _addAll( items ) {
-        this._map._setAll( items, __value );
-    };
-
-    //API
-
-    method.forEach = SetForEach;
-
-    method.clone = function clone() {
-        return new this.constructor(
-            this._map.keys(),
-            this._map._equality
-        );
-    };
-
-    method.add = function add( value ) {
-        return this._map.put( value, __value );
-    };
-
-    method.remove = function remove( value ) {
-        return this._map.remove( value ) === __value;
-    };
-
-    method.addAll = function addAll( items ) {
-        this._addAll( toList( items ) );
-    };
-
-    method.clear = function clear() {
-        this._map.clear();
-    };
-
-    method.values = method.toArray = function toArray() {
-        return this._map.keys();
-    };
-
-    method.contains = function contains( value ) {
-        return this._map.containsKey( value );
-    };
-
-    method.size = method.length = function length() {
-        return this._map.size();
-    };
-
-    method.isEmpty = function isEmpty() {
-        return this.size() === 0;
-    };
-
-    method.subsetOf = function subsetOf( set ) {
-        var it = this.iterator();
-        while( it.next() ) {
-            if( !set.contains( it.value ) ) {
-                return false;
+    if( this._isOverCapacity( newSize ) ) {
+        var capacity = pow2AtLeast( newSize );
+        if( ( ( newSize << 2 ) - newSize ) >= ( capacity << 1 ) ) {
+            capacity <<= 1;
+            if( capacity < 100000 ) {
+                capacity <<= 1;
             }
         }
-        return this.size() !== set.size();
-    };
+        this._resizeTo( capacity );
+    }
 
-    method.supersetOf = function supersetOf( set ) {
-        return set.subsetOf( this );
-    };
+    for( var i = 0; i < obj.length; ++i ) {
+        this.add( obj[i] );
+    }
 
-    method.allContainedIn = function allContainedIn( set ) {
-        var it = this.iterator();
-        while( it.next() ) {
-            if( !set.contains( it.value ) ) {
-                return false;
-            }
+};
+
+//API
+/**
+ * Simple way to iterate the set. The callback fn receives arguments:
+ *
+ * {dynamic} value, {integer} index
+ *
+ * Iteration can be very slow in an unordered set.
+ *
+ * @param {function} fn Description of fn parameter.
+ * @param {Object=} ctx Description of ctx parameter.
+ * @return {void}
+ *
+ */
+method.forEach = SetForEach;
+
+/**
+ * Returns a shallow clone of the set.
+ *
+ * @return {Set}
+ *
+ */
+method.clone = function clone() {
+    return new this.constructor(
+        this.toArray()
+    );
+};
+
+/**
+ * Add a value into the set. If the value is already in the
+ * set, nothing happens.
+ *
+ * The undefined value is not supported as a value. Use
+ * null instead.
+ *
+ * @param {dynamic} value The value to add into the set.
+ * @return {void}
+ * @throws {Error} When value is undefined
+ *
+ */
+method.add = function add( value ) {
+    if( value === void 0 ) {
+        throw new Error( "Cannot use undefined as a value" );
+    }
+    if( isArray( value ) ) {
+        this._checkEquals();
+    }
+    this._modCount++;
+    var bucketIndex = hash( value, this._capacity ),
+        capacity = this._capacity - 1,
+        buckets = this._buckets;
+    while( true ) {
+        var k = buckets[ bucketIndex ];
+
+        if( k === void 0 ) {
+            buckets[ bucketIndex ] = value;
+            this._size++;
+            this._checkResize();
+            return void 0;
         }
-        return true;
-    };
-
-    method.containsAll = function containsAll( set ) {
-        return set.allContainedIn( this );
-    };
-
-    method.valueOf = SetValueOf;
-
-    method.toString = SetToString;
-
-    method.toJSON = SetToJSON;
-
-    method.union = function union( a ) {
-        var ret = new this.constructor( this.size() + a.size(), this._map._equality );
-
-        var aHas, bHas,
-            itA = this.iterator(),
-            itB = a.iterator();
-
-        while( true ) {
-            if( aHas = itA.next() ) {
-                ret.add( itA.value );
-            }
-            if( bHas = itB.next() ) {
-                ret.add( itB.value );
-            }
-
-            if( !aHas && !bHas ) {
-                break;
-            }
-        }
-
-        return ret;
-    };
-
-    method.intersection = function intersection( a ) {
-        var ret = new this.constructor( Math.max( this.size(), a.size() ), this._map._equality );
-
-        var src = this.size() < a.size() ? this : a,
-            dst = src === a ? this : a,
-            it = src.iterator();
-
-        while( it.next() ) {
-            if( dst.contains( it.value ) ) {
-                ret.add( it.value );
-            }
-        }
-
-        return ret;
-    };
-
-    method.complement = function complement( a ) {
-        var ret = new this.constructor( Math.max( this.size(), a.size() ), this._map._equality );
-
-        var it = this.iterator();
-
-        while( it.next() ) {
-            if( !a.contains( it.value ) ) {
-                ret.add( it.value );
-            }
-        }
-        return ret;
-    };
-
-    method.difference = function difference( a ) {
-        var ret = this.union( a ),
-            tmp = this.intersection( a ),
-            it = tmp.iterator();
-
-        while( it.next() ) {
-            ret.remove( it.value );
+        else if( this._equality( k, value ) === true ) {
+            return void 0;
         }
 
-        return ret;
-    };
+        bucketIndex = ( 1 + bucketIndex ) & capacity;
+    }
+};
 
-    method.iterator = function iterator() {
-        return new Iterator( this );
-    };
+/**
+ * Removes the given value from the set. If the
+ * value is not in the set, returns false. If the value is in the
+ * set, the value is removed and true is returned;
+ *
+ * You can check if the removal was successful by checking
+ *
+ * set.remove( value ) === true
+ *
+ * The undefined value as a value is not supported. Use null instead.
+ *
+ * @param {dynamic} value The value to remove from the set.
+ * @return {boolean}
+ *
+ */
+//Linear probing with step of 1 can use
+//the instant clean-up algorithm from
+//http://en.wikipedia.org/wiki/Open_addressing
+//instead of marking slots as deleted.
+method["delete"] = method.remove = function remove( value ) {
+    this._modCount++;
+    var bucketIndex = hash( key, this._capacity ),
+        capacity = this._capacity - 1,
+        buckets = this._buckets;
+    while( true ) {
+        var k = buckets[ bucketIndex ];
 
-    var Iterator = (function() {
-        var method = Iterator.prototype;
-
-        function Iterator( set ) {
-            this._iterator = set._map.iterator();
-            this.value = void 0;
-            this.index = -1;
-            this.moveToStart();
+        if( k === void 0 ) {
+            //value is not in table
+            return false;
+        }
+        else if( this._equality( k, value ) ) {
+            break;
         }
 
-        copyProperties( setIteratorMethods, method );
+        bucketIndex = ( 1 + bucketIndex ) & capacity;
+    }
 
-        return Iterator;
-    })();
+    var entryIndex = bucketIndex;
 
-    method._Iterator = Iterator;
+    buckets[ bucketIndex ] = void 0;
 
-    return Set;
+    while( true ) {
+        entryIndex = ( 1 + entryIndex ) & capacity;
+
+        var slotKey = buckets[ entryIndex ];
+
+        if( slotKey === void 0 ) {
+            break;
+        }
+
+        var k = hash( slotKey, capacity + 1 );
+
+        if ( ( bucketIndex <= entryIndex ) ?
+            ( ( bucketIndex < k ) && ( k <= entryIndex ) ) :
+            ( ( bucketIndex < k ) || ( k <= entryIndex ) ) ) {
+            continue;
+        }
+
+        buckets[ bucketIndex  ] = buckets[ entryIndex ];
+        bucketIndex = entryIndex;
+        buckets[ bucketIndex ] = void 0;
+    }
+
+    this._size--;
+    return true;
+};
+
+/**
+ * Insert the given values into the set. Can be given in the form
+ * of an array or another Set.
+ *
+ *
+ * @param {Array.<dynamic>|Set} items Description of items parameter.
+ * @return {void}
+ *
+ */
+method.addAll = function addAll( items ) {
+    this._addAll( toList( items ) );
+};
+
+/**
+ * Remove everything in the set.
+ *
+ * @return {void}
+ *
+ */
+method.clear = Map.prototype.clear;
+
+/**
+ * Returns the set as an array.
+ *
+ * Iteration can be very slow in an unordered set.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
+method.values = method.toArray = MapValues;
+
+/**
+ * See if the value is contained in this set.
+ *
+ * Value cannot be undefined.
+ *
+ * @param {dynamic} value The value to look up.
+ * @return {boolean}
+ *
+ */
+method.contains = function contains( value ) {
+    var capacity = this._capacity,
+        buckets = this._buckets,
+        bucketIndex = hash( value, capacity );
+
+    while( true ) {
+        var k = buckets[ bucketIndex ];
+
+        if( k === void 0 ) {
+            return false;
+        }
+        else if( this._equality( k, value ) ) {
+            return true;
+        }
+        bucketIndex = ( 1 + bucketIndex ) & ( capacity - 1 );
+    }
+};
+
+/**
+ * Returns the amount of items in the set.
+ *
+ * @return {int}
+ *
+ */
+method.size = method.length = Map.prototype.size;
+
+/**
+ * See if the set doesn't contain anything.
+ *
+ * @return {boolean}
+ *
+ */
+method.isEmpty = Map.prototype.isEmpty;
+
+method.subsetOf = function subsetOf( set ) {
+    var it = this.iterator();
+    while( it.next() ) {
+        if( !set.contains( it.value ) ) {
+            return false;
+        }
+    }
+    return this.size() !== set.size();
+};
+
+method.supersetOf = function supersetOf( set ) {
+    return set.subsetOf( this );
+};
+
+method.allContainedIn = function allContainedIn( set ) {
+    var it = this.iterator();
+    while( it.next() ) {
+        if( !set.contains( it.value ) ) {
+            return false;
+        }
+    }
+    return true;
+};
+
+method.containsAll = function containsAll( set ) {
+    return set.allContainedIn( this );
+};
+
+method.valueOf = SetValueOf;
+
+method.toString = SetToString;
+
+method.toJSON = SetToJSON;
+
+method.union = function union( a ) {
+    var ret = new this.constructor( ( this.size() + a.size() ) / 0.67 );
+
+    var aHas, bHas,
+        itA = this.iterator(),
+        itB = a.iterator();
+
+    while( true ) {
+        if( aHas = itA.next() ) {
+            ret.add( itA.value );
+        }
+        if( bHas = itB.next() ) {
+            ret.add( itB.value );
+        }
+
+        if( !aHas && !bHas ) {
+            break;
+        }
+    }
+
+    return ret;
+};
+
+method.intersection = function intersection( a ) {
+    var ret = new this.constructor( Math.max( this.size(), a.size() ) / 0.67 );
+
+    var src = this.size() < a.size() ? this : a,
+        dst = src === a ? this : a,
+        it = src.iterator();
+
+    while( it.next() ) {
+        if( dst.contains( it.value ) ) {
+            ret.add( it.value );
+        }
+    }
+
+    return ret;
+};
+
+method.complement = function complement( a ) {
+    var ret = new this.constructor( Math.max( this.size(), a.size() ) / 0.67 );
+
+    var it = this.iterator();
+
+    while( it.next() ) {
+        if( !a.contains( it.value ) ) {
+            ret.add( it.value );
+        }
+    }
+    return ret;
+};
+
+method.difference = function difference( a ) {
+    var ret = this.union( a ),
+        tmp = this.intersection( a ),
+        it = tmp.iterator();
+
+    while( it.next() ) {
+        ret.remove( it.value );
+    }
+
+    return ret;
+};
+
+method.iterator = function iterator() {
+    return new Iterator( this );
+};
+
+var Iterator = (function() {
+    var method = Iterator.prototype;
+
+    function Iterator( set ) {
+        this._iterator = set._map.iterator();
+        this.value = void 0;
+        this.index = -1;
+        this.moveToStart();
+    }
+
+    copyProperties( setIteratorMethods, method );
+
+    return Iterator;
 })();
+
+method._Iterator = Iterator;
+
+
+return Set;})();
 ;
 /* global OrderedMap */
 var OrderedSet = (function() {

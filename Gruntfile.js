@@ -12,12 +12,7 @@ module.exports = function( grunt ) {
 
     gruntConfig.concat = {
         options: {
-            separator: ';\n',
-
-            stripBanners: {
-                block: true,
-                line: true
-            }
+            separator: ';\n'
         },
 
         dist: {
@@ -27,9 +22,16 @@ module.exports = function( grunt ) {
                 "./src/core.js",
                 "./src/object.js",
 
+
                 "./src/red_black_tree_util.js",
                 "./src/red_black_tree_node.js",
                 "./src/red_black_tree.js",
+
+                "./src/mt.js",
+
+                "./src/capacity.js",
+                "./src/equality.js",
+                "./src/hash.js",
 
                 "./src/map.js",
                 "./src/orderedmap.js",

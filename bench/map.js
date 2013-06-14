@@ -106,7 +106,7 @@ var datenow = typeof performance!== "undefined" && function(){return performance
 
 
     console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "integers");
-})();
+});
 
 
 (function ENTRY_FUNCTION_NATIVE(){ //Naming to distinguish in v8 dumps
@@ -152,7 +152,7 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var opsps = Math.round( ops * ( 1000 / duration));
 
     console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "integers");
-})();
+});
 
 
 
@@ -249,7 +249,7 @@ var hpr = {}.hasOwnProperty;
 
     console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "strings");
 
-})();
+});
 
 (function ENTRY_FUNCTION_MAP_FLOAT(){ //Naming to distinguish in v8 dumps
     var a = new Map(itemCount / 0.67);
@@ -290,7 +290,7 @@ var hpr = {}.hasOwnProperty;
 
     console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using when using DS.Map filled with", itemCount, "floats");
 
-})();
+});
 
 
 (function ENTRY_FUNCTION_NATIVE_FLOAT(){ //Naming to distinguish in v8 dumps
@@ -338,4 +338,4 @@ var hpr = {}.hasOwnProperty;
 
     console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "floats");
 
-})();
+});
