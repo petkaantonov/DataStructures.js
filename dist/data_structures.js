@@ -350,6 +350,12 @@ function MapIteratorCheckModCount() {
         throw new Error( "map cannot be mutated while iterating" );
     }
 }
+
+function SetIteratorCheckModCount() {
+    if( this._modCount !== this._set._modCount ) {
+        throw new Error( "set cannot be mutated while iterating" );
+    }
+}
 ;
 /* jshint -W079 */
 /* exported Object */
@@ -3292,15 +3298,15 @@ method._resized = function _resized( oldBuckets ) {
 
     for( var i = 0; i < oldLength; i++ ) {
 
-        var key = oldBuckets[i];
-        if( key !== void 0) {
-            var newIndex = hash( key, this._capacity );
+        var value = oldBuckets[i];
+        if( value !== void 0) {
+            var newIndex = hash( value, this._capacity );
 
             while( newBuckets[ newIndex ] !== void 0 ) {
                 newIndex = ( this._capacity - 1 ) & ( newIndex + 1 );
             }
             newBuckets[ newIndex ] = oldBuckets[ i ];
-            oldBuckets[i] =  = void 0;
+            oldBuckets[ i ] = void 0;
         }
     }
 };
@@ -3424,7 +3430,7 @@ method.add = function add( value ) {
 //instead of marking slots as deleted.
 method["delete"] = method.remove = function remove( value ) {
     this._modCount++;
-    var bucketIndex = hash( key, this._capacity ),
+    var bucketIndex = hash( value, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
     while( true ) {
@@ -3448,13 +3454,13 @@ method["delete"] = method.remove = function remove( value ) {
     while( true ) {
         entryIndex = ( 1 + entryIndex ) & capacity;
 
-        var slotKey = buckets[ entryIndex ];
+        var slotValue = buckets[ entryIndex ];
 
-        if( slotKey === void 0 ) {
+        if( slotValue === void 0 ) {
             break;
         }
 
-        var k = hash( slotKey, capacity + 1 );
+        var k = hash( slotValue, capacity + 1 );
 
         if ( ( bucketIndex <= entryIndex ) ?
             ( ( bucketIndex < k ) && ( k <= entryIndex ) ) :
@@ -3545,6 +3551,13 @@ method.size = method.length = Map.prototype.size;
  */
 method.isEmpty = Map.prototype.isEmpty;
 
+/**
+ * See if this set is a proper subset of the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.subsetOf = function subsetOf( set ) {
     var it = this.iterator();
     while( it.next() ) {
@@ -3555,10 +3568,24 @@ method.subsetOf = function subsetOf( set ) {
     return this.size() !== set.size();
 };
 
+/**
+ * See if this set is a proper superset of the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.supersetOf = function supersetOf( set ) {
     return set.subsetOf( this );
 };
 
+/**
+ * See if this set is fully contained in the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.allContainedIn = function allContainedIn( set ) {
     var it = this.iterator();
     while( it.next() ) {
@@ -3569,16 +3596,51 @@ method.allContainedIn = function allContainedIn( set ) {
     return true;
 };
 
+/**
+ * See if this set is fully contains the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.containsAll = function containsAll( set ) {
     return set.allContainedIn( this );
 };
 
+/**
+ * Returns a hash code for the set.
+ *
+ * @return {int}
+ *
+ */
 method.valueOf = SetValueOf;
 
+/**
+ * Returns a string representation of the set.
+ *
+ * @return {String}
+ *
+ */
 method.toString = SetToString;
 
+/**
+ * Automatically called by JSON.stringify. If you later parse the JSON
+ * you can pass the array to a set constructor.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.toJSON = SetToJSON;
 
+/**
+ * Returns the union of the argument set and this set. The returned
+ * set will have all the members that appear in this set, the second
+ * set or both.
+ *
+ * @param {Set} a The set to union this set with.
+ * @return {Set}
+ *
+ */
 method.union = function union( a ) {
     var ret = new this.constructor( ( this.size() + a.size() ) / 0.67 );
 
@@ -3602,6 +3664,15 @@ method.union = function union( a ) {
     return ret;
 };
 
+/**
+ * Returns the intersection of the argument set and this set. The returned
+ * set will have all the members that appear in both this set and the
+ * argument set.
+ *
+ * @param {Set} a The set to intersect this set with.
+ * @return {Set}
+ *
+ */
 method.intersection = function intersection( a ) {
     var ret = new this.constructor( Math.max( this.size(), a.size() ) / 0.67 );
 
@@ -3618,6 +3689,17 @@ method.intersection = function intersection( a ) {
     return ret;
 };
 
+/**
+ * Returns the relative complement of this set in relation to the argument
+ * set. The returned set will have all the members that are in this set
+ * but were not in the argument set.
+ *
+ * Note that set1.complement(set2) is different from set2.complement(set1)
+ *
+ * @param {Set} a The set to complement this set with.
+ * @return {Set}
+ *
+ */
 method.complement = function complement( a ) {
     var ret = new this.constructor( Math.max( this.size(), a.size() ) / 0.67 );
 
@@ -3631,18 +3713,48 @@ method.complement = function complement( a ) {
     return ret;
 };
 
+/**
+ * Returns the symmetrict difference of this set and the argument set.
+ * set. The returned set will have all the members that are in this set
+ * and the argument set, but not those that are in both sets.
+ *
+ * This is relatively expensive operation, requiring iteration of both
+ * sets currently.
+ *
+ * @param {Set} a The argument set.
+ * @return {Set}
+ *
+ */
 method.difference = function difference( a ) {
-    var ret = this.union( a ),
-        tmp = this.intersection( a ),
-        it = tmp.iterator();
+    var ret = new this.constructor( Math.max( this.size(), a.size() ) / 0.67 );
+
+    var it = this.iterator();
 
     while( it.next() ) {
-        ret.remove( it.value );
+        if( !a.contains( it.value ) ) {
+            ret.add( it.value );
+        }
     }
 
+    it = a.iterator();
+
+    while( it.next() ) {
+        if( !this.contains( it.value ) ) {
+            ret.add( it.value );
+        }
+    }
     return ret;
 };
 
+/**
+ * Returns an Iterator for the set. The iterator will become invalid
+ * if the set is modified outside that iterator.
+ *
+ * Iteration can be very slow in an unordered set.
+ *
+ * @return {MapIterator}
+ *
+ */
 method.iterator = function iterator() {
     return new Iterator( this );
 };
@@ -3650,14 +3762,229 @@ method.iterator = function iterator() {
 var Iterator = (function() {
     var method = Iterator.prototype;
 
+    /**
+     * Iterator constructor for the unordered set.
+     *
+     * If the iterator cursor is currently pointing at a valid
+     * entry, you can retrieve the entry's value and index
+     * from the iterator .value and .index properties
+     * respectively.
+     *
+     * For performance, they are just simple properties but
+     * they are meant to be read-only.
+     *
+     * You may reset the cursor at no cost to the beginning (
+     * .moveToStart()) or to the end (.moveToEnd()).
+     *
+     * You may move the cursor one item forward (.next())
+     * or backward (.prev()).
+     *
+     * Example:
+     *
+     * var it = set.iterator();
+     *
+     * while( it.next() ) {
+     *      console.log( it.value, it.index );
+     * }
+     * //Cursor is now *after* the last entry
+     * while( it.prev() ) { //Iterate backwards
+     *      console.log(  it.value, it.index );
+     * }
+     * //Cursor is now *before*the first entry
+     *
+     * Iteration can be very slow in an unordered set.
+     *
+     * @param {Set} set Description of set parameter.
+     * @constructor
+     */
     function Iterator( set ) {
-        this._iterator = set._map.iterator();
         this.value = void 0;
         this.index = -1;
-        this.moveToStart();
+        this._modCount = set._modCount;
+
+        this._indexDelta = 1;
+        this._index = -1;
+        this._set = set;
+        this._bucketIndex = -1;
     }
 
-    copyProperties( setIteratorMethods, method );
+    /**
+     * Internal
+     *
+     * @return {void}
+     *
+     */
+    method._checkModCount = SetIteratorCheckModCount;
+
+    /**
+     * Internal.
+     *
+     * @return {void}
+     *
+     */
+    method._moveToNextBucketIndex = function _moveToNextBucketIndex() {
+        var i = this._bucketIndex + this._indexDelta,
+            b = this._set._buckets,
+            l = b.length;
+        for( ; i < l; i ++ ) {
+            if( b[i] !== void 0 ) {
+                this.value = b[i];
+                this._bucketIndex = i;
+                break;
+            }
+        }
+    };
+
+    /**
+     * Internal.
+     *
+     * @return {void}
+     *
+     */
+    method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
+        var i = this._bucketIndex - 1,
+            b = this._set._buckets;
+        for( ; i >= 0; i -- ) {
+            if( b[i] !== void 0 ) {
+                this.value = b[i];
+                this._bucketIndex = i;
+                break;
+            }
+        }
+    };
+
+    //API
+
+    /**
+     * Move the cursor forward by one position. Returns true if the cursor is
+     * pointing at a valid entry. Returns false otherwise.
+     *
+     * @return {boolean}
+     *
+     */
+    method.next = function next() {
+        this._checkModCount();
+        this._index += this._indexDelta;
+
+        if( this._index >= this._set._size ) {
+            this.moveToEnd();
+            return false;
+        }
+
+        this._moveToNextBucketIndex();
+        this.index = this._index;
+        this._indexDelta = 1;
+
+        return true;
+    };
+
+    /**
+     * Move the cursor backward by one position. Returns true if the cursor is
+     * pointing at a valid entry. Returns false otherwise.
+     *
+     * @return {boolean}
+     *
+     */
+    method.prev = function prev() {
+        this._checkModCount();
+        this._index--;
+
+        if( this._index < 0 ||
+            this._set._size === 0 ) {
+            this.moveToStart();
+            return false;
+        }
+
+        this._moveToPrevBucketIndex();
+        this.index = this._index;
+
+        this._indexDelta = 1;
+
+        return true;
+    };
+
+    /**
+     * Move the cursor before the first entry. The cursor is not
+     * pointing at a valid entry, you may move to the first entry after
+     * calling this method by calling .next().
+     *
+     * This method operates in constant time.
+     *
+     * @return {SetIterator}
+     *
+     */
+    method.moveToStart = function moveToStart() {
+        this._checkModCount();
+        this.value = void 0;
+        this.index = -1;
+        this._index = -1;
+        this._bucketIndex = -1;
+        this._indexDelta = 1;
+
+        return this;
+    };
+
+    /**
+     * Move the cursor after the last entry. The cursor is not pointing at
+     * a valid entry, you may move to the last entry after calling this
+     * method by calling .prev().
+     *
+     * This method operates in constant time.
+     *
+     * @return {SetIterator}
+     *
+     */
+    method.moveToEnd = function moveToEnd() {
+        this._checkModCount();
+        this.value = void 0;
+        this._index = this._set._size;
+        this.index = -1;
+        this._bucketIndex = this._set._capacity;
+        this._indexDelta = 1;
+
+        return this;
+    };
+
+
+    /**
+     * If the cursor is pointing at a valid entry, you may delete
+     * the value from the iterated set without invalidating this
+     * iterator.
+     *
+     * An iterator becomes invalid if the set is modified behind
+     * its back.
+     *
+     * After successfully calling this method (deletion happend),
+     * the cursor does not point at anything. After deletion, you
+     * may move the cursor normally with the cursor traversal
+     * methods.
+     *
+     * If deletion happened, returns true. Returns false otherwise.
+     *
+     * @return {boolean}
+     * @return {void}
+     *
+     */
+    method["delete"] = method.remove = function remove() {
+        this._checkModCount();
+
+        var i = this._bucketIndex;
+
+        if( i < 0 || i >= this._set._capacity ||
+            this.value === void 0 ) {
+            return false;
+        }
+
+        this._set.remove( this.value );
+        this._modCount = this._set._modCount;
+        this.value = void 0;
+        this.index = -1;
+
+        this._indexDelta = 0;
+
+        return true;
+    };
+
 
     return Iterator;
 })();

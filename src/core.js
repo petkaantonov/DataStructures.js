@@ -327,3 +327,9 @@ function MapIteratorCheckModCount() {
         throw new Error( "map cannot be mutated while iterating" );
     }
 }
+
+function SetIteratorCheckModCount() {
+    if( this._modCount !== this._set._modCount ) {
+        throw new Error( "set cannot be mutated while iterating" );
+    }
+}
