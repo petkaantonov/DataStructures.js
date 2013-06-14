@@ -335,7 +335,7 @@ method.put = method.set = function set( key, value ) {
     if( isArray( key ) ) {
         this._checkEquals();
     }
-    this._modCount++;
+
     var bucketIndex = hash( key, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -348,12 +348,15 @@ method.put = method.set = function set( key, value ) {
             buckets[ ( bucketIndex << 1 ) + 1 ] = value;
             this._size++;
             this._checkResize();
+            this._modCount++;
             return void 0;
         }
         else if( this._equality( k, key ) === true ) {
+
             //update
             var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
             buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+            this._modCount++;
             return ret;
         }
 
@@ -382,7 +385,6 @@ method.put = method.set = function set( key, value ) {
 //http://en.wikipedia.org/wiki/Open_addressing
 //instead of marking slots as deleted.
 method["delete"] = method.unset = method.remove = function remove( key ) {
-    this._modCount++;
     var bucketIndex = hash( key, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -405,6 +407,8 @@ method["delete"] = method.unset = method.remove = function remove( key ) {
 
     buckets[ ( bucketIndex << 1 ) ] =
         buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+
+    this._modCount++;
 
     while( true ) {
         entryIndex = ( 1 + entryIndex ) & capacity;

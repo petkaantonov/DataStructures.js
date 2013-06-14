@@ -1,3 +1,5 @@
+var itemCount = 25000;
+
 function seqString( i ) {
     var src = i.toString(26),
         dst = "";
@@ -38,7 +40,7 @@ function randomString( i ) {
     return ret;
 }
 
-var itemCount = 500000;
+
 
 var stringItems = [];
 
@@ -63,6 +65,7 @@ for( var i = 0; i < half; ++i ) {
 
 var ds = typeof require !== "undefined" && require('../dist/data_structures.js') || DS;
 var Map = ds.Map;
+var Set = ds.Set;
 var datenow = typeof performance!== "undefined" && function(){return performance.now()} || Date.now;
 
 
@@ -105,8 +108,8 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var opsps = Math.round( ops * ( 1000 / duration));
 
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "integers");
-});
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "integers");
+})();
 
 
 (function ENTRY_FUNCTION_NATIVE(){ //Naming to distinguish in v8 dumps
@@ -151,8 +154,8 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "integers");
-});
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "integers");
+})();
 
 
 
@@ -196,7 +199,7 @@ var datenow = typeof performance!== "undefined" && function(){return performance
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "strings");
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "strings");
 
 })();
 
@@ -247,9 +250,9 @@ var hpr = {}.hasOwnProperty;
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "strings");
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "strings");
 
-});
+})();
 
 (function ENTRY_FUNCTION_MAP_FLOAT(){ //Naming to distinguish in v8 dumps
     var a = new Map(itemCount / 0.67);
@@ -288,9 +291,9 @@ var hpr = {}.hasOwnProperty;
     var ops = (half* 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using when using DS.Map filled with", itemCount, "floats");
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Map filled with", itemCount, "floats");
 
-});
+})();
 
 
 (function ENTRY_FUNCTION_NATIVE_FLOAT(){ //Naming to distinguish in v8 dumps
@@ -336,6 +339,132 @@ var hpr = {}.hasOwnProperty;
     var ops = (half * 2);
     var opsps = Math.round( ops * ( 1000 / duration));
 
-    console.log( "Completed", ops , "operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "floats");
+    console.log( "Completed", ops , "get operations in", duration, "milliseconds. ", opsps, "OP/s", "when using Native filled with", itemCount, "floats");
 
-});
+})();
+
+(function ENTRY_FUNCTION_SET_INTEGER(){ //Naming to distinguish in v8 dumps
+    var a = new Set(itemCount / 0.67);
+    var o = {};
+    var c;
+    var half = itemCount;
+
+    for( var i = 0, len = intItems.length; i < len; ++i ) {
+        c = a.add( intItems[i] );
+    }
+
+    for( var i = 0, len = intItems.length; i < len; ++i ) {
+        c = a.contains( intItems[i] );
+    }
+
+    var now = datenow();
+
+    for( var i = 0, len = intItems.length; i < len; ++i ) {
+        c = a.contains( intItems[i] );
+    }
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    for( var i = intItems.length - 1; i >= 0; --i ) {
+        c = a.contains( intItems[i] );
+    }
+
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    var duration = ( datenow() - now );
+    var ops = (half* 2);
+    var opsps = Math.round( ops * ( 1000 / duration));
+
+
+    console.log( "Completed", ops , "contains operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Set filled with", itemCount, "integers");
+})();
+
+(function ENTRY_FUNCTION_SET_FLOAT(){ //Naming to distinguish in v8 dumps
+    var a = new Set(itemCount / 0.67);
+    var o = {};
+    var c;
+    var half = itemCount;
+
+    for( var i = 0, len = floatItems.length; i < len; ++i ) {
+        c = a.add( floatItems[i] );
+    }
+
+    for( var i = 0, len = floatItems.length; i < len; ++i ) {
+        c = a.contains( floatItems[i] );
+    }
+
+    var now = datenow();
+
+    for( var i = 0, len = floatItems.length; i < len; ++i ) {
+        c = a.contains( floatItems[i] );
+    }
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    for( var i = floatItems.length - 1; i >= 0; --i ) {
+        c = a.contains( floatItems[i] );
+    }
+
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    var duration = ( datenow() - now );
+    var ops = (half* 2);
+    var opsps = Math.round( ops * ( 1000 / duration));
+
+    console.log( "Completed", ops , "contains operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Set filled with", itemCount, "floats");
+
+})();
+
+(function ENTRY_FUNCTION_SET_STRING(){ //Naming to distinguish in v8 dumps
+
+    var a = new Set(itemCount / 0.67);
+    var o = {};
+    var c;
+
+    var half = itemCount;
+
+
+    for( var i = 0, len = stringItems.length; i < len; ++i ) {
+        c = a.add( stringItems[i] );
+    }
+
+    for( var i = 0, len = stringItems.length; i < len; ++i ) {
+        c = a.contains( stringItems[i] );
+    }
+
+    var now = datenow();
+
+    for( var i = 0, len = stringItems.length; i < len; ++i ) {
+        c = a.contains( stringItems[i] );
+    }
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+    for( var i = stringItems.length - 1; i >= 0; --i ) {
+        c = a.contains( stringItems[i] );
+    }
+
+    if( c === 3 ) {
+        Math.rand()
+    }
+
+
+    var duration = ( datenow() - now );
+    var ops = (half * 2);
+    var opsps = Math.round( ops * ( 1000 / duration));
+
+    console.log( "Completed", ops , "contains operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Set filled with", itemCount, "strings");
+
+})();

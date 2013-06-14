@@ -2227,7 +2227,7 @@ method.put = method.set = function set( key, value ) {
     if( isArray( key ) ) {
         this._checkEquals();
     }
-    this._modCount++;
+
     var bucketIndex = hash( key, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -2240,12 +2240,15 @@ method.put = method.set = function set( key, value ) {
             buckets[ ( bucketIndex << 1 ) + 1 ] = value;
             this._size++;
             this._checkResize();
+            this._modCount++;
             return void 0;
         }
         else if( this._equality( k, key ) === true ) {
+
             //update
             var ret = buckets[ ( bucketIndex << 1 ) + 1 ];
             buckets[ ( bucketIndex << 1 ) + 1 ] = value;
+            this._modCount++;
             return ret;
         }
 
@@ -2274,7 +2277,6 @@ method.put = method.set = function set( key, value ) {
 //http://en.wikipedia.org/wiki/Open_addressing
 //instead of marking slots as deleted.
 method["delete"] = method.unset = method.remove = function remove( key ) {
-    this._modCount++;
     var bucketIndex = hash( key, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -2297,6 +2299,8 @@ method["delete"] = method.unset = method.remove = function remove( key ) {
 
     buckets[ ( bucketIndex << 1 ) ] =
         buckets[ ( bucketIndex << 1 ) + 1 ] = void 0;
+
+    this._modCount++;
 
     while( true ) {
         entryIndex = ( 1 + entryIndex ) & capacity;
@@ -3199,10 +3203,6 @@ var SortedMap = (function() {
     SetToJSON, SetToString, SetValueOf */
 /* jshint -W079 */
 var Set = (function() {
-
-var method = Set.prototype;
-
-
 /**
  * Constructor for sets. Set is a unique collection of values, without
  * any ordering. It is not backed by a map and the memory usage is thus
@@ -3226,6 +3226,7 @@ function Set( capacity ) {
     this._usingSimpleEquals = true;
     this._init( capacity );
 }
+var method = Set.prototype;
 
 /**
  * Internal.
@@ -3371,13 +3372,13 @@ method.clone = function clone() {
 
 /**
  * Add a value into the set. If the value is already in the
- * set, nothing happens.
+ * set, returns false. Returns true otherwise.
  *
  * The undefined value is not supported as a value. Use
  * null instead.
  *
  * @param {dynamic} value The value to add into the set.
- * @return {void}
+ * @return {boolean}
  * @throws {Error} When value is undefined
  *
  */
@@ -3388,7 +3389,6 @@ method.add = function add( value ) {
     if( isArray( value ) ) {
         this._checkEquals();
     }
-    this._modCount++;
     var bucketIndex = hash( value, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -3399,10 +3399,11 @@ method.add = function add( value ) {
             buckets[ bucketIndex ] = value;
             this._size++;
             this._checkResize();
-            return void 0;
+            this._modCount++;
+            return true;
         }
         else if( this._equality( k, value ) === true ) {
-            return void 0;
+            return false;
         }
 
         bucketIndex = ( 1 + bucketIndex ) & capacity;
@@ -3429,7 +3430,6 @@ method.add = function add( value ) {
 //http://en.wikipedia.org/wiki/Open_addressing
 //instead of marking slots as deleted.
 method["delete"] = method.remove = function remove( value ) {
-    this._modCount++;
     var bucketIndex = hash( value, this._capacity ),
         capacity = this._capacity - 1,
         buckets = this._buckets;
@@ -3448,8 +3448,8 @@ method["delete"] = method.remove = function remove( value ) {
     }
 
     var entryIndex = bucketIndex;
-
     buckets[ bucketIndex ] = void 0;
+    this._modCount++;
 
     while( true ) {
         entryIndex = ( 1 + entryIndex ) & capacity;
