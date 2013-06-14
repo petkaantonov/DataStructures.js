@@ -810,7 +810,7 @@ var Iterator = (function() {
      * @return {void}
      *
      */
-    method["delete"] = method.remove = function remove() {
+    method["delete"] = method.remove = method.unset = function remove() {
         this._checkModCount();
 
         var i = this._bucketIndex;
