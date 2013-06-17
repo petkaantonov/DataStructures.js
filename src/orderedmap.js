@@ -24,6 +24,9 @@ var ACCESS_ORDER = OrderedMap._ACCESS_ORDER = {};
  * Ordering gives a meaning to operations like firstKey, firstValue,
  * lastKey, lastValue, nthKey, nthValue, indexOfKey, indexOfValue and so on.
  *
+ * Deletion of an entry doesn't affect order of other entries
+ * in either ordering mode.
+ *
  * Array of tuples initialization:
  *
  * var map = OrderedMap([
@@ -64,12 +67,46 @@ OrderedMap.inAccessOrder = function inAccessOrder( capacity ) {
     return ret;
 };
 
-
+/**
+ * Internal.
+ *
+ *
+ */
 method._init = Map.prototype._init;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._checkEquals = Map.prototype._checkEquals;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._resizeTo = Map.prototype._resizeTo;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._getNextCapacity = Map.prototype._getNextCapacity;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._isOverCapacity = Map.prototype._isOverCapacity;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._checkResize = Map.prototype._checkResize;
 
 /**
@@ -167,17 +204,114 @@ method._setAll = function _setAll( obj, __value ) {
 
 //API
 
-
+/**
+ * Simple way to iterate the map. The callback fn receives arguments:
+ *
+ * {dynamic} value, {dynamic} key, {integer} index
+ *
+ * @param {function} fn Description of fn parameter.
+ * @param {Object=} ctx Description of ctx parameter.
+ * @return {void}
+ *
+ */
 method.forEach = Map.prototype.forEach;
+
+/**
+ * Returns the amount of items in the map.
+ *
+ * @return {int}
+ *
+ */
 method.length = method.size = Map.prototype.size;
+
+/**
+ * See if the map doesn't contain anything.
+ *
+ * @return {boolean}
+ *
+ */
 method.isEmpty = Map.prototype.isEmpty;
+
+/**
+ * Automatically called by JSON.stringify. If you later parse the JSON
+ * you can pass the array of tuples to a map constructor.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
 method.toJSON = Map.prototype.toJSON;
+
+/**
+ * Returns a string representation of the map.
+ *
+ * @return {String}
+ *
+ */
 method.toString = Map.prototype.toString;
+
+/**
+ * Returns a hash code for the map.
+ *
+ * @return {int}
+ *
+ */
 method.valueOf = Map.prototype.valueOf;
+
+/**
+ * Returns the keys in the map as an array.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.keys = Map.prototype.keys;
+
+/**
+ * Returns the values in the map as an array.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.values = Map.prototype.values;
+
+/**
+ * Returns the key-value pairs in the map as an array of tuples.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
 method.entries = Map.prototype.entries;
+
+/**
+ * Insert the given key-value pairs into the map. Can be given in the form
+ * of an array of tuples, another Map, or an Object which will be
+ * reflectively iterated over for string keys.
+ *
+ * Array of tuples example:
+ *
+ * map.setAll([
+ *      [0, "zero"],
+ *      [5, "five"],
+ *      [10, "ten"],
+ *      [13, "thirteen"]
+ * ]);
+ *
+ * The array of tuples syntax supports all types of keys, not just strings.
+ *
+ * @param {Array.<Tuple>|Map|Object} obj Description of obj parameter.
+ * @return {void}
+ *
+ */
 method.putAll = method.setAll = Map.prototype.putAll;
+
+/**
+ * See if the key is contained in the map.
+ *
+ * @param {dynamic} key The key to lookup.
+ * @return {boolean}
+ *
+ */
 method.containsKey = method.hasKey = Map.prototype.hasKey;
 
 /**
@@ -340,7 +474,7 @@ method.containsValue = method.hasValue = function hasValue( value ) {
  *
  * Key cannot be undefined. Use null instead.
  *
- * @param {dynamic} key They key to lookup index for.
+ * @param {dynamic} key The key to lookup index for.
  * @return {int}
  *
  */
@@ -367,7 +501,7 @@ method.indexOfKey = function indexOfKey( key ) {
  *
  * Returns -1 if the value is not in the map.
  *
- * @param {dynamic} value They value to lookup index for.
+ * @param {dynamic} value The value to lookup index for.
  * @return {int}
  *
  */
@@ -487,7 +621,7 @@ method.clear = function clear() {
 
 /**
  * Returns an Iterator for the map. The iterator will become invalid
- * if the map is modified outside that iterator.
+ * if the map is modified outside the iterator's methods.
  *
  * @return {MapIterator}
  *

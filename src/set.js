@@ -45,7 +45,8 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
+        this._capacity =
+            clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
@@ -60,10 +61,44 @@ method._init = function _init( capacity ) {
     }
 };
 
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._checkEquals = Map.prototype._checkEquals;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._resizeTo = Map.prototype._resizeTo;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._getNextCapacity = Map.prototype._getNextCapacity;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._isOverCapacity = Map.prototype._isOverCapacity;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._checkResize = Map.prototype._checkResize;
 
 /**

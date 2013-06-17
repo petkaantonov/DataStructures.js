@@ -3121,6 +3121,9 @@ var ACCESS_ORDER = OrderedMap._ACCESS_ORDER = {};
  * Ordering gives a meaning to operations like firstKey, firstValue,
  * lastKey, lastValue, nthKey, nthValue, indexOfKey, indexOfValue and so on.
  *
+ * Deletion of an entry doesn't affect order of other entries
+ * in either ordering mode.
+ *
  * Array of tuples initialization:
  *
  * var map = OrderedMap([
@@ -3161,12 +3164,46 @@ OrderedMap.inAccessOrder = function inAccessOrder( capacity ) {
     return ret;
 };
 
-
+/**
+ * Internal.
+ *
+ *
+ */
 method._init = Map.prototype._init;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._checkEquals = Map.prototype._checkEquals;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._resizeTo = Map.prototype._resizeTo;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._getNextCapacity = Map.prototype._getNextCapacity;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._isOverCapacity = Map.prototype._isOverCapacity;
+
+/**
+ * Internal.
+ *
+ *
+ */
 method._checkResize = Map.prototype._checkResize;
 
 /**
@@ -3264,17 +3301,114 @@ method._setAll = function _setAll( obj, __value ) {
 
 //API
 
-
+/**
+ * Simple way to iterate the map. The callback fn receives arguments:
+ *
+ * {dynamic} value, {dynamic} key, {integer} index
+ *
+ * @param {function} fn Description of fn parameter.
+ * @param {Object=} ctx Description of ctx parameter.
+ * @return {void}
+ *
+ */
 method.forEach = Map.prototype.forEach;
+
+/**
+ * Returns the amount of items in the map.
+ *
+ * @return {int}
+ *
+ */
 method.length = method.size = Map.prototype.size;
+
+/**
+ * See if the map doesn't contain anything.
+ *
+ * @return {boolean}
+ *
+ */
 method.isEmpty = Map.prototype.isEmpty;
+
+/**
+ * Automatically called by JSON.stringify. If you later parse the JSON
+ * you can pass the array of tuples to a map constructor.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
 method.toJSON = Map.prototype.toJSON;
+
+/**
+ * Returns a string representation of the map.
+ *
+ * @return {String}
+ *
+ */
 method.toString = Map.prototype.toString;
+
+/**
+ * Returns a hash code for the map.
+ *
+ * @return {int}
+ *
+ */
 method.valueOf = Map.prototype.valueOf;
+
+/**
+ * Returns the keys in the map as an array.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.keys = Map.prototype.keys;
+
+/**
+ * Returns the values in the map as an array.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.values = Map.prototype.values;
+
+/**
+ * Returns the key-value pairs in the map as an array of tuples.
+ *
+ * Iteration can be very slow in an unordered map.
+ *
+ * @return {Array.<Tuple>}
+ *
+ */
 method.entries = Map.prototype.entries;
+
+/**
+ * Insert the given key-value pairs into the map. Can be given in the form
+ * of an array of tuples, another Map, or an Object which will be
+ * reflectively iterated over for string keys.
+ *
+ * Array of tuples example:
+ *
+ * map.setAll([
+ *      [0, "zero"],
+ *      [5, "five"],
+ *      [10, "ten"],
+ *      [13, "thirteen"]
+ * ]);
+ *
+ * The array of tuples syntax supports all types of keys, not just strings.
+ *
+ * @param {Array.<Tuple>|Map|Object} obj Description of obj parameter.
+ * @return {void}
+ *
+ */
 method.putAll = method.setAll = Map.prototype.putAll;
+
+/**
+ * See if the key is contained in the map.
+ *
+ * @param {dynamic} key The key to lookup.
+ * @return {boolean}
+ *
+ */
 method.containsKey = method.hasKey = Map.prototype.hasKey;
 
 /**
@@ -3437,7 +3571,7 @@ method.containsValue = method.hasValue = function hasValue( value ) {
  *
  * Key cannot be undefined. Use null instead.
  *
- * @param {dynamic} key They key to lookup index for.
+ * @param {dynamic} key The key to lookup index for.
  * @return {int}
  *
  */
@@ -3464,7 +3598,7 @@ method.indexOfKey = function indexOfKey( key ) {
  *
  * Returns -1 if the value is not in the map.
  *
- * @param {dynamic} value They value to lookup index for.
+ * @param {dynamic} value The value to lookup index for.
  * @return {int}
  *
  */
@@ -3584,7 +3718,7 @@ method.clear = function clear() {
 
 /**
  * Returns an Iterator for the map. The iterator will become invalid
- * if the map is modified outside that iterator.
+ * if the map is modified outside the iterator's methods.
  *
  * @return {MapIterator}
  *
@@ -4176,7 +4310,8 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
+        this._capacity =
+            clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
@@ -4191,10 +4326,44 @@ method._init = function _init( capacity ) {
     }
 };
 
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._checkEquals = Map.prototype._checkEquals;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._resizeTo = Map.prototype._resizeTo;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._getNextCapacity = Map.prototype._getNextCapacity;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._isOverCapacity = Map.prototype._isOverCapacity;
+
+/**
+ * Internal.
+ *
+ * @return {void}
+ *
+ */
 method._checkResize = Map.prototype._checkResize;
 
 /**
@@ -4928,9 +5097,24 @@ var OrderedSet = (function() {
 var __value = true;
 
 /**
- * Description.
+ * Constructor for ordered sets. Ordered set is like set except
+ * it has an inherent order. The inherent order is the order
+ * the values are inserted into the set in.
  *
+ * Compared to Set, OrderedSet is extremely memory inefficient,
+ * has slightly slower lookup but iteration is faster.
  *
+ * The undefined value is not supported as a value. Use
+ * null instead.
+ *
+ * Ordering gives a meaning to operations like first,
+ * last, nth, indexOf and so on.
+ *
+ * Deletion of an entry doesn't affect order of other values.
+ *
+ * @param {int=|Array.<dynamic>|Set} capacity The initial capacity.
+ * Can also be an array or another set to initialize the set.
+ * @constructor
  */
 function OrderedSet( capacity ) {
     this._map = null;
@@ -4940,7 +5124,7 @@ var method = OrderedSet.prototype;
 
 
 /**
- * Description.
+ * Internal.
  *
  *
  */
@@ -4950,7 +5134,7 @@ method._addAll = function _addAll( items ) {
 };
 
 /**
- * Description.
+ * Internal.
  *
  *
  */
@@ -4971,11 +5155,22 @@ method._init = function _init( capacity ) {
 
 //API
 
+/**
+ * Simple way to iterate the set. The callback fn receives arguments:
+ *
+ * {dynamic} value, {integer} index
+ *
+ * @param {function} fn Description of fn parameter.
+ * @param {Object=} ctx Description of ctx parameter.
+ * @return {void}
+ *
+ */
 method.forEach = SetForEach;
 
 /**
- * Description.
+ * Returns a shallow clone of the set.
  *
+ * @return {OrderedSet}
  *
  */
 method.clone = function clone() {
@@ -4983,17 +5178,37 @@ method.clone = function clone() {
 };
 
 /**
- * Description.
+ * Add a value into the set. If the value is already in the
+ * set, returns false. Returns true otherwise.
  *
+ * The undefined value is not supported as a value. Use
+ * null instead.
+ *
+ * @param {dynamic} value The value to add into the set.
+ * @return {boolean}
+ * @throws {Error} When value is undefined
  *
  */
 method.add = function add( value ) {
+    if( value === void 0) {
+        throw new Error( "Cannot use undefined as a value" );
+    }
     return this._map.put( value, __value ) === void 0;
 };
 
 /**
- * Description.
+ * Removes the given value from the set. If the
+ * value is not in the set, returns false. If the value is in the
+ * set, the value is removed and true is returned;
  *
+ * You can check if the removal was successful by checking
+ *
+ * set.remove( value ) === true
+ *
+ * The undefined value as a value is not supported. Use null instead.
+ *
+ * @param {dynamic} value The value to remove from the set.
+ * @return {boolean}
  *
  */
 method["delete"] = method.remove = function remove( value ) {
@@ -5001,8 +5216,12 @@ method["delete"] = method.remove = function remove( value ) {
 };
 
 /**
- * Description.
+ * See if the value is contained in this set.
  *
+ * Value cannot be undefined.
+ *
+ * @param {dynamic} value The value to look up.
+ * @return {boolean}
  *
  */
 method.contains = function contains( value ) {
@@ -5010,8 +5229,12 @@ method.contains = function contains( value ) {
 };
 
 /**
- * Description.
+ * Insert the given values into the set. Can be given in the form
+ * of an array or another Set.
  *
+ *
+ * @param {Array.<dynamic>|Set} items Description of items parameter.
+ * @return {void}
  *
  */
 method.addAll = function addAll( items ) {
@@ -5019,8 +5242,9 @@ method.addAll = function addAll( items ) {
 };
 
 /**
- * Description.
+ * Remove everything in the set.
  *
+ * @return {void}
  *
  */
 method.clear = function clear() {
@@ -5037,8 +5261,9 @@ method.toArray = method.values = function toArray() {
 };
 
 /**
- * Description.
+ * Returns the amount of items in the set.
  *
+ * @return {int}
  *
  */
 method.size = method.length = function size() {
@@ -5046,29 +5271,134 @@ method.size = method.length = function size() {
 };
 
 /**
- * Description.
+ * See if the set doesn't contain anything.
  *
+ * @return {boolean}
  *
  */
 method.isEmpty = function isEmpty() {
     return this._map.isEmpty();
 };
 
+/**
+ * See if this set is a proper superset of the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.supersetOf = Set.prototype.supersetOf;
+
+/**
+ * See if this set is a proper subset of the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.subsetOf = Set.prototype.subsetOf;
+
+/**
+ * See if this set is fully contained in the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.allContainedIn = Set.prototype.allContainedIn;
+
+/**
+ * See if this set is fully contains the argument set.
+ *
+ * @param {Set} set The argument set.
+ * @return {boolean}
+ *
+ */
 method.containsAll = Set.prototype.containsAll;
+
+/**
+ * Returns a hash code for the set.
+ *
+ * @return {int}
+ *
+ */
 method.valueOf = Set.prototype.valueOf;
+
+/**
+ * Returns a string representation of the set.
+ *
+ * @return {String}
+ *
+ */
 method.toString = Set.prototype.toString;
+
+/**
+ * Automatically called by JSON.stringify. If you later parse the JSON
+ * you can pass the array to a set constructor.
+ *
+ * @return {Array.<dynamic>}
+ *
+ */
 method.toJSON = Set.prototype.toJSON;
+
+/**
+ * Returns the union of the argument set and this set. The returned
+ * set will have all the members that appear in this set, the second
+ * set or both.
+ *
+ * @param {Set} a The set to union this set with.
+ * @return {Set}
+ *
+ */
 method.union = Set.prototype.union;
+
+/**
+ * Returns the intersection of the argument set and this set. The returned
+ * set will have all the members that appear in both this set and the
+ * argument set.
+ *
+ * @param {Set} a The set to intersect this set with.
+ * @return {Set}
+ *
+ */
 method.intersection = Set.prototype.intersection;
+
+/**
+ * Returns the relative complement of this set in relation to the argument
+ * set. The returned set will have all the members that are in this set
+ * but were not in the argument set.
+ *
+ * Note that set1.complement(set2) is different from set2.complement(set1)
+ *
+ * @param {Set} a The set to complement this set with.
+ * @return {Set}
+ *
+ */
 method.complement = Set.prototype.complement;
+
+/**
+ * Returns the symmetrict difference of this set and the argument set.
+ * set. The returned set will have all the members that are in this set
+ * and the argument set, but not those that are in both sets.
+ *
+ * This is relatively expensive operation, requiring iteration of both
+ * sets currently.
+ *
+ * @param {Set} a The argument set.
+ * @return {Set}
+ *
+ */
 method.difference = Set.prototype.difference;
 
 /**
- * Description.
+ * Find the zero-based index of the value in the set. O(n).
  *
+ * Returns -1 if the value is not in the set.
+ *
+ * Value cannot be undefined. Use null instead.
+ *
+ * @param {dynamic} value The value to lookup index for.
+ * @return {int}
  *
  */
 method.indexOf = function indexOf( value ) {
@@ -5076,8 +5406,10 @@ method.indexOf = function indexOf( value ) {
 };
 
 /**
- * Description.
+ * Returns the first value in the set. Returns
+ * undefined if the set is empty. O(1).
  *
+ * @return {dynamic}
  *
  */
 method.first = function first() {
@@ -5085,8 +5417,10 @@ method.first = function first() {
 };
 
 /**
- * Description.
+ * Returns the last value in the set. Returns
+ * undefined if the set is empty. O(1).
  *
+ * @return {dynamic}
  *
  */
 method.last = function last() {
@@ -5094,8 +5428,10 @@ method.last = function last() {
 };
 
 /**
- * Description.
+ * Returns the nth value (0-based) in the set. Returns
+ * undefined if the index is out of bounds. O(N).
  *
+ * @return {dynamic}
  *
  */
 method.get = method.nth = function nth( index ) {
@@ -5103,8 +5439,10 @@ method.get = method.nth = function nth( index ) {
 };
 
 /**
- * Description.
+ * Returns an Iterator for the set. The iterator will become invalid
+ * if the set is modified outside the iterator's methods.
  *
+ * @return {SetIterator}
  *
  */
 method.iterator = function iterator() {
@@ -5112,6 +5450,40 @@ method.iterator = function iterator() {
 };
 
 var Iterator = (function() {
+    /**
+     * Iterator constructor for the ordered set.
+     *
+     * If the iterator cursor is currently pointing at a valid
+     * entry, you can retrieve the entry's value and index
+     * from the iterator .value and .index properties
+     * respectively.
+     *
+     * For performance, they are just simple properties but
+     * they are meant to be read-only.
+     *
+     * You may reset the cursor at no cost to the beginning (
+     * .moveToStart()) or to the end (.moveToEnd()).
+     *
+     * You may move the cursor one item forward (.next())
+     * or backward (.prev()).
+     *
+     * Example:
+     *
+     * var it = set.iterator();
+     *
+     * while( it.next() ) {
+     *      console.log( it.value, it.index );
+     * }
+     * //Cursor is now *after* the last entry
+     * while( it.prev() ) { //Iterate backwards
+     *      console.log( it.value, it.index );
+     * }
+     * //Cursor is now *before*the first entry
+     *
+     *
+     * @param {OrderedSet} set Description of set parameter.
+     * @constructor
+     */
     function Iterator( set ) {
         this._iterator = set._map.iterator();
         this.value = void 0;
