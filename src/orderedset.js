@@ -1,4 +1,6 @@
-/* global OrderedMap */
+/* global OrderedMap, setIteratorMethods, copyProperties,
+    toList, SetForEach, toList */
+/* exported OrderedSet */
 var OrderedSet = (function() {
 var __value = true;
 
@@ -117,7 +119,7 @@ method.toArray = method.values = function toArray() {
  *
  */
 method.size = method.length = function size() {
-    return this._map.size()
+    return this._map.size();
 };
 
 /**

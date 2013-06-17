@@ -27,7 +27,7 @@ module.exports = function( grunt ) {
                 "./src/red_black_tree_node.js",
                 "./src/red_black_tree.js",
 
-                "./src/mt.js",
+                "./lib/mt.js",
 
                 "./src/capacity.js",
                 "./src/equality.js",
@@ -76,8 +76,7 @@ module.exports = function( grunt ) {
 
             files: {
                 src: [
-                    './src/**/*.js',
-                    './test/**/*.js'
+                    './src/**/*.js'
                 ]
             }
         }

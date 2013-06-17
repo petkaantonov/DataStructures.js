@@ -2,7 +2,8 @@
     toList, toListOfTuples,
     copyProperties, setIteratorMethods, MapForEach, SetForEach, exportCtor,
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, SetToJSON,
-    SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString, arrayCopy, arraySearch
+    SetValueOf, SetToString, MapToJSON, MapValueOf, MapToString,
+    arrayCopy, arraySearch, SetIteratorCheckModCount
 */
 /* jshint -W079 */
 var Array = [].constructor,
@@ -29,11 +30,19 @@ var Array = [].constructor,
     };
 
 
-//Takes a constructor function and returns a function that can instantiate the constructor
-//Without using the new- keyword.
+//Takes a constructor function and returns a function that
+//can instantiate the constructor Without using
+//the new- keyword.
 
-//Also copies any properties of the constructor unless they are underscore prefixed
-//(includes .prototype, so it can still be monkey-patched from outside)
+//Also copies any properties of the constructor
+//unless they are underscore prefixed
+//(includes .prototype, so it can still be
+//monkey-patched from outside)
+/**
+ * Description.
+ *
+ *
+ */
 var exportCtor = (function() {
 
     var rnocopy = /(?:^_|^(?:length|name|arguments|caller|callee)$)/;
@@ -48,15 +57,20 @@ var exportCtor = (function() {
         if( params.length ) {
             instantiateCode = "switch( arguments.length ) {\n";
             for( var i = params.length - 1; i >= 0; --i ) {
-                instantiateCode += "case "+ (i + 1) + ": return new Constructor(" + params.slice(0, i + 1).join( ", " ) + ");\n";
+                instantiateCode += "case "+ (i + 1) +
+                    ": return new Constructor(" + params.slice(0, i + 1)
+                    .join( ", " ) + ");\n";
             }
-            instantiateCode += "case 0: return new Constructor();\n}\nthrow new Error(\"too many arguments\");\n";
+            instantiateCode += "case 0: return new Constructor();\n}"+
+                "\nthrow new Error(\"too many arguments\");\n";
         }
         else {
             instantiateCode = "return new Constructor();";
         }
 
-        var code = "return function ConstructorProxy(" + params.join( ", " ) + ") { \"use strict\"; " + instantiateCode + "};";
+        var code = "return function ConstructorProxy(" +
+            params.join( ", " ) + ") { \"use strict\"; " +
+            instantiateCode + "};";
 
         var ret = new Function( "Constructor", code )( Constructor );
 
@@ -73,9 +87,16 @@ var exportCtor = (function() {
 })();
 
 
+/**
+ * Description.
+ *
+ *
+ */
 var uid = (function() {
     var id = 0,
-        key = "__uid" + (Math.random() + "").replace(/[^0-9]/g, "").substr(5) + "__";
+        key = "__uid" +
+            (Math.random() + "").replace(/[^0-9]/g, "")
+            .substr(5) + "__";
 
     return function uid( obj ) {
         if( !hasOwn.call( obj, key ) ) {
@@ -87,6 +108,11 @@ var uid = (function() {
     };
 })();
 
+/**
+ * Description.
+ *
+ *
+ */
 function toList( obj ) {
     var items;
     if( isArray( obj ) ) {
@@ -119,6 +145,11 @@ function toList( obj ) {
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function toListOfTuples( obj ) {
     if( isArray( obj ) ) {
         return obj;
@@ -148,6 +179,11 @@ function toListOfTuples( obj ) {
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function copyProperties( src, dst ) {
     for( var key in src ) {
         if( hasOwn.call( src, key ) ) {
@@ -156,6 +192,11 @@ function copyProperties( src, dst ) {
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function arraySearch( array, startIndex, length, value ) {
     for( var i = startIndex; i < length; ++i ) {
         if( array[i] === value ) {
@@ -165,6 +206,11 @@ function arraySearch( array, startIndex, length, value ) {
     return false;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
     for( var j = 0; j < len; ++j ) {
         dst[j + dstIndex ] = src[j + srcIndex];
@@ -172,6 +218,11 @@ function arrayCopy( src, srcIndex, dst, dstIndex, len ) {
 }
 
 var setIteratorMethods = {
+    /**
+     * Description.
+     *
+     *
+     */
     next: function next() {
         var ret = this._iterator.next();
         this.value = this._iterator.key;
@@ -179,6 +230,11 @@ var setIteratorMethods = {
         return ret;
     },
 
+    /**
+     * Description.
+     *
+     *
+     */
     prev: function prev() {
         var ret = this._iterator.prev();
         this.value = this._iterator.key;
@@ -186,6 +242,11 @@ var setIteratorMethods = {
         return ret;
     },
 
+    /**
+     * Description.
+     *
+     *
+     */
     moveToStart: function moveToStart() {
         this._iterator.moveToStart();
         this.value = this._iterator.key;
@@ -193,6 +254,11 @@ var setIteratorMethods = {
         return this;
     },
 
+    /**
+     * Description.
+     *
+     *
+     */
     moveToEnd: function moveToEnd() {
         this._iterator.moveToEnd();
         this.value = this._iterator.key;
@@ -200,6 +266,11 @@ var setIteratorMethods = {
         return this;
     },
 
+    /**
+     * Description.
+     *
+     *
+     */
     "delete": function $delete() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
@@ -207,6 +278,11 @@ var setIteratorMethods = {
         return ret;
     },
 
+    /**
+     * Description.
+     *
+     *
+     */
     remove: function remove() {
         var ret = this._iterator.remove();
         this.value = this._iterator.key;
@@ -215,6 +291,11 @@ var setIteratorMethods = {
     }
 };
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapForEach( fn, ctx ) {
     var it = this.iterator();
     if( ctx ) {
@@ -233,6 +314,11 @@ function MapForEach( fn, ctx ) {
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function SetForEach( fn, ctx ) {
     var it = this.iterator();
     if( ctx ) {
@@ -251,6 +337,11 @@ function SetForEach( fn, ctx ) {
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapToString() {
     var ret = [],
         it = this.iterator();
@@ -265,14 +356,29 @@ function MapToString() {
     return JSON.stringify( ret );
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapValueOf() {
     return 1;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapToJSON() {
     return this.entries();
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function SetToString() {
     var ret = [],
         it = this.iterator();
@@ -284,14 +390,29 @@ function SetToString() {
     return JSON.stringify( ret );
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function SetValueOf() {
     return 1;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function SetToJSON() {
     return this.values();
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapKeys() {
     var keys = [],
         it = this.iterator();
@@ -302,6 +423,11 @@ function MapKeys() {
     return keys;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapValues() {
     var values = [],
         it = this.iterator();
@@ -312,6 +438,11 @@ function MapValues() {
     return values;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapEntries() {
     var entries = [],
     it = this.iterator();
@@ -322,12 +453,22 @@ function MapEntries() {
     return entries;
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function MapIteratorCheckModCount() {
     if( this._modCount !== this._map._modCount ) {
         throw new Error( "map cannot be mutated while iterating" );
     }
 }
 
+/**
+ * Description.
+ *
+ *
+ */
 function SetIteratorCheckModCount() {
     if( this._modCount !== this._set._modCount ) {
         throw new Error( "set cannot be mutated while iterating" );

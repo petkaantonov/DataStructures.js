@@ -1,4 +1,4 @@
-})(this);
+})( ( function(){}.constructor( "return this" )() ) );
 
 
 

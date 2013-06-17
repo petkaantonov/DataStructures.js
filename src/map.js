@@ -1,12 +1,12 @@
-/* global Buffer, uid, MapForEach, toListOfTuples,
+/* global MapForEach, toListOfTuples,
     MapIteratorCheckModCount, MapEntries, MapKeys, MapValues, MapValueOf,
-    MapToJSON, MapToString */
+    MapToJSON, MapToString, DEFAULT_CAPACITY, hash,
+    isArray, pow2AtLeast, clampCapacity, equality, LOAD_FACTOR,
+    global */
 /* exported Map */
 /* jshint -W079 */
 var Map = (function() {
 var Error = global.Error;
-var LOAD_FACTOR = 0.67;
-
 /**
  * Constructor for Maps. Map is a simple lookup structure without
  * any ordering. Fast lookup, slow iteration. Memory

@@ -1,3 +1,5 @@
+/* exported DEFAULT_CAPACITY, LOAD_FACTOR, MAX_CAPACITY, pow2AtLeast,
+    clampCapacity */
 /**
  * Get the closest next power of two of the given integer
  * or the number itself if it is a power of two.
@@ -30,3 +32,4 @@ function clampCapacity( capacity ) {
 
 var DEFAULT_CAPACITY = 1 << 4;
 var MAX_CAPACITY = 1 << 30;
+var LOAD_FACTOR = 0.67;

@@ -1,3 +1,6 @@
+/* global MapIteratorCheckModCount, DEFAULT_CAPACITY, isArray,
+    pow2AtLeast, hash, equality */
+/* exported OrderedMap */
 var OrderedMap = (function() {
 
 var INSERTION_ORDER = OrderedMap._INSERTION_ORDER = {};
@@ -552,7 +555,6 @@ var Iterator = (function() {
      */
     method.set = method.put = function put( value ) {
         this._checkModCount();
-        var i = this._bucketIndex;
 
         if( this._currentEntry === null ) {
             return;
@@ -647,7 +649,8 @@ var Entry = (function() {
             prevIsNull = prev === null,
             nextIsNull = next === null;
 
-        this.prevEntry = this.nextEntry = this.key = this.value = this.next = null;
+        this.prevEntry = this.nextEntry =
+            this.key = this.value = this.next = null;
 
         if( prevIsNull && nextIsNull ) {
             map._firstEntry = map._lastEntry = null;

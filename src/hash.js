@@ -1,3 +1,5 @@
+/* global isArray, uid, MersenneTwister */
+/* exported hash */
 var hash = (function() {
 
 var haveTypedArrays = typeof ArrayBuffer !== "undefined" &&
@@ -26,14 +28,15 @@ var seeds = [
 var seed = seeds[ ( Math.random() * seeds.length ) | 0 ];
 
 var seedTable = (function(){
-    var r = new ( typeof Int32Array !== "undefined" ?
+    var ArrayConstructor = typeof Int32Array !== "undefined" ?
             Int32Array :
-            Array )( 8192 );
+            Array;
+    var r = new ArrayConstructor( 8192 );
 
     var m = new MersenneTwister( seed );
 
     for( var i = 0; i < r.length; ++i ) {
-        r[i] = ( m.genrand_int32() & 0xFFFFFFFF );
+        r[i] = ( m.genrandInt32() & 0xFFFFFFFF );
     }
     return r;
 
@@ -131,7 +134,7 @@ if( haveTypedArrays ) {
         a = (i & 0xFF);
         x = (seedTable[a]) ^ x;
         return x & 0x3FFFFFFF;
-    }
+    };
 }
 else {
     var hashFloat = hashInt;

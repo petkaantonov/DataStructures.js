@@ -21,7 +21,8 @@ function defaultComparer( a,b ) {
         return 1;
     }
 
-    //equal primitives or uncomparable objects for which .valueOf() returns just the object itself
+    //equal primitives or uncomparable objects for which
+    //.valueOf() returns just the object itself
     a = a.valueOf();
     b = b.valueOf();
 
@@ -81,6 +82,8 @@ function NULL() {}
 
 var NIL = new NULL();
 
-NIL.left = NIL.right = NIL.key = NIL.contents = NIL.parent = void 0;
+NIL.left = NIL.right = NIL.parent =
+    NIL.key = NIL.contents = void 0;
+
 NIL.subtreeCount = 0;
 NIL.color = BLACK;

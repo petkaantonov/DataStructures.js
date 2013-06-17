@@ -1,8 +1,10 @@
-/* global copyProperties, setIteratorMethods, toList, SetForEach,
-    SetToJSON, SetToString, SetValueOf */
+/* global toList, SetForEach,
+    SetToJSON, SetToString, SetValueOf, SetIteratorCheckModCount,
+    hash, MapValues, isArray, pow2AtLeast,
+    clampCapacity, equality, DEFAULT_CAPACITY, LOAD_FACTOR */
+/* exported Set */
 /* jshint -W079 */
 var Set = (function() {
-var LOAD_FACTOR = 0.67;
 /**
  * Constructor for sets. Set is a unique collection of values, without
  * any ordering. It is not backed by a map and the memory usage is thus

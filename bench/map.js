@@ -1,4 +1,4 @@
-var itemCount = 25000;
+var itemCount = 500000;
 
 function seqString( i ) {
     var src = i.toString(26),
@@ -466,5 +466,5 @@ var hpr = {}.hasOwnProperty;
     var opsps = Math.round( ops * ( 1000 / duration));
 
     console.log( "Completed", ops , "contains operations in", duration, "milliseconds. ", opsps, "OP/s", "when using DS.Set filled with", itemCount, "strings");
-
 })();
+
