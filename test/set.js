@@ -262,27 +262,27 @@ test( "Test set theoretical operations ", function() {
             1, 2, 3, 4, 5
         ]);
 
-    deepEqual( emptySet1.union( emptySet2 ).values(), [], "the union of empty sets is an empty set" );
-    deepEqual( set1.union( set2 ).values(), set1.values(), "the union of equal sets is just the first set" );
-    deepEqual( set1.union( emptySet1 ).values(), set1.values(), "the union of set and empty set is just the first set" );
-    deepEqual( set3.union( set4 ).values(), new DS.Set([1,2,3,4,5,6]).values(), "just the 6 is added in an union" );
+    deepEqual( emptySet1.union( emptySet2 ).values().sort(), [], "the union of empty sets is an empty set" );
+    deepEqual( set1.union( set2 ).values().sort(), set1.values().sort(), "the union of equal sets is just the first set" );
+    deepEqual( set1.union( emptySet1 ).values().sort(), set1.values().sort(), "the union of set and empty set is just the first set" );
+    deepEqual( set3.union( set4 ).values().sort(), new DS.Set([1,2,3,4,5,6]).values().sort(), "just the 6 is added in an union" );
 
-    deepEqual( emptySet1.intersection( emptySet2 ).values(), [], "the intersection of empty sets is an empty set" );
-    deepEqual( set1.intersection( set2 ).values(), set1.values(), "the intersection of equal sets is just the first set" );
-    deepEqual( set1.intersection( emptySet1 ).values(), [], "the intersection of set and empty set is an empty set" );
-    deepEqual( set3.intersection( set4 ).values(), new DS.Set([4,5]).values(), "just the 4 and 5 is added in an intersection" );
+    deepEqual( emptySet1.intersection( emptySet2 ).values().sort(), [], "the intersection of empty sets is an empty set" );
+    deepEqual( set1.intersection( set2 ).values().sort(), set1.values().sort(), "the intersection of equal sets is just the first set" );
+    deepEqual( set1.intersection( emptySet1 ).values().sort(), [], "the intersection of set and empty set is an empty set" );
+    deepEqual( set3.intersection( set4 ).values().sort(), new DS.Set([4,5]).values().sort(), "just the 4 and 5 is added in an intersection" );
 
-    deepEqual( emptySet1.complement( emptySet2 ).values(), [], "the complement of empty sets is an empty set" );
-    deepEqual( set1.complement( set2 ).values(), [], "the complement of equal sets is empty" );
-    deepEqual( set1.complement( emptySet1 ).values(), set1.values(), "the complement of set and empty set is just the first set" );
-    deepEqual( emptySet1.complement( set1 ).values(), [], "the complement of empty set and set with items is empty set" );
-    deepEqual( set3.complement( set4 ).values(), new DS.Set([6]).values(), "just the 6 is added in an complement" );
-    deepEqual( set4.complement( set3 ).values(), new DS.Set([1,2,3]).values(), "just the 1,2,3 is added in an complement" );
+    deepEqual( emptySet1.complement( emptySet2 ).values().sort(), [], "the complement of empty sets is an empty set" );
+    deepEqual( set1.complement( set2 ).values().sort(), [], "the complement of equal sets is empty" );
+    deepEqual( set1.complement( emptySet1 ).values().sort(), set1.values().sort(), "the complement of set and empty set is just the first set" );
+    deepEqual( emptySet1.complement( set1 ).values().sort(), [], "the complement of empty set and set with items is empty set" );
+    deepEqual( set3.complement( set4 ).values().sort(), new DS.Set([6]).values().sort(), "just the 6 is added in an complement" );
+    deepEqual( set4.complement( set3 ).values().sort(), new DS.Set([1,2,3]).values().sort(), "just the 1,2,3 is added in an complement" );
 
-    deepEqual( emptySet1.difference( emptySet2 ).values(), [], "the difference of empty sets is an empty set" );
-    deepEqual( set1.difference( set2 ).values(), [], "the difference of equal sets is empty set" );
-    deepEqual( set1.difference( emptySet1 ).values(), set1.values(), "the difference of set and empty set is just the first set" );
-    deepEqual( set3.difference( set4 ).values(), new DS.Set([1,2,3,6]).values(), "just the 1,2,3,6 is added in a difference" );
+    deepEqual( emptySet1.difference( emptySet2 ).values().sort(), [], "the difference of empty sets is an empty set" );
+    deepEqual( set1.difference( set2 ).values().sort(), [], "the difference of equal sets is empty set" );
+    deepEqual( set1.difference( emptySet1 ).values().sort(), set1.values().sort(), "the difference of set and empty set is just the first set" );
+    deepEqual( set3.difference( set4 ).values().sort(), new DS.Set([1,2,3,6]).values().sort(), "just the 1,2,3,6 is added in a difference" );
 });
 
 test( "Test foreach", function() {

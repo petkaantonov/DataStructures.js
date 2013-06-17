@@ -5,6 +5,7 @@
 /* jshint -W079 */
 var Map = (function() {
 var Error = global.Error;
+var LOAD_FACTOR = 0.67;
 
 /**
  * Constructor for Maps. Map is a simple lookup structure without
@@ -56,17 +57,13 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
         var tuples = toListOfTuples( capacity );
         var size = tuples.length;
-        var capacity = pow2AtLeast( size );
-        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
-            capacity = capacity << 1;
-        }
-        this._capacity = capacity;
+        this._capacity = pow2AtLeast( size / LOAD_FACTOR );
         this._makeBuckets();
         this._setAll( tuples );
         break;
@@ -215,7 +212,7 @@ method._setAll = function _setAll( obj ) {
     }
 
     for( var i = 0; i < obj.length; ++i ) {
-        this.set( obj[i][0], obj[i][1] );
+        this.set( obj[ i ][ 0 ], obj[ i ][ 1 ] );
     }
 
 };
@@ -243,9 +240,7 @@ method.forEach = MapForEach;
  *
  */
 method.clone = function clone() {
-    return new this.constructor(
-        this.entries()
-    );
+    return new this.constructor( this.entries() );
 };
 
 /**
@@ -569,8 +564,6 @@ method.iterator = function iterator() {
 };
 
 var Iterator = (function() {
-    var method = Iterator.prototype;
-
     /**
      * Iterator constructor for the unordered map.
      *
@@ -616,6 +609,7 @@ var Iterator = (function() {
         this._map = map;
         this._bucketIndex = -1;
     }
+    var method = Iterator.prototype;
 
     /**
      * Internal
@@ -635,6 +629,7 @@ var Iterator = (function() {
         var i = ( this._bucketIndex << 1 ) + ( this._indexDelta << 1 ),
             b = this._map._buckets,
             l = b.length;
+
         for( ; i < l; i += 2 ) {
             if( b[i] !== void 0 ) {
                 this.key = b[i];
@@ -654,6 +649,7 @@ var Iterator = (function() {
     method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
         var i = ( this._bucketIndex << 1 ) - 2,
             b = this._map._buckets;
+
         for( ; i >= 0; i -= 2 ) {
             if( b[i] !== void 0 ) {
                 this.key = b[i];
@@ -836,5 +832,4 @@ var Iterator = (function() {
 method._Iterator = Iterator;
 
 
-return Map;
-})();
+return Map;})();

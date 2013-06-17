@@ -1897,6 +1897,7 @@ return hash;})();
 /* jshint -W079 */
 var Map = (function() {
 var Error = global.Error;
+var LOAD_FACTOR = 0.67;
 
 /**
  * Constructor for Maps. Map is a simple lookup structure without
@@ -1948,17 +1949,13 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
         var tuples = toListOfTuples( capacity );
         var size = tuples.length;
-        var capacity = pow2AtLeast( size );
-        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
-            capacity = capacity << 1;
-        }
-        this._capacity = capacity;
+        this._capacity = pow2AtLeast( size / LOAD_FACTOR );
         this._makeBuckets();
         this._setAll( tuples );
         break;
@@ -2107,7 +2104,7 @@ method._setAll = function _setAll( obj ) {
     }
 
     for( var i = 0; i < obj.length; ++i ) {
-        this.set( obj[i][0], obj[i][1] );
+        this.set( obj[ i ][ 0 ], obj[ i ][ 1 ] );
     }
 
 };
@@ -2135,9 +2132,7 @@ method.forEach = MapForEach;
  *
  */
 method.clone = function clone() {
-    return new this.constructor(
-        this.entries()
-    );
+    return new this.constructor( this.entries() );
 };
 
 /**
@@ -2461,8 +2456,6 @@ method.iterator = function iterator() {
 };
 
 var Iterator = (function() {
-    var method = Iterator.prototype;
-
     /**
      * Iterator constructor for the unordered map.
      *
@@ -2508,6 +2501,7 @@ var Iterator = (function() {
         this._map = map;
         this._bucketIndex = -1;
     }
+    var method = Iterator.prototype;
 
     /**
      * Internal
@@ -2527,6 +2521,7 @@ var Iterator = (function() {
         var i = ( this._bucketIndex << 1 ) + ( this._indexDelta << 1 ),
             b = this._map._buckets,
             l = b.length;
+
         for( ; i < l; i += 2 ) {
             if( b[i] !== void 0 ) {
                 this.key = b[i];
@@ -2546,6 +2541,7 @@ var Iterator = (function() {
     method._moveToPrevBucketIndex = function _moveToPrevBucketIndex() {
         var i = ( this._bucketIndex << 1 ) - 2,
             b = this._map._buckets;
+
         for( ; i >= 0; i -= 2 ) {
             if( b[i] !== void 0 ) {
                 this.key = b[i];
@@ -2728,8 +2724,7 @@ var Iterator = (function() {
 method._Iterator = Iterator;
 
 
-return Map;
-})();;
+return Map;})();;
 var OrderedMap = (function() {
 
 var INSERTION_ORDER = OrderedMap._INSERTION_ORDER = {};
@@ -3587,6 +3582,7 @@ var SortedMap = (function() {
     SetToJSON, SetToString, SetValueOf */
 /* jshint -W079 */
 var Set = (function() {
+var LOAD_FACTOR = 0.67;
 /**
  * Constructor for sets. Set is a unique collection of values, without
  * any ordering. It is not backed by a map and the memory usage is thus
@@ -3627,17 +3623,13 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
         var items = toList( capacity );
         var size = items.length;
-        var capacity = pow2AtLeast( size );
-        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
-            capacity = capacity << 1;
-        }
-        this._capacity = capacity;
+        this._capacity = pow2AtLeast( size / LOAD_FACTOR );
         this._makeBuckets();
         this._addAll( items );
         break;
@@ -4144,8 +4136,6 @@ method.iterator = function iterator() {
 };
 
 var Iterator = (function() {
-    var method = Iterator.prototype;
-
     /**
      * Iterator constructor for the unordered set.
      *
@@ -4191,6 +4181,7 @@ var Iterator = (function() {
         this._set = set;
         this._bucketIndex = -1;
     }
+    var method = Iterator.prototype;
 
     /**
      * Internal
@@ -4380,35 +4371,208 @@ return Set;})();
 ;
 /* global OrderedMap */
 var OrderedSet = (function() {
-    var _super = Set.prototype,
-        method = OrderedSet.prototype = Object.create( _super );
+var __value = true;
 
-    method.constructor = OrderedSet;
+/**
+ * Description.
+ *
+ *
+ */
+function OrderedSet( capacity ) {
+    this._map = null;
+    this._init( capacity );
+}
+var method = OrderedSet.prototype;
 
-    function OrderedSet( capacity, equality ) {
-        _super.constructor.call( this, capacity, equality );
+
+/**
+ * Description.
+ *
+ *
+ */
+
+method._addAll = function _addAll( items ) {
+    this._map._setAll( items, __value );
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method._init = function _init( capacity ) {
+    if( typeof capacity === "object" &&
+        capacity !== null ) {
+        capacity = toList( capacity );
+        this._map = new OrderedMap( capacity.length | 0 );
+        this._addAll( capacity );
     }
+    else if( typeof capacity === "number" ) {
+        this._map = new OrderedMap( capacity );
+    }
+    else {
+        this._map = new OrderedMap();
+    }
+};
 
-    method._mapType = OrderedMap;
+//API
 
-    method.indexOf = function indexOf( value ) {
-        return this._map.indexOfKey( value );
-    };
+method.forEach = SetForEach;
 
-    method.first = function first() {
-        return this._map.firstKey();
-    };
+/**
+ * Description.
+ *
+ *
+ */
+method.clone = function clone() {
+    return new OrderedSet( this.toArray() );
+};
 
-    method.last = function last() {
-        return this._map.lastKey();
-    };
+/**
+ * Description.
+ *
+ *
+ */
+method.add = function add( value ) {
+    return this._map.put( value, __value ) === void 0;
+};
 
-    method.get = method.nth = function nth( index ) {
-        return this._map.nthKey( index );
-    };
+/**
+ * Description.
+ *
+ *
+ */
+method["delete"] = method.remove = function remove( value ) {
+    return this._map.remove( value ) !== void 0;
+};
 
-    return OrderedSet;
+/**
+ * Description.
+ *
+ *
+ */
+method.contains = function contains( value ) {
+    return this._map.hasKey( value );
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.addAll = function addAll( items ) {
+    this._addAll( toList( items ) );
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.clear = function clear() {
+    return this._map.clear();
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.toArray = method.values = function toArray() {
+    return this._map.keys();
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.size = method.length = function size() {
+    return this._map.size()
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.isEmpty = function isEmpty() {
+    return this._map.isEmpty();
+};
+
+method.supersetOf = Set.prototype.supersetOf;
+method.subsetOf = Set.prototype.subsetOf;
+method.allContainedIn = Set.prototype.allContainedIn;
+method.containsAll = Set.prototype.containsAll;
+method.valueOf = Set.prototype.valueOf;
+method.toString = Set.prototype.toString;
+method.toJSON = Set.prototype.toJSON;
+method.union = Set.prototype.union;
+method.intersection = Set.prototype.intersection;
+method.complement = Set.prototype.complement;
+method.difference = Set.prototype.difference;
+
+/**
+ * Description.
+ *
+ *
+ */
+method.indexOf = function indexOf( value ) {
+    return this._map.indexOfKey( value );
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.first = function first() {
+    return this._map.firstKey();
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.last = function last() {
+    return this._map.lastKey();
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.get = method.nth = function nth( index ) {
+    return this._map.nthKey( index );
+};
+
+/**
+ * Description.
+ *
+ *
+ */
+method.iterator = function iterator() {
+    return new Iterator( this );
+};
+
+var Iterator = (function() {
+    function Iterator( set ) {
+        this._iterator = set._map.iterator();
+        this.value = void 0;
+        this.index = -1;
+    }
+    var method = Iterator.prototype;
+
+    copyProperties( setIteratorMethods, method );
+
+    return Iterator;
 })();
+
+
+
+return OrderedSet;})();
 ;
 /* global defaultComparer, SortedMap, SetForEach, setIteratorMethods,
     copyProperties, toList, RedBlackTree,

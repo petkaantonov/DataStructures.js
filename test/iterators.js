@@ -1,4 +1,4 @@
-/* global DS, test, strictEqual */
+/* global DS, test, strictEqual, deepEqual */
 /* jshint -W024 */
 test( "Test sorted set forward iterator", function() {
     var a = new DS.SortedSet( [15, 38, 4, 2, 40, 39, 33, 36, 20, 7, 22, 42,
@@ -23,7 +23,8 @@ test( "Test sorted set forward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.next();
     }, Error, "must throw when modified during iteration" );
 
@@ -69,7 +70,8 @@ test( "Test sorted set backward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.prev();
     }, Error, "must throw when modified during iteration" );
 
@@ -214,7 +216,8 @@ test( "Test ordered set forward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.next();
     }, Error, "must throw when modified during iteration" );
 
@@ -257,7 +260,8 @@ test( "Test ordered set backward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.prev();
     }, Error, "must throw when modified during iteration" );
 
@@ -392,7 +396,8 @@ test( "Test set forward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.next();
     }, Error, "must throw when modified during iteration" );
 
@@ -435,7 +440,8 @@ test( "Test set backward iterator", function() {
 
     throws( function() {
         var it = t.iterator();
-        t.add(30);
+        t.add(59);
+        t.remove(59);
         it.prev();
     }, Error, "must throw when modified during iteration" );
 
@@ -498,11 +504,15 @@ test( "Test set forward remove", function() {
     var size = a.size();
     var i = 0;
     var c = a.values();
+    var d = [];
     while(it.next()){
         var ind = i;
-        strictEqual( it.value, c[ind], "iterator key must match" );
+        d.push( it.value );
         strictEqual( it.index, 0, "iterator index must be 0" );
+        var value = it.value;
+        strictEqual( a.contains( value ), true, "value is contained");
         it.remove();
+        strictEqual( a.contains( value ), false, "value is not contained");
         strictEqual( it.value, void 0, "itereator key undefined after .remove()" );
         strictEqual( it.index, -1, "iterator index -1 after .remove()" );
         strictEqual( a.size(), --size, "size must be adjusted after iterator removal" );
@@ -510,6 +520,7 @@ test( "Test set forward remove", function() {
     }
 
     strictEqual( a.size(), 0, "should be empty after run");
+    deepEqual( d.sort(), c.sort(), "should be equal" );
 
 });
 

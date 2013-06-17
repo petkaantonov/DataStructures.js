@@ -185,7 +185,7 @@ test( "Test ordered map resize", function() {
 
 test( "Test ordered map capacity", function() {
     var maps = [new DS.OrderedMap(10), new DS.OrderedMap(100), new DS.OrderedMap(1000), new DS.OrderedMap(10000), new DS.OrderedMap(35000)];
-    var expectedCapacity = [16, 128, 1024, 16384, 65536];
+    var expectedCapacity = [16, 256, 2048, 16384, 65536];
 
     for( var i = 0; i < maps.length; ++i ) {
 

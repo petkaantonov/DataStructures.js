@@ -2,6 +2,7 @@
     SetToJSON, SetToString, SetValueOf */
 /* jshint -W079 */
 var Set = (function() {
+var LOAD_FACTOR = 0.67;
 /**
  * Constructor for sets. Set is a unique collection of values, without
  * any ordering. It is not backed by a map and the memory usage is thus
@@ -42,17 +43,13 @@ method._init = function _init( capacity ) {
 
     switch( typeof capacity ) {
     case "number":
-        this._capacity = clampCapacity( pow2AtLeast( capacity ) );
+        this._capacity = clampCapacity( pow2AtLeast( capacity / LOAD_FACTOR ) );
         this._makeBuckets();
         break;
     case "object":
         var items = toList( capacity );
         var size = items.length;
-        var capacity = pow2AtLeast( size );
-        if( ( ( size << 2 ) - size ) >= ( capacity << 1 ) ) {
-            capacity = capacity << 1;
-        }
-        this._capacity = capacity;
+        this._capacity = pow2AtLeast( size / LOAD_FACTOR );
         this._makeBuckets();
         this._addAll( items );
         break;
@@ -559,8 +556,6 @@ method.iterator = function iterator() {
 };
 
 var Iterator = (function() {
-    var method = Iterator.prototype;
-
     /**
      * Iterator constructor for the unordered set.
      *
@@ -606,6 +601,7 @@ var Iterator = (function() {
         this._set = set;
         this._bucketIndex = -1;
     }
+    var method = Iterator.prototype;
 
     /**
      * Internal
