@@ -96,11 +96,10 @@ method._makeBuckets = function _makeBuckets() {
 
     var b = this._buckets = new Array( length < 100000 ? length : 0 );
 
-    if( length >= 100000 ) {
-        for( var i = 0; i < length; ++i ) {
-            b[i] = void 0;
-        }
+    for( var i = 0; i < length; ++i ) {
+        b[i] = void 0;
     }
+
 };
 
 /**
